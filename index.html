@@ -223,31 +223,44 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
           课程表
         </h2>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;font-size:14px;color:var(--muted)">
+          <span id="courseWeekInfo" style="font-weight:700;color:var(--primary);font-size:16px"></span>
+          <span id="courseDateInfo"></span>
+        </div>
         <p class="hint">按星期维护本学期课表，今天高亮显示。上课前这里会提醒你。</p>
-        <form id="formCourse" class="form-grid">
-          <div class="field"><label>星期</label>
-            <select id="cDay">
-              <option value="1">周一</option><option value="2">周二</option><option value="3">周三</option>
-              <option value="4">周四</option><option value="5">周五</option><option value="6">周六</option><option value="7">周日</option>
-            </select>
-          </div>
-          <div class="field"><label>开始</label><input type="time" id="cStart" required></div>
-          <div class="field"><label>结束</label><input type="time" id="cEnd" required></div>
-          <div class="field"><label>课程名</label><input type="text" id="cName" placeholder="如 高等数学" required></div>
-          <div class="field"><label>教室</label><input type="text" id="cRoom" placeholder="如 A101"></div>
-          <div class="field"><label>老师</label><input type="text" id="cTeacher" placeholder="如 张教授"></div>
-          <div class="field"><label>颜色</label>
-            <select id="cColor">
-              <option value="#4361ee">蓝</option><option value="#2e9e5b">绿</option>
-              <option value="#e8a33d">橙</option><option value="#9b5de5">紫</option>
-              <option value="#e5484d">红</option>
-            </select>
-          </div>
-          <div class="field" style="justify-content:flex-end"><label>&nbsp;</label>
-            <button type="submit" class="btn">添加课程</button>
-          </div>
-        </form>
         <div class="week" id="weekGrid"></div>
+        <details style="margin-top:14px">
+          <summary style="cursor:pointer;font-size:13px;color:var(--muted);padding:6px 0;font-weight:600">＋ 添加课程</summary>
+          <form id="formCourse" class="form-grid" style="margin-top:8px">
+            <div class="field"><label>星期</label>
+              <select id="cDay">
+                <option value="1">周一</option><option value="2">周二</option><option value="3">周三</option>
+                <option value="4">周四</option><option value="5">周五</option><option value="6">周六</option><option value="7">周日</option>
+              </select>
+            </div>
+            <div class="field"><label>节数</label>
+              <select id="cSlot" required>
+                <option value="">请选择</option>
+                <option value="1">第1-2节</option><option value="3">第3-4节</option>
+                <option value="5">第5-6节</option><option value="7">第7-8节</option>
+                <option value="9">第9-10节</option><option value="11">第11-12节</option>
+              </select>
+            </div>
+            <div class="field"><label>课程名</label><input type="text" id="cName" placeholder="如 高等数学" required></div>
+            <div class="field"><label>教室</label><input type="text" id="cRoom" placeholder="如 A101"></div>
+            <div class="field"><label>老师</label><input type="text" id="cTeacher" placeholder="如 张教授"></div>
+            <div class="field"><label>颜色</label>
+              <select id="cColor">
+                <option value="#4361ee">蓝</option><option value="#2e9e5b">绿</option>
+                <option value="#e8a33d">橙</option><option value="#9b5de5">紫</option>
+                <option value="#e5484d">红</option>
+              </select>
+            </div>
+            <div class="field" style="justify-content:flex-end"><label>&nbsp;</label>
+              <button type="submit" class="btn">添加课程</button>
+            </div>
+          </form>
+        </details>
       </section>
 
       <!-- 六级单词 -->
@@ -624,6 +637,15 @@
     var grid=document.getElementById("weekGrid");
     var courses=load(K.courses,[]);
     var td=dow();
+    // 周数 & 日期
+    var now=new Date();
+    var jan1=new Date(now.getFullYear(),0,1);
+    var firstDay=jan1.getDay()||7;
+    var doy=Math.floor((now-jan1)/864e5);
+    var weekNum=Math.ceil((doy+firstDay-1)/7);
+    var m=now.getMonth()+1,d2=now.getDate();
+    document.getElementById("courseWeekInfo").textContent="第 "+weekNum+" 周";
+    document.getElementById("courseDateInfo").textContent=m+"月"+d2+"日";
     var html="";
     for(var d=1; d<=7; d++){
       var cls=courses.filter(function(c){ return c.day===d; }).sort(function(a,b){ return a.start<b.start?-1:1; });
@@ -717,10 +739,14 @@
   });
 
   // course form
+  var SLOT_TIME={1:["08:00","09:35"],3:["09:55","11:30"],5:["13:30","15:05"],7:["15:25","17:00"],9:["18:00","19:35"],11:["19:55","21:30"]};
   document.getElementById("formCourse").addEventListener("submit", function(e){
     e.preventDefault();
-    var c={ id:uid(), day:+document.getElementById("cDay").value, start:document.getElementById("cStart").value,
-      end:document.getElementById("cEnd").value, name:document.getElementById("cName").value.trim(),
+    var slot=+document.getElementById("cSlot").value;
+    if(!slot){ toast("请选择节数"); return; }
+    var t=SLOT_TIME[slot];
+    var c={ id:uid(), day:+document.getElementById("cDay").value, start:t[0], end:t[1],
+      name:document.getElementById("cName").value.trim(),
       room:document.getElementById("cRoom").value.trim(), teacher:document.getElementById("cTeacher").value.trim(),
       color:document.getElementById("cColor").value, sample:false };
     var arr=load(K.courses,[]); arr.push(c); save(K.courses,arr);
