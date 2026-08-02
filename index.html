@@ -458,7 +458,8 @@
 
   // ---------- seed example data ----------
   function seed(){
-    if(load(K.seeded, false)) return;
+    var existingCourses = load(K.courses, []);
+    if(load(K.seeded, false) && existingCourses.length > 0) return;
     var courses = [
       {
         "day": 1,
