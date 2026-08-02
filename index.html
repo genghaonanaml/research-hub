@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>研途学习台</title>
+<style>
+  :root{
+    --primary:#4361ee; --primary-d:#2f4bcf; --green:#2e9e5b; --red:#e5484d;
+    --amber:#e8a33d; --purple:#9b5de5; --bg:#f4f5fa; --card:#ffffff;
+    --text:#1f2430; --muted:#8a90a2; --border:#e7e9f0; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--text); font-size:15px; line-height:1.5;
+    -webkit-text-size-adjust:100%;
+  }
+  /* topbar */
+  .topbar{
+    position:sticky; top:0; z-index:40; background:var(--card);
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 14px; gap:8px;
+  }
+  .brand{display:flex; align-items:center; gap:8px; font-weight:800; font-size:17px; letter-spacing:.5px}
+  .brand .logo{color:var(--primary); display:flex}
+  .top-actions{display:flex; gap:6px; align-items:center}
+  .icon-btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    min-width:44px; min-height:44px; padding:0 10px;
+    border:1px solid var(--border); background:#fff; color:var(--text);
+    border-radius:10px; cursor:pointer; font-size:14px; font-weight:600;
+  }
+  .icon-btn:hover{border-color:var(--primary); color:var(--primary)}
+  .icon-btn svg{width:20px; height:20px}
+  .icon-btn.danger:hover{border-color:var(--red); color:var(--red)}
+  /* layout */
+  .app{display:flex; min-height:calc(100vh - 61px)}
+  .sidebar{
+    width:188px; background:var(--card); border-right:1px solid var(--border);
+    padding:12px 10px; display:flex; flex-direction:column; gap:4px; flex-shrink:0;
+  }
+  .nav-item{
+    display:flex; align-items:center; gap:10px; padding:12px 12px; border-radius:11px;
+    cursor:pointer; font-weight:700; color:var(--muted); font-size:14px; user-select:none;
+  }
+  .nav-item svg{width:20px; height:20px; flex-shrink:0}
+  .nav-item.active{background:var(--primary); color:#fff}
+  .nav-item:hover:not(.active){background:#eef0fe; color:var(--primary)}
+  .content{flex:1; padding:16px; max-width:920px; width:100%; margin:0 auto}
+  .bottomtab{display:none}
+  @media(max-width:768px){
+    .app{flex-direction:column; min-height:auto}
+    .sidebar{display:none}
+    .content{padding:12px 12px 90px}
+    .icon-btn span.txt{display:none}
+    .icon-btn{padding:0; width:44px}
+    .bottomtab{
+      display:flex; position:fixed; bottom:0; left:0; right:0; z-index:50;
+      background:var(--card); border-top:1px solid var(--border);
+      padding-bottom:env(safe-area-inset-bottom);
+    }
+    .bottomtab .nav-item{flex:1; flex-direction:column; gap:3px; padding:9px 2px; font-size:11px; border-radius:0}
+    .bottomtab .nav-item.active{background:transparent; color:var(--primary)}
+  }
+  /* cards */
+  .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:16px}
+  .card h2{margin:0 0 12px; font-size:16px; display:flex; align-items:center; gap:8px}
+  .card h2 svg{width:20px; height:20px; color:var(--primary)}
+  .muted{color:var(--muted)}
+  .hint{font-size:13px; color:var(--muted); margin:4px 0 12px}
+  /* todo */
+  .todo-item{
+    display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px;
+    margin-bottom:10px; background:#fff; border:1px solid var(--border);
+  }
+  .todo-item.overdue{border-color:#f7c5c7; background:#fff5f5}
+  .todo-item.done{border-color:#bfe6cd; background:#f3fbf6}
+  .todo-dot{width:10px; height:10px; border-radius:50%; flex-shrink:0}
+  .todo-dot.red{background:var(--red)} .todo-dot.green{background:var(--green)} .todo-dot.blue{background:var(--primary)}
+  .todo-body{flex:1; min-width:0}
+  .todo-title{font-weight:700}
+  .todo-sub{font-size:13px; color:var(--muted)}
+  .todo-act{
+    border:1px solid var(--primary); color:var(--primary); background:#fff;
+    border-radius:9px; padding:8px 12px; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap; min-height:40px;
+  }
+  .todo-act.done{border-color:var(--green); color:var(--green)}
+  /* forms */
+  .form-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:12px}
+  .field{display:flex; flex-direction:column; gap:4px}
+  .field label{font-size:13px; font-weight:600; color:var(--muted)}
+  input,select,textarea{
+    font-size:16px; padding:10px 12px; border:1px solid var(--border); border-radius:10px;
+    background:#fff; color:var(--text); width:100%; font-family:inherit;
+  }
+  textarea{resize:vertical; min-height:60px}
+  input:focus,select:focus,textarea:focus{outline:none; border-color:var(--primary)}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    background:var(--primary); color:#fff; border:none; border-radius:10px;
+    padding:11px 16px; font-size:15px; font-weight:700; cursor:pointer; min-height:46px;
+  }
+  .btn:hover{background:var(--primary-d)}
+  .btn.ghost{background:#fff; color:var(--primary); border:1px solid var(--primary)}
+  .btn.sm{padding:8px 12px; font-size:13px; min-height:40px}
+  .btn.green{background:var(--green)} .btn.green:hover{background:#268a4e}
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  /* lists */
+  .item{display:flex; align-items:flex-start; gap:10px; padding:12px; border:1px solid var(--border); border-radius:12px; margin-bottom:10px; background:#fff}
+  .item .main{flex:1; min-width:0}
+  .item .t{font-weight:700; word-break:break-word}
+  .item .s{font-size:13px; color:var(--muted); word-break:break-word; margin-top:2px}
+  .item .acts{display:flex; gap:6px; flex-shrink:0; align-items:center}
+  .mini-btn{border:1px solid var(--border); background:#fff; border-radius:8px; width:38px; height:38px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted)}
+  .mini-btn:hover{color:var(--primary); border-color:var(--primary)}
+  .mini-btn svg{width:18px; height:18px}
+  .mini-btn.ok{color:var(--green); border-color:#bfe6cd}
+  .mini-btn.del:hover{color:var(--red); border-color:var(--red)}
+  .tag{display:inline-block; font-size:12px; padding:2px 8px; border-radius:20px; background:#eef0fe; color:var(--primary); font-weight:700; margin-right:6px}
+  .tag.green{background:#e6f6ec; color:var(--green)} .tag.red{background:#fdeaea; color:var(--red)} .tag.gray{background:#eef0f3; color:var(--muted)}
+  .stat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:14px}
+  .stat{background:#f7f8fc; border-radius:12px; padding:14px; text-align:center}
+  .stat .n{font-size:26px; font-weight:800; color:var(--primary)}
+  .stat .l{font-size:13px; color:var(--muted); margin-top:2px}
+  /* schedule */
+  .week{display:grid; grid-template-columns:repeat(7,1fr); gap:8px}
+  .daycol{background:#f7f8fc; border-radius:12px; padding:8px; min-height:120px}
+  .daycol.today{background:#eef0fe; border:1px solid var(--primary)}
+  .daycol .dh{font-weight:800; font-size:13px; text-align:center; margin-bottom:6px; color:var(--muted)}
+  .daycol.today .dh{color:var(--primary)}
+  .cls{background:#fff; border-radius:9px; padding:7px; margin-bottom:6px; border-left:4px solid var(--primary); font-size:12px}
+  .cls .cn{font-weight:700; line-height:1.3}
+  .cls .ci{color:var(--muted); font-size:11px; margin-top:2px}
+  .cls .cx{float:right; cursor:pointer; color:var(--muted); border:none; background:none; font-size:14px; line-height:1}
+  @media(max-width:768px){
+    .week{grid-template-columns:1fr; gap:10px}
+    .daycol{min-height:auto}
+  }
+  .empty{text-align:center; color:var(--muted); padding:24px 10px; font-size:14px}
+  .backup-note{font-size:13px; color:var(--amber); font-weight:700; margin-top:8px; display:none}
+  .backup-note.show{display:block}
+  .seed-clear{font-size:13px; color:var(--muted); margin-top:8px}
+  .seed-clear a{color:var(--primary); cursor:pointer; font-weight:700}
+  .hidden{display:none}
+  .heat-wrap{overflow-x:auto; padding-bottom:6px}
+  .toast{position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#1f2430; color:#fff; padding:10px 18px; border-radius:10px; font-size:14px; z-index:99; opacity:0; transition:opacity .25s; pointer-events:none}
+  .toast.show{opacity:1}
+  /* sync */
+  .sync-card{background:#f7f8fc; border:1px dashed var(--border); border-radius:12px; padding:14px; margin-top:14px}
+  .sync-card h3{margin:0 0 8px; font-size:14px; display:flex; align-items:center; gap:6px; color:var(--text)}
+  .sync-status{font-size:13px; font-weight:700; margin:8px 0; padding:6px 10px; border-radius:8px; background:#fff; border:1px solid var(--border)}
+  .sync-status.ok{color:var(--green); border-color:#bfe6cd}
+  .sync-status.err{color:var(--red); border-color:#f7c5c7}
+  .sync-status.busy{color:var(--amber)}
+  .sync-row{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  .sync-id{font-size:12px; color:var(--muted); word-break:break-all; background:#fff; border:1px solid var(--border); border-radius:8px; padding:6px 8px; flex:1; min-width:120px}
+  .sync-tip{font-size:12px; color:var(--muted); margin-top:8px; line-height:1.5}
+  .sync-tip code{background:#eef0fe; color:var(--primary); padding:1px 5px; border-radius:4px; font-size:11px}
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="logo">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2z"/><path d="M17 8h3v12a2 2 0 0 1-2 2H6"/><path d="M12 6l3 3"/></svg>
+    </span>研途学习台</div>
+    <div class="top-actions">
+      <button class="icon-btn" id="btnExport" title="导出 JSON 备份">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        <span class="txt">导出</span>
+      </button>
+      <button class="icon-btn" id="btnImport" title="导入恢复">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+        <span class="txt">导入</span>
+      </button>
+      <button class="icon-btn danger" id="btnClear" title="清空全部数据">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        <span class="txt">清空</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="app">
+    <nav class="sidebar">
+      <div class="nav-item active" data-mod="todo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        今天要处理
+      </div>
+      <div class="nav-item" data-mod="courses">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
+        课程表
+      </div>
+      <div class="nav-item" data-mod="words">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2z"/><path d="M17 8h3v12a2 2 0 0 1-2 2H6"/></svg>
+        六级单词
+      </div>
+      <div class="nav-item" data-mod="papers">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8"/><path d="M8 17h8"/></svg>
+        文献阅读
+      </div>
+    </nav>
+
+    <main class="content">
+      <!-- 今天要处理 -->
+      <section class="card" id="panel-todo">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          今天要处理
+        </h2>
+        <div id="todoList"></div>
+        <div class="backup-note" id="backupNote">数据已积累 30 条以上，建议点右上角「导出」做备份 ↑</div>
+        <div class="seed-clear hidden" id="seedClear">当前含示例数据，<a id="btnSeedClear">清空示例数据</a></div>
+        <div class="sync-card">
+          <h3>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9"/><path d="M21 3v6h-6"/><path d="M3 21v-6h6"/></svg>
+            云同步（自动）
+          </h3>
+          <div class="field"><label>Blob ID（第一台留空自动创建，第二台填入同一 ID）</label>
+            <input type="text" id="syncGist" placeholder="留空则自动创建新的同步仓库">
+          </div>
+          <div class="sync-row">
+            <button class="btn sm" id="btnSaveToken">保存并启用同步</button>
+            <button class="btn sm ghost" id="btnSyncNow">立即同步</button>
+            <label class="field" style="flex-direction:row; align-items:center; gap:6px; font-size:13px; color:var(--muted)"><input type="checkbox" id="syncAuto" style="width:auto"> 自动同步</label>
+          </div>
+          <div class="sync-status" id="syncStatus">未配置同步</div>
+          <div class="sync-row" id="gistRow" style="display:none">
+            <div class="sync-id" id="gistIdText"></div>
+            <button class="mini-btn" id="btnCopyGist" title="复制 Blob ID"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+          </div>
+          <div class="sync-tip">使用 <b>jsonblob.com</b> 免费云存储，<b>无需注册、无需 API Key</b>。<br>第一台设备点「保存」→ 自动创建仓库并显示 Blob ID → 复制给第二台设备填入即可共用。<br>⚠️ Blob ID 即为唯一凭证，请勿泄露给他人。</div>
+        </div>
+      </section>
+
+      <!-- 课程表 -->
+      <section class="card hidden" id="panel-courses">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
+          课程表
+        </h2>
+        <p class="hint">按星期维护本学期课表，今天高亮显示。上课前这里会提醒你。</p>
+        <form id="formCourse" class="form-grid">
+          <div class="field"><label>星期</label>
+            <select id="cDay">
+              <option value="1">周一</option><option value="2">周二</option><option value="3">周三</option>
+              <option value="4">周四</option><option value="5">周五</option><option value="6">周六</option><option value="7">周日</option>
+            </select>
+          </div>
+          <div class="field"><label>开始</label><input type="time" id="cStart" required></div>
+          <div class="field"><label>结束</label><input type="time" id="cEnd" required></div>
+          <div class="field"><label>课程名</label><input type="text" id="cName" placeholder="如 高等数学" required></div>
+          <div class="field"><label>教室</label><input type="text" id="cRoom" placeholder="如 A101"></div>
+          <div class="field"><label>老师</label><input type="text" id="cTeacher" placeholder="如 张教授"></div>
+          <div class="field"><label>颜色</label>
+            <select id="cColor">
+              <option value="#4361ee">蓝</option><option value="#2e9e5b">绿</option>
+              <option value="#e8a33d">橙</option><option value="#9b5de5">紫</option>
+              <option value="#e5484d">红</option>
+            </select>
+          </div>
+          <div class="field" style="justify-content:flex-end"><label>&nbsp;</label>
+            <button type="submit" class="btn">添加课程</button>
+          </div>
+        </form>
+        <div class="week" id="weekGrid"></div>
+      </section>
+
+      <!-- 六级单词 -->
+      <section class="card hidden" id="panel-words">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2z"/><path d="M17 8h3v12a2 2 0 0 1-2 2H6"/></svg>
+          六级单词打卡
+        </h2>
+        <div class="stat-grid">
+          <div class="stat"><div class="n" id="stStreak">0</div><div class="l">连续天数</div></div>
+          <div class="stat"><div class="n" id="stTotal">0</div><div class="l">累计背词</div></div>
+          <div class="stat"><div class="n" id="stDays">0</div><div class="l">打卡天数</div></div>
+        </div>
+        <div class="heat-wrap" id="wordHeat"></div>
+
+        <div class="card" style="background:#f7f8fc; margin-top:8px">
+          <h2 style="font-size:15px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            今日打卡
+          </h2>
+          <div id="todayCheckin"></div>
+        </div>
+
+        <h2 style="font-size:15px; margin-top:18px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          生词本（不会的六级词）
+        </h2>
+        <form id="formWord" class="form-grid">
+          <div class="field"><label>单词</label><input type="text" id="wWord" placeholder="如 ambiguous" required></div>
+          <div class="field"><label>释义</label><input type="text" id="wMean" placeholder="如 模棱两可的" required></div>
+          <div class="field" style="justify-content:flex-end"><label>&nbsp;</label>
+            <button type="submit" class="btn">加入生词本</button>
+          </div>
+        </form>
+        <div id="wordList"></div>
+      </section>
+
+      <!-- 文献阅读 -->
+      <section class="card hidden" id="panel-papers">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8"/><path d="M8 17h8"/></svg>
+          文献阅读追踪
+        </h2>
+        <div class="stat-grid">
+          <div class="stat"><div class="n" id="pToday">0</div><div class="l">今日已读</div></div>
+          <div class="stat"><div class="n" id="pGoal">3</div><div class="l">每日目标</div></div>
+          <div class="stat"><div class="n" id="pTotal">0</div><div class="l">累计篇数</div></div>
+        </div>
+        <div class="heat-wrap" id="paperHeat"></div>
+
+        <div class="row" style="margin:10px 0 14px">
+          <div class="field" style="flex:0 0 140px"><label>每日阅读目标</label>
+            <input type="number" id="pGoalInput" min="1" value="3">
+          </div>
+          <button class="btn sm" id="btnSaveGoal" style="align-self:flex-end">保存目标</button>
+        </div>
+
+        <form id="formPaper" class="form-grid">
+          <div class="field"><label>阅读日期</label><input type="date" id="pDate" required></div>
+          <div class="field"><label>标题</label><input type="text" id="pTitle" placeholder="论文/文献标题" required></div>
+          <div class="field"><label>来源</label><input type="text" id="pSource" placeholder="如 arXiv / 期刊"></div>
+          <div class="field"><label>计划日期(可选)</label><input type="date" id="pPlan"></div>
+          <div class="field"><label>状态</label>
+            <select id="pStatus"><option value="已读">已读</option><option value="未读">未读(计划中)</option></select>
+          </div>
+          <div class="field" style="grid-column:1/-1"><label>笔记 / 心得</label>
+            <textarea id="pNote" placeholder="核心结论、方法、启发…"></textarea>
+          </div>
+          <div class="field" style="justify-content:flex-end; grid-column:1/-1"><label>&nbsp;</label>
+            <button type="submit" class="btn green">记录阅读</button>
+          </div>
+        </form>
+        <div id="paperList"></div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="bottomtab">
+    <div class="nav-item active" data-mod="todo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      今天
+    </div>
+    <div class="nav-item" data-mod="courses">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
+      课表
+    </div>
+    <div class="nav-item" data-mod="words">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2z"/><path d="M17 8h3v12a2 2 0 0 1-2 2H6"/></svg>
+      单词
+    </div>
+    <div class="nav-item" data-mod="papers">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8"/><path d="M8 17h8"/></svg>
+      文献
+    </div>
+  </nav>
+
+  <input type="file" id="importFile" accept="application/json,.json" class="hidden">
+  <div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  var PREFIX = "wb_research_";
+  var K = {
+    courses: PREFIX+"courses",
+    checkins: PREFIX+"wordcheckins",
+    words: PREFIX+"words",
+    papers: PREFIX+"papers",
+    papergoal: PREFIX+"papergoal",
+    wordgoal: PREFIX+"wordgoal",
+    seeded: PREFIX+"seeded"
+  };
+  function load(key, def){ try{ var v=localStorage.getItem(key); return v==null?def:JSON.parse(v); }catch(e){ return def; } }
+  function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); scheduleSync(); }
+  function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function pad(n){ return n<10?"0"+n:""+n; }
+  function fmt(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function parseD(s){ var p=s.split("-"); return new Date(+p[0], +p[1]-1, +p[2]); }
+  function addDays(n){ var d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+n); return fmt(d); }
+  function todayStr(){ var d=new Date(); d.setHours(0,0,0,0); return fmt(d); }
+  function dow(){ var d=new Date().getDay(); return d===0?7:d; }
+  var WEEK = ["周一","周二","周三","周四","周五","周六","周日"];
+
+  // ---------- toast ----------
+  var toastT;
+  function toast(msg){ var el=document.getElementById("toast"); el.textContent=msg; el.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(function(){ el.classList.remove("show"); },1800); }
+
+  // ---------- cloud sync (JSONBin.io) ----------
+  // ---------- cloud sync (jsonblob.com) ----------
+  var SYNC_KEY = PREFIX+"sync";
+  var BLOB_API = "https://jsonblob.com/api/jsonblob";
+  function getSync(){ try{ return JSON.parse(localStorage.getItem(SYNC_KEY))||{}; }catch(e){ return {}; } }
+  function setSync(obj){ localStorage.setItem(SYNC_KEY, JSON.stringify(obj)); }
+  function setSyncStatus(msg, cls){
+    var el=document.getElementById("syncStatus"); if(!el) return;
+    el.textContent=msg; el.className="sync-status"+(cls?(" "+cls):"");
+  }
+  function buildSyncPayload(){
+    var d={}; Object.keys(K).forEach(function(k){ d[k]=localStorage.getItem(k); }); return d;
+  }
+  function mergePayload(obj){
+    Object.keys(K).forEach(function(k){
+      if(obj[k]==null) return;
+      if(k===K.courses||k===K.checkins||k===K.words||k===K.papers){
+        var local=load(k,[]); var remote=[];
+        try{ remote=JSON.parse(obj[k])||[]; }catch(e){ remote=[]; }
+        var map={}; local.forEach(function(x){ if(x&&x.id) map[x.id]=x; });
+        remote.forEach(function(x){ if(x&&x.id) map[x.id]=x; });
+        var merged=[]; Object.keys(map).forEach(function(id){ merged.push(map[id]); });
+        save(k, merged);
+      } else {
+        localStorage.setItem(k, obj[k]);
+      }
+    });
+  }
+  function pushSync(){
+    var s=getSync(); if(!s.auto) return;
+    var payload=buildSyncPayload();
+    var isNew=!s.blobId;
+    var url=isNew?BLOB_API:BLOB_API+"/"+s.blobId;
+    setSyncStatus("同步中…", "busy");
+    fetch(url,{
+      method:isNew?"POST":"PUT",
+      headers:{"Content-Type":"application/json","Accept":"application/json"},
+      body:JSON.stringify(payload)
+    })
+      .then(function(r){
+        if(!r.ok) throw new Error("HTTP "+r.status);
+        if(isNew){
+          var loc=r.headers.get("Location")||"";
+          var id=loc.split("/").pop();
+          if(id){ s.blobId=id; setSync(s); renderSyncId(); }
+          else throw new Error("未返回 Blob ID");
+        }
+        setSyncStatus("已同步 ✓ "+new Date().toLocaleTimeString(), "ok");
+      })
+      .catch(function(e){ setSyncStatus("同步失败："+e.message, "err"); });
+  }
+  function pullSync(){
+    var s=getSync(); if(!s.blobId) return Promise.resolve();
+    setSyncStatus("拉取中…", "busy");
+    return fetch(BLOB_API+"/"+s.blobId,{
+      headers:{"Accept":"application/json"} })
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(data){
+        if(data&&typeof data==="object"){ mergePayload(data); renderAll(); }
+        setSyncStatus("已拉取 ✓ "+new Date().toLocaleTimeString(), "ok");
+      })
+      .catch(function(e){ setSyncStatus("拉取失败："+e.message, "err"); });
+  }
+  var syncTimer;
+  function scheduleSync(){
+    var s=getSync(); if(!s.auto) return;
+    clearTimeout(syncTimer); syncTimer=setTimeout(pushSync, 1200);
+  }
+  function renderSyncId(){
+    var s=getSync(); var row=document.getElementById("gistRow");
+    if(s.blobId){ row.style.display="flex"; document.getElementById("gistIdText").textContent=s.blobId; }
+    else { row.style.display="none"; }
+  }
+
+  // ---------- seed example data ----------
+  function seed(){
+    if(load(K.seeded, false)) return;
+    var courses = [
+      {id:uid(), day:1, start:"08:00", end:"09:40", name:"高等数学", room:"A101", teacher:"张教授", color:"#4361ee", sample:true},
+      {id:uid(), day:3, start:"10:00", end:"11:40", name:"学术英语(六级)", room:"B203", teacher:"李老师", color:"#2e9e5b", sample:true},
+      {id:uid(), day:5, start:"14:00", end:"15:40", name:"机器学习导论", room:"C305", teacher:"王教授", color:"#e8a33d", sample:true},
+      {id:uid(), day:2, start:"15:00", end:"16:40", name:"研究方法论", room:"D102", teacher:"赵老师", color:"#9b5de5", sample:true}
+    ];
+    var checkins = [
+      {id:uid(), date:addDays(-4), count:30, note:"list 词表", sample:true},
+      {id:uid(), date:addDays(-3), count:35, note:"", sample:true},
+      {id:uid(), date:addDays(-2), count:28, note:"复习昨日", sample:true}
+    ];
+    var words = [
+      {id:uid(), word:"ambiguous", meaning:"模棱两可的；含糊的", addedDate:addDays(-3), reviewed:false, sample:true},
+      {id:uid(), word:"comprehensive", meaning:"综合性的；全面的", addedDate:addDays(-2), reviewed:false, sample:true},
+      {id:uid(), word:"phenomenon", meaning:"现象", addedDate:addDays(-1), reviewed:true, sample:true}
+    ];
+    var papers = [
+      {id:uid(), date:addDays(-1), title:"ResNet: Deep Residual Learning", source:"arXiv", note:"残差连接解决退化问题", planDate:"", status:"已读", sample:true},
+      {id:uid(), date:addDays(0), title:"Batch Normalization", source:"arXiv", note:"加速收敛、稳定训练", planDate:"", status:"已读", sample:true},
+      {id:uid(), date:"", title:"Attention Is All You Need", source:"arXiv", note:"Transformer 经典，计划精读", planDate:addDays(-2), status:"未读", sample:true}
+    ];
+    save(K.courses, courses);
+    save(K.checkins, checkins);
+    save(K.words, words);
+    save(K.papers, papers);
+    save(K.papergoal, 3);
+    save(K.wordgoal, 30);
+    save(K.seeded, true);
+  }
+
+  // ---------- helpers ----------
+  function checkinMap(){ var m={}; load(K.checkins,[]).forEach(function(c){ m[c.date]=(m[c.date]||0)+ (+c.count||0); }); return m; }
+  function paperMap(){ var m={}; load(K.papers,[]).forEach(function(p){ if(p.status==="已读" && p.date){ m[p.date]=(m[p.date]||0)+1; } }); return m; }
+  function calcStreak(map){
+    var today=new Date(); today.setHours(0,0,0,0);
+    var cur=new Date(today);
+    if(!map[fmt(cur)]) cur.setDate(cur.getDate()-1);
+    var s=0;
+    while(map[fmt(cur)]){ s++; cur.setDate(cur.getDate()-1); }
+    return s;
+  }
+  function missedDays(map){
+    var y=new Date(); y.setHours(0,0,0,0); y.setDate(y.getDate()-1);
+    var m=0, c=new Date(y);
+    while(!map[fmt(c)]){ m++; c.setDate(c.getDate()-1); if(m>400) break; }
+    return m;
+  }
+  function hasSample(){
+    var arr=[].concat(load(K.courses,[]),load(K.checkins,[]),load(K.words,[]),load(K.papers,[]));
+    return arr.some(function(x){ return x && x.sample; });
+  }
+
+  // ---------- heatmap ----------
+  function heatmapSVG(map, weeks){
+    weeks=weeks||8; var cell=13, gap=3, pad=2;
+    var today=new Date(); today.setHours(0,0,0,0);
+    var total=weeks*7;
+    var start=new Date(today); start.setDate(start.getDate()-(total-1));
+    var rects="";
+    for(var i=0;i<total;i++){
+      var d=new Date(start); d.setDate(start.getDate()+i);
+      var ds=fmt(d); var v=map[ds]||0;
+      var col=Math.floor(i/7), row=i%7;
+      var x=pad+col*(cell+gap), y=pad+row*(cell+gap);
+      var fill = v===0 ? "#ebedf3" : (v<3 ? "#b9c6ff" : (v<6 ? "#7d93f7" : "#4361ee"));
+      rects += '<rect x="'+x+'" y="'+y+'" width="'+cell+'" height="'+cell+'" rx="3" fill="'+fill+'"><title>'+ds+": "+v+"</title></rect>";
+    }
+    var w=pad*2+weeks*(cell+gap)-gap, h=pad*2+7*(cell+gap)-gap;
+    return '<svg viewBox="0 0 '+w+' '+h+'" width="'+(w*0.9)+'" style="max-width:'+w+'px;min-width:'+w+'px" role="img" aria-label="学习热力图">'+rects+'</svg>';
+  }
+
+  // ---------- render: today ----------
+  function renderTodo(){
+    var td=todayStr(), wd=dow();
+    var html="";
+    // 今日课程
+    var courses=load(K.courses,[]).filter(function(c){ return c.day===wd; }).sort(function(a,b){ return a.start<b.start?-1:1; });
+    if(courses.length){
+      courses.forEach(function(c){
+        html += '<div class="todo-item"><span class="todo-dot blue"></span><div class="todo-body"><div class="todo-title">'+esc(c.start)+"-"+esc(c.end)+" "+esc(c.name)+'</div><div class="todo-sub">'+esc(c.room||"")+(c.teacher?(" · "+esc(c.teacher)):"")+'</div></div><button class="todo-act" data-go="courses">看课表</button></div>';
+      });
+    } else {
+      html += '<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">今天没有课</div><div class="todo-sub">好好自习或休息一下</div></div></div>';
+    }
+    // 今日背单词
+    var cm=checkinMap();
+    var todayDone = cm[td]||0;
+    if(todayDone>0){
+      html += '<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">今日已背 '+todayDone+' 词</div><div class="todo-sub">连续 '+calcStreak(cm)+' 天 · 保持住！</div></div><button class="todo-act done" data-go="words">查看</button></div>';
+    } else {
+      var miss=missedDays(cm);
+      var sub = miss>0 ? ("已连续空缺 "+miss+" 天，今天补上") : "今天还没背，去打卡";
+      html += '<div class="todo-item overdue"><span class="todo-dot red"></span><div class="todo-body"><div class="todo-title">今日未背单词</div><div class="todo-sub">'+sub+'</div></div><button class="todo-act" data-go="words">去背词</button></div>';
+    }
+    // 今日读文献
+    var pm=paperMap();
+    var goal=load(K.papergoal,3);
+    var pToday=pm[td]||0;
+    if(pToday>=goal){
+      html += '<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">今日已读 '+pToday+' 篇文献</div><div class="todo-sub">已达标（目标 '+goal+' 篇）</div></div><button class="todo-act done" data-go="papers">查看</button></div>';
+    } else {
+      var diff=goal-pToday;
+      html += '<div class="todo-item overdue"><span class="todo-dot red"></span><div class="todo-body"><div class="todo-title">今日还差 '+diff+' 篇文献</div><div class="todo-sub">目标每天 '+goal+' 篇</div></div><button class="todo-act" data-go="papers">去记录</button></div>';
+    }
+    // 逾期文献
+    var papers=load(K.papers,[]);
+    var overdue=papers.filter(function(p){ return p.status==="未读" && p.planDate && p.planDate<todayStr(); });
+    overdue.forEach(function(p){
+      html += '<div class="todo-item overdue"><span class="todo-dot red"></span><div class="todo-body"><div class="todo-title">逾期未读：'+esc(p.title)+'</div><div class="todo-sub">计划 '+esc(p.planDate)+' · '+esc(p.source||"")+'</div></div><button class="todo-act" data-go="papers">去处理</button></div>';
+    });
+    if(!html){ html='<div class="empty">今天暂时没有待处理事项，去各模块添加内容吧。</div>'; }
+    document.getElementById("todoList").innerHTML=html;
+
+    // backup note
+    var total=load(K.courses,[]).length+load(K.checkins,[]).length+load(K.words,[]).length+load(K.papers,[]).length;
+    document.getElementById("backupNote").classList.toggle("show", total>=30);
+    document.getElementById("seedClear").classList.toggle("hidden", !hasSample());
+  }
+
+  // ---------- render: courses ----------
+  function renderCourses(){
+    var grid=document.getElementById("weekGrid");
+    var courses=load(K.courses,[]);
+    var td=dow();
+    var html="";
+    for(var d=1; d<=7; d++){
+      var cls=courses.filter(function(c){ return c.day===d; }).sort(function(a,b){ return a.start<b.start?-1:1; });
+      var col='<div class="daycol'+(d===td?" today":"")+'"><div class="dh">'+WEEK[d-1]+(d===td?" · 今天":"")+'</div>';
+      if(cls.length){
+        cls.forEach(function(c){
+          col += '<div class="cls" style="border-left-color:'+esc(c.color||"#4361ee")+'"><button class="cx" data-delcourse="'+c.id+'" title="删除">×</button><div class="cn">'+esc(c.name)+'</div><div class="ci">'+esc(c.start)+"-"+esc(c.end)+'</div>'+(c.room?'<div class="ci">'+esc(c.room)+'</div>':'')+(c.teacher?'<div class="ci">'+esc(c.teacher)+'</div>':'')+'</div>';
+        });
+      } else {
+        col += '<div class="empty" style="padding:8px 0;font-size:12px">无课</div>';
+      }
+      col += '</div>';
+      html += col;
+    }
+    grid.innerHTML=html;
+  }
+
+  // ---------- render: words ----------
+  function renderWords(){
+    var cm=checkinMap();
+    document.getElementById("stStreak").textContent=calcStreak(cm);
+    document.getElementById("stTotal").textContent=load(K.checkins,[]).reduce(function(s,c){ return s+(+c.count||0); },0);
+    document.getElementById("stDays").textContent=load(K.checkins,[]).length;
+    document.getElementById("wordHeat").innerHTML=heatmapSVG(cm,8);
+
+    var td=todayStr();
+    var todayRec=load(K.checkins,[]).filter(function(c){ return c.date===td; })[0];
+    var box=document.getElementById("todayCheckin");
+    if(todayRec){
+      box.innerHTML='<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">今日已背 '+todayRec.count+' 词</div><div class="todo-sub">'+(todayRec.note?esc(todayRec.note):"连续 "+calcStreak(cm)+" 天")+'</div></div><button class="todo-act done" id="btnRecheck">重新打卡</button></div>';
+    } else {
+      var goal=load(K.wordgoal,30);
+      box.innerHTML='<form id="formCheckin" class="row" style="margin:0"><div class="field" style="flex:0 0 130px"><label>今天背了几个词</label><input type="number" id="ckCount" min="1" value="'+goal+'"></div><div class="field" style="flex:1"><label>备注(可选)</label><input type="text" id="ckNote" placeholder="如 词表 List 5"></div><button class="btn" type="submit" style="align-self:flex-end">打卡</button></form>';
+    }
+
+    var words=load(K.words,[]).slice().sort(function(a,b){ return (b.addedDate||"")<(a.addedDate||"")?-1:1; });
+    var list=document.getElementById("wordList");
+    if(!words.length){ list.innerHTML='<div class="empty">生词本还是空的，遇到不会的六级词就记下来。</div>'; return; }
+    var h="";
+    words.forEach(function(w){
+      h += '<div class="item"><div class="main"><div class="t">'+esc(w.word)+' <span class="tag '+(w.reviewed?"green":"gray")+'">'+(w.reviewed?"已巩固":"待巩固")+'</span></div><div class="s">'+esc(w.meaning)+' · 添加于 '+(w.addedDate||"")+'</div></div><div class="acts"><button class="mini-btn '+(w.reviewed?"":"ok")+'" data-toggleword="'+w.id+'" title="切换巩固状态">'+(w.reviewed?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>')+'</button><button class="mini-btn del" data-delword="'+w.id+'" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button></div></div>';
+    });
+    list.innerHTML=h;
+  }
+
+  // ---------- render: papers ----------
+  function renderPapers(){
+    var pm=paperMap();
+    var td=todayStr();
+    document.getElementById("pToday").textContent=pm[td]||0;
+    var goal=load(K.papergoal,3);
+    document.getElementById("pGoal").textContent=goal;
+    document.getElementById("pGoalInput").value=goal;
+    document.getElementById("pTotal").textContent=load(K.papers,[]).filter(function(p){ return p.status==="已读"; }).length;
+    document.getElementById("paperHeat").innerHTML=heatmapSVG(pm,8);
+
+    var papers=load(K.papers,[]).slice().sort(function(a,b){
+      var da=a.date||a.planDate||"", db=b.date||b.planDate||""; return da<db?1:-1;
+    });
+    var list=document.getElementById("paperList");
+    if(!papers.length){ list.innerHTML='<div class="empty">还没有阅读记录，读完一篇就记一篇。</div>'; return; }
+    var h="";
+    papers.forEach(function(p){
+      var tagcls = p.status==="已读" ? "green" : (p.planDate && p.planDate<td ? "red" : "gray");
+      h += '<div class="item"><div class="main"><div class="t">'+esc(p.title)+' <span class="tag '+tagcls+'">'+(p.status==="已读"?"已读":(p.planDate&&p.planDate<td?"逾期未读":"未读"))+'</span></div><div class="s">'+(p.date?("读于 "+esc(p.date)):"")+(p.planDate?(" · 计划 "+esc(p.planDate)):"")+(p.source?(" · "+esc(p.source)):"")+'</div>'+(p.note?'<div class="s">'+esc(p.note)+'</div>':'')+'</div><div class="acts"><button class="mini-btn" data-togglepaper="'+p.id+'" title="切换已读/未读">'+(p.status==="已读"?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>')+'</button><button class="mini-btn del" data-delpaper="'+p.id+'" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button></div></div>';
+    });
+    list.innerHTML=h;
+  }
+
+  function renderAll(){ renderTodo(); renderCourses(); renderWords(); renderPapers(); }
+
+  // ---------- module switch ----------
+  function showMod(mod){
+    ["todo","courses","words","papers"].forEach(function(m){
+      var p=document.getElementById("panel-"+m);
+      if(p) p.classList.toggle("hidden", m!==mod);
+    });
+    document.querySelectorAll(".nav-item").forEach(function(n){
+      n.classList.toggle("active", n.getAttribute("data-mod")===mod);
+    });
+    if(mod==="todo") renderTodo();
+  }
+
+  // ---------- events ----------
+  document.querySelectorAll(".nav-item").forEach(function(n){
+    n.addEventListener("click", function(){ showMod(n.getAttribute("data-mod")); });
+  });
+  // todo quick actions
+  document.getElementById("todoList").addEventListener("click", function(e){
+    var b=e.target.closest("[data-go]"); if(b){ showMod(b.getAttribute("data-go")); }
+  });
+
+  // course form
+  document.getElementById("formCourse").addEventListener("submit", function(e){
+    e.preventDefault();
+    var c={ id:uid(), day:+document.getElementById("cDay").value, start:document.getElementById("cStart").value,
+      end:document.getElementById("cEnd").value, name:document.getElementById("cName").value.trim(),
+      room:document.getElementById("cRoom").value.trim(), teacher:document.getElementById("cTeacher").value.trim(),
+      color:document.getElementById("cColor").value, sample:false };
+    var arr=load(K.courses,[]); arr.push(c); save(K.courses,arr);
+    this.reset(); renderCourses(); renderTodo(); toast("已添加课程");
+  });
+  document.getElementById("weekGrid").addEventListener("click", function(e){
+    var b=e.target.closest("[data-delcourse]"); if(!b) return;
+    if(!confirm("确定删除这门课？")) return;
+    var arr=load(K.courses,[]).filter(function(x){ return x.id!==b.getAttribute("data-delcourse"); });
+    save(K.courses,arr); renderCourses(); renderTodo(); toast("已删除");
+  });
+
+  // word checkin (delegated, may re-render)
+  document.getElementById("panel-words").addEventListener("submit", function(e){
+    if(e.target.id!=="formCheckin") return;
+    e.preventDefault();
+    var count=+document.getElementById("ckCount").value||0;
+    if(count<=0){ toast("请输入正确的数量"); return; }
+    var arr=load(K.checkins,[]).filter(function(c){ return c.date!==todayStr(); });
+    arr.push({id:uid(), date:todayStr(), count:count, note:document.getElementById("ckNote").value.trim(), sample:false});
+    save(K.checkins,arr); renderWords(); renderTodo(); toast("打卡成功 +"+count);
+  });
+  document.getElementById("todayCheckin").addEventListener("click", function(e){
+    if(e.target.id==="btnRecheck" || e.target.closest("#btnRecheck")){
+      var arr=load(K.checkins,[]).filter(function(c){ return c.date!==todayStr(); });
+      save(K.checkins,arr); renderWords(); renderTodo(); toast("已清除今日打卡，可重新打");
+    }
+  });
+
+  // word form
+  document.getElementById("formWord").addEventListener("submit", function(e){
+    e.preventDefault();
+    var w={ id:uid(), word:document.getElementById("wWord").value.trim(), meaning:document.getElementById("wMean").value.trim(),
+      addedDate:todayStr(), reviewed:false, sample:false };
+    if(!w.word){ return; }
+    var arr=load(K.words,[]); arr.push(w); save(K.words,arr);
+    this.reset(); renderWords(); toast("已加入生词本");
+  });
+  document.getElementById("wordList").addEventListener("click", function(e){
+    var tg=e.target.closest("[data-toggleword]"); if(tg){
+      var arr=load(K.words,[]); var id=tg.getAttribute("data-toggleword");
+      arr.forEach(function(x){ if(x.id===id) x.reviewed=!x.reviewed; }); save(K.words,arr); renderWords(); return;
+    }
+    var dl=e.target.closest("[data-delword]"); if(dl){
+      if(!confirm("删除这个生词？")) return;
+      var arr=load(K.words,[]).filter(function(x){ return x.id!==dl.getAttribute("data-delword"); });
+      save(K.words,arr); renderWords(); toast("已删除");
+    }
+  });
+
+  // paper goal
+  document.getElementById("btnSaveGoal").addEventListener("click", function(){
+    var g=+document.getElementById("pGoalInput").value||1; if(g<1)g=1;
+    save(K.papergoal,g); renderPapers(); renderTodo(); toast("目标已设为每天 "+g+" 篇");
+  });
+  // paper form
+  document.getElementById("formPaper").addEventListener("submit", function(e){
+    e.preventDefault();
+    var p={ id:uid(), date:document.getElementById("pDate").value, title:document.getElementById("pTitle").value.trim(),
+      source:document.getElementById("pSource").value.trim(), planDate:document.getElementById("pPlan").value,
+      status:document.getElementById("pStatus").value, note:document.getElementById("pNote").value.trim(), sample:false };
+    if(!p.title){ return; }
+    var arr=load(K.papers,[]); arr.push(p); save(K.papers,arr);
+    this.reset(); document.getElementById("pDate").value=todayStr();
+    renderPapers(); renderTodo(); toast("已记录");
+  });
+  document.getElementById("paperList").addEventListener("click", function(e){
+    var tg=e.target.closest("[data-togglepaper]"); if(tg){
+      var arr=load(K.papers,[]); var id=tg.getAttribute("data-togglepaper");
+      arr.forEach(function(x){ if(x.id===id) x.status=(x.status==="已读"?"未读":"已读"); }); save(K.papers,arr); renderPapers(); renderTodo(); return;
+    }
+    var dl=e.target.closest("[data-delpaper]"); if(dl){
+      if(!confirm("删除这条记录？")) return;
+      var arr=load(K.papers,[]).filter(function(x){ return x.id!==dl.getAttribute("data-delpaper"); });
+      save(K.papers,arr); renderPapers(); renderTodo(); toast("已删除");
+    }
+  });
+
+  // export
+  document.getElementById("btnExport").addEventListener("click", function(){
+    var data={}; Object.keys(K).forEach(function(k){ data[k]=localStorage.getItem(k); });
+    var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="研途学习台-备份-"+todayStr()+".json";
+    a.click(); URL.revokeObjectURL(a.href);
+    toast("已导出备份");
+  });
+  // import
+  document.getElementById("btnImport").addEventListener("click", function(){ document.getElementById("importFile").click(); });
+  document.getElementById("importFile").addEventListener("change", function(e){
+    var f=e.target.files[0]; if(!f) return;
+    var r=new FileReader();
+    r.onload=function(){
+      try{
+        var obj=JSON.parse(r.result); var n=0;
+        Object.keys(K).forEach(function(k){ if(obj[k]!=null){ localStorage.setItem(k,obj[k]); n++; } });
+        renderAll(); toast("导入完成，共恢复 "+n+" 项");
+      }catch(err){ toast("导入失败：文件格式不正确"); }
+      e.target.value="";
+    };
+    r.readAsText(f);
+  });
+  // clear all
+  document.getElementById("btnClear").addEventListener("click", function(){
+    if(!confirm("确定清空全部数据？此操作不可恢复！\n（建议先点「导出」备份）")) return;
+    Object.keys(K).forEach(function(k){ localStorage.removeItem(k); });
+    renderAll(); toast("已清空全部数据");
+  });
+  // clear sample
+  document.getElementById("btnSeedClear").addEventListener("click", function(){
+    if(!confirm("仅清空示例数据，保留你自己添加的内容？")) return;
+    ["courses","checkins","words","papers"].forEach(function(key){
+      var arr=load(K[key],[]).filter(function(x){ return !(x && x.sample); });
+      save(K[key],arr);
+    });
+    renderAll(); toast("已清空示例数据");
+  });
+
+  // sync events
+  document.getElementById("btnSaveToken").addEventListener("click", function(){
+    var s=getSync(); if(s.auto==null) s.auto=true;
+    var g=document.getElementById("syncGist").value.trim(); if(g) s.blobId=g;
+    setSync(s); document.getElementById("syncAuto").checked=!!s.auto;
+    renderSyncId(); pushSync(); toast("同步已启用");
+  });
+  document.getElementById("btnSyncNow").addEventListener("click", function(){
+    var s=getSync(); if(!s.token){ toast("请先保存令牌"); return; }
+    pullSync().then(function(){ pushSync(); });
+  });
+  document.getElementById("syncAuto").addEventListener("change", function(){
+    var s=getSync(); s.auto=this.checked; setSync(s); if(s.auto) pushSync();
+  });
+  document.getElementById("btnCopyGist").addEventListener("click", function(){
+    var s=getSync(); if(!s.blobId) return;
+    if(navigator.clipboard){ navigator.clipboard.writeText(s.blobId).then(function(){ toast("已复制 Blob ID"); }); }
+    else { toast("Blob ID: "+s.blobId); }
+  });
+
+  // init
+  seed();
+  document.getElementById("pDate").value=todayStr();
+  renderAll();
+  // init sync UI
+  (function(){
+    var s=getSync();
+    document.getElementById("syncToken").value="";
+    document.getElementById("syncAuto").checked=!!s.auto;
+    renderSyncId();
+    if(s.auto){
+      setSyncStatus("已配置，打开时自动同步","ok");
+      if(s.blobId) pullSync();
+    }
+  })();
+})();
+</script>
+</body>
+</html>
