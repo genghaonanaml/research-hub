@@ -145,11 +145,11 @@
   .wb-day.today .wbd-name{color:#4361ee}
   .wbd-name{display:block;font-size:12px}
   .wbd-num{display:block;font-size:15px;font-weight:800}
-  .timetable{display:grid;grid-template-columns:40px repeat(7,1fr);gap:2px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--border);min-height:400px}
-  .tt-slot{background:#f8f9fc;padding:6px 4px;text-align:center;font-size:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid var(--border)}
+  .timetable{display:grid;grid-template-columns:40px repeat(7,1fr);gap:2px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--border)}
+  .tt-slot{background:#f8f9fc;padding:8px 4px;text-align:center;font-size:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid var(--border)}
   .tt-slot .tt-snum{font-size:14px;font-weight:800;color:var(--text)}
   .tt-slot .tt-stime{font-size:10px;color:var(--muted)}
-  .tt-cell{background:#fff;min-height:52px;padding:3px;position:relative;display:flex;flex-direction:column;gap:2px}
+  .tt-cell{background:#fff;min-height:80px;padding:4px;position:relative;display:flex;flex-direction:column;gap:2px}
   .tt-cell.today-col{background:#f5f7ff}
   .tt-card{background:var(--card-color,#4361ee);color:#fff;border-radius:7px;padding:5px 6px;font-size:12px;line-height:1.25;cursor:pointer;position:relative;min-height:100%;display:flex;flex-direction:column;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.08)}
   .tt-card:hover{opacity:.9}
@@ -159,12 +159,12 @@
   .tt-card:hover .tc-del{display:block}
   @media(max-width:768px){
     .timetable{font-size:12px}
-    .tt-slot{padding:4px 2px}
+    .tt-slot{padding:6px 2px}
     .tt-slot .tt-snum{font-size:12px}
-    .tt-card{padding:4px;font-size:11px}
+    .tt-card{padding:5px;font-size:11px}
     .tt-card .tc-name{font-size:11px}
     .tt-card .tc-room{font-size:9px}
-    .tt-cell{min-height:42px}
+    .tt-cell{min-height:64px}
   }
   /* course form - vertical list style */
   .cf-list{display:flex;flex-direction:column;gap:14px}
@@ -717,13 +717,14 @@
 
   // ---------- render: courses ----------
   // ---------- render: courses (timetable grid) ----------
+  // 每行 = 一堂课(两小节连上)，共6个时间段
   var SLOT_INFO=[
-    {num:'1',start:'08:00',end:'08:45'},{num:'2',start:'08:45',end:'09:35'},
-    {num:'3',start:'09:55',end:'10:40'},{num:'4',start:'10:40',end:'11:30'},
-    {num:'5',start:'13:30',end:'14:15'},{num:'6',start:'14:15',end:'15:05'},
-    {num:'7',start:'15:25',end:'16:10'},{num:'8',start:'16:10',end:'17:00'},
-    {num:'9',start:'18:00',end:'18:45'},{num:'10',start:'18:45',end:'19:35'},
-    {num:'11',start:'19:55',end:'20:40'},{num:'12',start:'20:40',end:'21:30'}
+    {num:'1-2',start:'08:00',end:'09:35'},
+    {num:'3-4',start:'09:55',end:'11:30'},
+    {num:'5-6',start:'13:30',end:'15:05'},
+    {num:'7-8',start:'15:25',end:'17:00'},
+    {num:'9-10',start:'18:00',end:'19:35'},
+    {num:'11-12',start:'19:55',end:'21:30'}
   ];
   var SLOT_TIME={1:["08:00","09:35"],3:["09:55","11:30"],5:["13:30","15:05"],7:["15:25","17:00"],9:["18:00","19:35"],11:["19:55","21:30"]};
   var COURSE_COLORS=['#4361ee','#2e9e5b','#e8a33d','#9b5de5','#e5484d','#00a3b4','#ff6b6b','#f06292'];
@@ -766,36 +767,31 @@
       wb+='</div>';
     }
     document.getElementById("weekBar").innerHTML=wb;
-    // timetable grid
+    // timetable grid (6 rows = 6 time slots, each row = one class period)
     var tt='<div class="tt-slot"><div class="tt-snum">节</div></div>';
     for(var d=0;d<7;d++) tt+='<div class="tt-cell'+(d+1===td?' today-col':'')+'"></div>';
-    for(var s=0;s<12;s++){
+    for(var s=0;s<6;s++){
       var si=SLOT_INFO[s];
       tt+='<div class="tt-slot"><div class="tt-snum">'+si.num+'</div><div class="tt-stime">'+si.start+'</div><div class="tt-stime">'+si.end+'</div></div>';
       for(var d=0;d<7;d++){
         var dayNum=d+1;
-        var slotKey=(Math.floor(s/2)*2)+1; // s=0→1, s=2→3, s=4→5, s=6→7, s=8→9, s=10→11
-        if(s%2===0){ // only odd rows (1,3,5,7,9,11) are start of a pair
-          var matches=courses.filter(function(c){
-            return c.day===dayNum && c.start===SLOT_TIME[slotKey][0];
+        var slotKey=(s*2)+1; // s=0→1, s=1→3, s=2→5, ...
+        var matches=courses.filter(function(c){
+          return c.day===dayNum && c.start===SLOT_TIME[slotKey][0];
+        });
+        var cellClass='tt-cell'+(dayNum===td?' today-col':'');
+        if(matches.length){
+          var cards='';
+          matches.forEach(function(c){
+            cards+='<div class="tt-card" style="--card-color:'+esc(c.color||'#4361ee')+'" data-delcourse="'+c.id+'" title="'+esc(c.name)+'">';
+            cards+='<div class="tc-name">'+esc(c.name)+'</div>';
+            if(c.room) cards+='<div class="tc-room">'+esc(c.room)+'</div>';
+            cards+='<button class="tc-del" data-delcourse="'+c.id+'" title="删除">×</button>';
+            cards+='</div>';
           });
-          var cellClass='tt-cell'+(dayNum===td?' today-col':'');
-          if(matches.length){
-            var cards='';
-            matches.forEach(function(c){
-              cards+='<div class="tt-card" style="--card-color:'+esc(c.color||'#4361ee')+'" data-delcourse="'+c.id+'" title="'+esc(c.name)+'">';
-              cards+='<div class="tc-name">'+esc(c.name)+'</div>';
-              if(c.room) cards+='<div class="tc-room">'+esc(c.room)+'</div>';
-              cards+='<button class="tc-del" data-delcourse="'+c.id+'" title="删除">×</button>';
-              cards+='</div>';
-            });
-            tt+='<div class="'+cellClass+'">'+cards+'</div>';
-          } else {
-            tt+='<div class="'+cellClass+'"></div>';
-          }
+          tt+='<div class="'+cellClass+'">'+cards+'</div>';
         } else {
-          // even row: merge with above visually by leaving empty but same styling
-          tt+='<div class="tt-cell'+(dayNum===td?' today-col':'')+'"></div>';
+          tt+='<div class="'+cellClass+'"></div>';
         }
       }
     }
