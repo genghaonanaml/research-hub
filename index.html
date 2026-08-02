@@ -890,7 +890,6 @@
     });
     var td=dow(); // 1=Mon..7=Sun
     var now=new Date();
-    var mon=new Date(now); mon.setDate(now.getDate()-((now.getDay()+6)%7));
     // header: 周数+状态 + 日期
     var wn=getWeekNum();
     var statusText="";
@@ -903,6 +902,16 @@
     document.getElementById("courseDateInfo").textContent=y+"/"+m+"/"+d2;
     document.getElementById("setTermStart").value=load(K.termStart,'')||'';
     document.getElementById("curWeekBadge").textContent="第 "+wn+" 周";
+    // week bar: 根据当前选择的周数算那一周的周一（切周时日期跟着变）
+    var termStart=load(K.termStart,null);
+    if(termStart){
+      // 从开学日期 + (wn-1)*7 天 算出该周周一
+      mon=new Date(termStart+"T00:00:00");
+      mon.setDate(mon.getDate()+(wn-1)*7);
+    } else {
+      // 没设开学日期，用今天所在周的周一
+      mon=new Date(now); mon.setDate(now.getDate()-((now.getDay()+6)%7));
+    }
     // week bar
     var wb='';
     wb+='<div class="wb-cell wb-label">月</div>';
