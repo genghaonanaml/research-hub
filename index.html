@@ -461,486 +461,61 @@
     var existingCourses = load(K.courses, []);
     if(load(K.seeded, false) && existingCourses.length > 0) return;
     var courses = [
-      {
-        "day": 1,
-        "start": "08:00",
-        "end": "08:50",
-        "name": "排球2班",
-        "room": "",
-        "teacher": "",
-        "color": "#9b5de5",
-        "sample": true
-      },
-      {
-        "day": 1,
-        "start": "08:00",
-        "end": "08:50",
-        "name": "武术1班",
-        "room": "",
-        "teacher": "",
-        "color": "#e5484d",
-        "sample": true
-      },
-      {
-        "day": 1,
-        "start": "08:00",
-        "end": "08:50",
-        "name": "足球1班",
-        "room": "",
-        "teacher": "",
-        "color": "#00a3b4",
-        "sample": true
-      },
-      {
-        "day": 1,
-        "start": "08:00",
-        "end": "08:50",
-        "name": "网球2班",
-        "room": "",
-        "teacher": "",
-        "color": "#4361ee",
-        "sample": true
-      },
-      {
-        "day": 1,
-        "start": "10:00",
-        "end": "10:50",
-        "name": "地热资源的开发与利用1班",
-        "room": "",
-        "teacher": "",
-        "color": "#2e9e5b",
-        "sample": true
-      },
-      {
-        "day": 1,
-        "start": "10:00",
-        "end": "10:50",
-        "name": "建筑清洁能源利用技术1班",
-        "room": "",
-        "teacher": "",
-        "color": "#e8a33d",
-        "sample": true
-      },
-      {
-        "day": 1,
-        "start": "14:00",
-        "end": "14:50",
-        "name": "清洁能源前沿技术",
-        "room": "",
-        "teacher": "",
-        "color": "#4361ee",
-        "sample": true
-      },
-      {
-        "day": 1,
-        "start": "14:00",
-        "end": "14:50",
-        "name": "清洁能源技术领域案例专题课",
-        "room": "",
-        "teacher": "",
-        "color": "#2e9e5b",
-        "sample": true
-      },
-      {
-        "day": 1,
-        "start": "14:00",
-        "end": "14:50",
-        "name": "数学物理方法2班",
-        "room": "",
-        "teacher": "",
-        "color": "#9b5de5",
-        "sample": true
-      },
-      {
-        "day": 1,
-        "start": "14:00",
-        "end": "14:50",
-        "name": "清洁能源技术专题实验1班",
-        "room": "",
-        "teacher": "",
-        "color": "#e5484d",
-        "sample": true
-      },
-      {
-        "day": 1,
-        "start": "16:00",
-        "end": "16:50",
-        "name": "数学物理方法2班",
-        "room": "",
-        "teacher": "",
-        "color": "#9b5de5",
-        "sample": true
-      },
-      {
-        "day": 1,
-        "start": "19:00",
-        "end": "19:50",
-        "name": "英语水平测试听力&综合训练",
-        "room": "",
-        "teacher": "",
-        "color": "#e8a33d",
-        "sample": true
-      },
-      {
-        "day": 1,
-        "start": "19:00",
-        "end": "19:50",
-        "name": "清洁能源前沿技术",
-        "room": "",
-        "teacher": "",
-        "color": "#4361ee",
-        "sample": true
-      },
-      {
-        "day": 1,
-        "start": "19:00",
-        "end": "19:50",
-        "name": "计算传热学（双语）1班",
-        "room": "",
-        "teacher": "",
-        "color": "#00a3b4",
-        "sample": true
-      },
-      {
-        "day": 1,
-        "start": "21:00",
-        "end": "21:50",
-        "name": "英语水平测试听力&综合训练",
-        "room": "",
-        "teacher": "",
-        "color": "#e8a33d",
-        "sample": true
-      },
-      {
-        "day": 1,
-        "start": "21:00",
-        "end": "21:50",
-        "name": "数学物理方法2班",
-        "room": "",
-        "teacher": "",
-        "color": "#9b5de5",
-        "sample": true
-      },
-      {
-        "day": 2,
-        "start": "08:00",
-        "end": "08:50",
-        "name": "新时代中国特色社会主义理论与实践",
-        "room": "",
-        "teacher": "",
-        "color": "#9b5de5",
-        "sample": true
-      },
-      {
-        "day": 2,
-        "start": "10:00",
-        "end": "10:50",
-        "name": "油田太阳能供热技术1班",
-        "room": "",
-        "teacher": "",
-        "color": "#4361ee",
-        "sample": true
-      },
-      {
-        "day": 2,
-        "start": "14:00",
-        "end": "14:50",
-        "name": "高等传热传质学（双语人工智能+）",
-        "room": "",
-        "teacher": "",
-        "color": "#e5484d",
-        "sample": true
-      },
-      {
-        "day": 2,
-        "start": "16:00",
-        "end": "16:50",
-        "name": "论文写作与指导",
-        "room": "",
-        "teacher": "",
-        "color": "#00a3b4",
-        "sample": true
-      },
-      {
-        "day": 2,
-        "start": "16:00",
-        "end": "16:50",
-        "name": "篮球2班",
-        "room": "",
-        "teacher": "",
-        "color": "#2e9e5b",
-        "sample": true
-      },
-      {
-        "day": 2,
-        "start": "16:00",
-        "end": "16:50",
-        "name": "健美操1班",
-        "room": "",
-        "teacher": "",
-        "color": "#e8a33d",
-        "sample": true
-      },
-      {
-        "day": 2,
-        "start": "16:00",
-        "end": "16:50",
-        "name": "定向越野2班",
-        "room": "",
-        "teacher": "",
-        "color": "#9b5de5",
-        "sample": true
-      },
-      {
-        "day": 2,
-        "start": "19:00",
-        "end": "19:50",
-        "name": "论文写作与指导",
-        "room": "",
-        "teacher": "",
-        "color": "#00a3b4",
-        "sample": true
-      },
-      {
-        "day": 2,
-        "start": "19:00",
-        "end": "19:50",
-        "name": "工程伦理",
-        "room": "",
-        "teacher": "",
-        "color": "#4361ee",
-        "sample": true
-      },
-      {
-        "day": 2,
-        "start": "21:00",
-        "end": "21:50",
-        "name": "工程伦理",
-        "room": "",
-        "teacher": "",
-        "color": "#4361ee",
-        "sample": true
-      },
-      {
-        "day": 3,
-        "start": "08:00",
-        "end": "08:50",
-        "name": "数学物理方法2班",
-        "room": "",
-        "teacher": "",
-        "color": "#9b5de5",
-        "sample": true
-      },
-      {
-        "day": 3,
-        "start": "10:00",
-        "end": "10:50",
-        "name": "高等工程热力学",
-        "room": "",
-        "teacher": "",
-        "color": "#2e9e5b",
-        "sample": true
-      },
-      {
-        "day": 3,
-        "start": "10:00",
-        "end": "10:50",
-        "name": "研究生学术外语（日语）1班",
-        "room": "",
-        "teacher": "",
-        "color": "#e5484d",
-        "sample": true
-      },
-      {
-        "day": 3,
-        "start": "14:00",
-        "end": "14:50",
-        "name": "清洁能源技术领域案例专题课",
-        "room": "",
-        "teacher": "",
-        "color": "#2e9e5b",
-        "sample": true
-      },
-      {
-        "day": 3,
-        "start": "14:00",
-        "end": "14:50",
-        "name": "研究生学术外语（英语）1班",
-        "room": "",
-        "teacher": "",
-        "color": "#00a3b4",
-        "sample": true
-      },
-      {
-        "day": 3,
-        "start": "19:00",
-        "end": "19:50",
-        "name": "英语水平测试听力&综合训练",
-        "room": "",
-        "teacher": "",
-        "color": "#e8a33d",
-        "sample": true
-      },
-      {
-        "day": 3,
-        "start": "19:00",
-        "end": "19:50",
-        "name": "计算传热学（双语）1班",
-        "room": "",
-        "teacher": "",
-        "color": "#00a3b4",
-        "sample": true
-      },
-      {
-        "day": 4,
-        "start": "08:00",
-        "end": "08:50",
-        "name": "自然辩证法概论",
-        "room": "",
-        "teacher": "",
-        "color": "#e8a33d",
-        "sample": true
-      },
-      {
-        "day": 4,
-        "start": "10:00",
-        "end": "10:50",
-        "name": "自然辩证法概论",
-        "room": "",
-        "teacher": "",
-        "color": "#e8a33d",
-        "sample": true
-      },
-      {
-        "day": 4,
-        "start": "10:00",
-        "end": "10:50",
-        "name": "油田太阳能供热技术1班",
-        "room": "",
-        "teacher": "",
-        "color": "#4361ee",
-        "sample": true
-      },
-      {
-        "day": 4,
-        "start": "10:00",
-        "end": "10:50",
-        "name": "地热资源的开发与利用1班",
-        "room": "",
-        "teacher": "",
-        "color": "#2e9e5b",
-        "sample": true
-      },
-      {
-        "day": 4,
-        "start": "10:00",
-        "end": "10:50",
-        "name": "清洁能源技术专题实验1班",
-        "room": "",
-        "teacher": "",
-        "color": "#e5484d",
-        "sample": true
-      },
-      {
-        "day": 4,
-        "start": "10:00",
-        "end": "10:50",
-        "name": "建筑清洁能源利用技术1班",
-        "room": "",
-        "teacher": "",
-        "color": "#e8a33d",
-        "sample": true
-      },
-      {
-        "day": 4,
-        "start": "14:00",
-        "end": "14:50",
-        "name": "高等工程热力学",
-        "room": "",
-        "teacher": "",
-        "color": "#2e9e5b",
-        "sample": true
-      },
-      {
-        "day": 4,
-        "start": "16:00",
-        "end": "16:50",
-        "name": "研究生学术外语（英语）1班",
-        "room": "",
-        "teacher": "",
-        "color": "#00a3b4",
-        "sample": true
-      },
-      {
-        "day": 4,
-        "start": "16:00",
-        "end": "16:50",
-        "name": "花式跳绳1班",
-        "room": "",
-        "teacher": "",
-        "color": "#4361ee",
-        "sample": true
-      },
-      {
-        "day": 4,
-        "start": "19:00",
-        "end": "19:50",
-        "name": "建筑清洁能源利用技术1班",
-        "room": "",
-        "teacher": "",
-        "color": "#e8a33d",
-        "sample": true
-      },
-      {
-        "day": 5,
-        "start": "08:00",
-        "end": "08:50",
-        "name": "英语水平测试听力&综合训练",
-        "room": "",
-        "teacher": "",
-        "color": "#e8a33d",
-        "sample": true
-      },
-      {
-        "day": 6,
-        "start": "14:00",
-        "end": "14:50",
-        "name": "新时代中国特色社会主义理论与实践",
-        "room": "",
-        "teacher": "",
-        "color": "#9b5de5",
-        "sample": true
-      },
-      {
-        "day": 6,
-        "start": "14:00",
-        "end": "14:50",
-        "name": "自然辩证法概论",
-        "room": "",
-        "teacher": "",
-        "color": "#e8a33d",
-        "sample": true
-      },
-      {
-        "day": 6,
-        "start": "16:00",
-        "end": "16:50",
-        "name": "新时代中国特色社会主义理论与实践",
-        "room": "",
-        "teacher": "",
-        "color": "#9b5de5",
-        "sample": true
-      },
-      {
-        "day": 7,
-        "start": "14:00",
-        "end": "14:50",
-        "name": "高等传热传质学（双语人工智能+）",
-        "room": "",
-        "teacher": "",
-        "color": "#e5484d",
-        "sample": true
-      }
+      /* ===== 周一 day=1 ===== */
+      {"day":1,"start":"08:00","end":"09:35","name":"排球2班","room":"","teacher":"","color":"#9b5de5","sample":true},
+      {"day":1,"start":"08:00","end":"09:35","name":"武术1班","room":"","teacher":"","color":"#e5484d","sample":true},
+      {"day":1,"start":"08:00","end":"09:35","name":"足球1班","room":"","teacher":"","color":"#00a3b4","sample":true},
+      {"day":1,"start":"08:00","end":"09:35","name":"网球2班","room":"","teacher":"","color":"#4361ee","sample":true},
+      {"day":1,"start":"09:55","end":"11:30","name":"地热资源的开发与利用1班","room":"","teacher":"","color":"#2e9e5b","sample":true},
+      {"day":1,"start":"09:55","end":"11:30","name":"建筑清洁能源利用技术1班","room":"","teacher":"","color":"#e8a33d","sample":true},
+      {"day":1,"start":"13:30","end":"15:05","name":"清洁能源前沿技术","room":"","teacher":"","color":"#4361ee","sample":true},
+      {"day":1,"start":"13:30","end":"15:05","name":"清洁能源技术领域案例专题课","room":"","teacher":"","color":"#2e9e5b","sample":true},
+      {"day":1,"start":"13:30","end":"15:05","name":"数学物理方法2班","room":"","teacher":"","color":"#9b5de5","sample":true},
+      {"day":1,"start":"13:30","end":"15:05","name":"清洁能源技术专题实验1班","room":"","teacher":"","color":"#e5484d","sample":true},
+      {"day":1,"start":"15:25","end":"17:00","name":"数学物理方法2班","room":"","teacher":"","color":"#9b5de5","sample":true},
+      {"day":1,"start":"18:00","end":"19:35","name":"英语水平测试听力&综合训练","room":"","teacher":"","color":"#e8a33d","sample":true},
+      {"day":1,"start":"18:00","end":"19:35","name":"清洁能源前沿技术","room":"","teacher":"","color":"#4361ee","sample":true},
+      {"day":1,"start":"18:00","end":"19:35","name":"计算传热学（双语）1班","room":"","teacher":"","color":"#00a3b4","sample":true},
+      {"day":1,"start":"19:55","end":"21:30","name":"英语水平测试听力&综合训练","room":"","teacher":"","color":"#e8a33d","sample":true},
+      {"day":1,"start":"19:55","end":"21:30","name":"数学物理方法2班","room":"","teacher":"","color":"#9b5de5","sample":true},
+      /* ===== 周二 day=2 ===== */
+      {"day":2,"start":"08:00","end":"09:35","name":"新时代中国特色社会主义理论与实践","room":"","teacher":"","color":"#9b5de5","sample":true},
+      {"day":2,"start":"09:55","end":"11:30","name":"油田太阳能供热技术1班","room":"","teacher":"","color":"#4361ee","sample":true},
+      {"day":2,"start":"13:30","end":"15:05","name":"高等传热传质学（双语人工智能+）","room":"","teacher":"","color":"#e5484d","sample":true},
+      {"day":2,"start":"15:25","end":"17:00","name":"论文写作与指导","room":"","teacher":"","color":"#00a3b4","sample":true},
+      {"day":2,"start":"15:25","end":"17:00","name":"篮球2班","room":"","teacher":"","color":"#2e9e5b","sample":true},
+      {"day":2,"start":"15:25","end":"17:00","name":"健美操1班","room":"","teacher":"","color":"#e8a33d","sample":true},
+      {"day":2,"start":"15:25","end":"17:00","name":"定向越野2班","room":"","teacher":"","color":"#9b5de5","sample":true},
+      {"day":2,"start":"18:00","end":"19:35","name":"论文写作与指导","room":"","teacher":"","color":"#00a3b4","sample":true},
+      {"day":2,"start":"18:00","end":"19:35","name":"工程伦理","room":"","teacher":"","color":"#4361ee","sample":true},
+      {"day":2,"start":"19:55","end":"21:30","name":"工程伦理","room":"","teacher":"","color":"#4361ee","sample":true},
+      /* ===== 周三 day=3 ===== */
+      {"day":3,"start":"08:00","end":"09:35","name":"数学物理方法2班","room":"","teacher":"","color":"#9b5de5","sample":true},
+      {"day":3,"start":"09:55","end":"11:30","name":"高等工程热力学","room":"","teacher":"","color":"#2e9e5b","sample":true},
+      {"day":3,"start":"09:55","end":"11:30","name":"研究生学术外语（日语）1班","room":"","teacher":"","color":"#e5484d","sample":true},
+      {"day":3,"start":"13:30","end":"15:05","name":"清洁能源技术领域案例专题课","room":"","teacher":"","color":"#2e9e5b","sample":true},
+      {"day":3,"start":"13:30","end":"15:05","name":"研究生学术外语（英语）1班","room":"","teacher":"","color":"#00a3b4","sample":true},
+      {"day":3,"start":"18:00","end":"19:35","name":"英语水平测试听力&综合训练","room":"","teacher":"","color":"#e8a33d","sample":true},
+      {"day":3,"start":"18:00","end":"19:35","name":"计算传热学（双语）1班","room":"","teacher":"","color":"#00a3b4","sample":true},
+      /* ===== 周四 day=4 ===== */
+      {"day":4,"start":"08:00","end":"09:35","name":"自然辩证法概论","room":"","teacher":"","color":"#e8a33d","sample":true},
+      {"day":4,"start":"09:55","end":"11:30","name":"自然辩证法概论","room":"","teacher":"","color":"#e8a33d","sample":true},
+      {"day":4,"start":"09:55","end":"11:30","name":"油田太阳能供热技术1班","room":"","teacher":"","color":"#4361ee","sample":true},
+      {"day":4,"start":"09:55","end":"11:30","name":"地热资源的开发与利用1班","room":"","teacher":"","color":"#2e9e5b","sample":true},
+      {"day":4,"start":"09:55","end":"11:30","name":"清洁能源技术专题实验1班","room":"","teacher":"","color":"#e5484d","sample":true},
+      {"day":4,"start":"09:55","end":"11:30","name":"建筑清洁能源利用技术1班","room":"","teacher":"","color":"#e8a33d","sample":true},
+      {"day":4,"start":"13:30","end":"15:05","name":"高等工程热力学","room":"","teacher":"","color":"#2e9e5b","sample":true},
+      {"day":4,"start":"15:25","end":"17:00","name":"研究生学术外语（英语）1班","room":"","teacher":"","color":"#00a3b4","sample":true},
+      {"day":4,"start":"15:25","end":"17:00","name":"花式跳绳1班","room":"","teacher":"","color":"#4361ee","sample":true},
+      {"day":4,"start":"18:00","end":"19:35","name":"建筑清洁能源利用技术1班","room":"","teacher":"","color":"#e8a33d","sample":true},
+      /* ===== 周五 day=5 ===== */
+      {"day":5,"start":"08:00","end":"09:35","name":"英语水平测试听力&综合训练","room":"","teacher":"","color":"#e8a33d","sample":true},
+      /* ===== 周六 day=6 ===== */
+      {"day":6,"start":"13:30","end":"15:05","name":"新时代中国特色社会主义理论与实践","room":"","teacher":"","color":"#9b5de5","sample":true},
+      {"day":6,"start":"13:30","end":"15:05","name":"自然辩证法概论","room":"","teacher":"","color":"#e8a33d","sample":true},
+      {"day":6,"start":"15:25","end":"17:00","name":"新时代中国特色社会主义理论与实践","room":"","teacher":"","color":"#9b5de5","sample":true},
+      /* ===== 周日 day=7 ===== */
+      {"day":7,"start":"13:30","end":"15:05","name":"高等传热传质学（双语人工智能+）","room":"","teacher":"","color":"#e5484d","sample":true}
     ];
     courses.forEach(function(c){ if(!c.id) c.id=uid(); });
     var checkins = [
