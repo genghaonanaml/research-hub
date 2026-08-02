@@ -130,20 +130,58 @@
   .stat{background:#f7f8fc; border-radius:12px; padding:14px; text-align:center}
   .stat .n{font-size:26px; font-weight:800; color:var(--primary)}
   .stat .l{font-size:13px; color:var(--muted); margin-top:2px}
-  /* schedule */
-  .week{display:grid; grid-template-columns:repeat(7,1fr); gap:8px}
-  .daycol{background:#f7f8fc; border-radius:12px; padding:8px; min-height:120px}
-  .daycol.today{background:#eef0fe; border:1px solid var(--primary)}
-  .daycol .dh{font-weight:800; font-size:13px; text-align:center; margin-bottom:6px; color:var(--muted)}
-  .daycol.today .dh{color:var(--primary)}
-  .cls{background:#fff; border-radius:9px; padding:7px; margin-bottom:6px; border-left:4px solid var(--primary); font-size:12px}
-  .cls .cn{font-weight:700; line-height:1.3}
-  .cls .ci{color:var(--muted); font-size:11px; margin-top:2px}
-  .cls .cx{float:right; cursor:pointer; color:var(--muted); border:none; background:none; font-size:14px; line-height:1}
+  /* schedule - timetable grid */
+  .schedule-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+  .schedule-title{font-size:18px;font-weight:800;color:var(--primary)}
+  .schedule-date{font-size:14px;color:var(--muted)}
+  .week-bar{display:grid;grid-template-columns:40px repeat(7,1fr);gap:2px;margin-bottom:8px;font-size:13px}
+  .wb-cell{text-align:center;padding:6px 2px;border-radius:8px}
+  .wb-label{color:var(--muted);font-weight:700;font-size:12px}
+  .wb-day{font-weight:600}
+  .wb-day.today{background:#eef2ff;color:#4361ee;border-radius:8px}
+  .wb-day.today .wbd-name{color:#4361ee}
+  .wbd-name{display:block;font-size:12px}
+  .wbd-num{display:block;font-size:15px;font-weight:800}
+  .timetable{display:grid;grid-template-columns:40px repeat(7,1fr);gap:2px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--border)}
+  .tt-slot{background:#f8f9fc;padding:6px 4px;text-align:center;font-size:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid var(--border)}
+  .tt-slot .tt-snum{font-size:14px;font-weight:800;color:var(--text)}
+  .tt-slot .tt-stime{font-size:10px;color:var(--muted)}
+  .tt-cell{background:#fff;min-height:52px;padding:3px;position:relative;display:flex;flex-direction:column;gap:2px}
+  .tt-cell.today-col{background:#f5f7ff}
+  .tt-card{background:var(--card-color,#4361ee);color:#fff;border-radius:7px;padding:5px 6px;font-size:12px;line-height:1.25;cursor:pointer;position:relative;min-height:100%;display:flex;flex-direction:column;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .tt-card:hover{opacity:.9}
+  .tt-card .tc-name{font-weight:700;font-size:12px}
+  .tt-card .tc-room{font-size:10px;opacity:.85}
+  .tt-card .tc-del{position:absolute;top:2px;right:3px;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.35);color:#fff;border:none;font-size:12px;line-height:16px;text-align:center;cursor:pointer;display:none}
+  .tt-card:hover .tc-del{display:block}
   @media(max-width:768px){
-    .week{grid-template-columns:1fr; gap:10px}
-    .daycol{min-height:auto}
+    .timetable{font-size:12px}
+    .tt-slot{padding:4px 2px}
+    .tt-slot .tt-snum{font-size:12px}
+    .tt-card{padding:4px;font-size:11px}
+    .tt-card .tc-name{font-size:11px}
+    .tt-card .tc-room{font-size:9px}
+    .tt-cell{min-height:42px}
   }
+  /* course form - vertical list style */
+  .cf-list{display:flex;flex-direction:column;gap:14px}
+  .cf-row{display:flex;align-items:center;gap:10px}
+  .cf-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .cf-icon svg{width:18px;height:18px}
+  .cf-body{flex:1;display:flex;flex-direction:column;gap:4px}
+  .cf-label{font-size:13px;font-weight:600;color:var(--muted)}
+  .cf-input{font-size:15px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;width:100%;font-family:inherit}
+  .cf-input:focus{outline:none;border-color:var(--primary)}
+  .cf-section{font-size:13px;font-weight:700;color:var(--text);margin:6px 0 2px;padding-top:6px;border-top:1px dashed var(--border)}
+  .cf-row-inline{display:flex;gap:8px;align-items:center}
+  .cf-row-inline select{flex:1}
+  .cf-colors{display:flex;gap:6px;flex-wrap:wrap}
+  .cf-color-btn{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer}
+  .cf-color-btn.active{border-color:var(--text);box-shadow:0 0 0 2px var(--bg)}
+  /* settings bar */
+  .settings-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f7f8fc;border-radius:10px;margin-bottom:10px;font-size:13px}
+  .settings-bar label{color:var(--muted);font-weight:600;white-space:nowrap}
+  .settings-bar input{width:60px;padding:6px 8px;font-size:14px;text-align:center;border:1px solid var(--border);border-radius:8px}
   .empty{text-align:center; color:var(--muted); padding:24px 10px; font-size:14px}
   .backup-note{font-size:13px; color:var(--amber); font-weight:700; margin-top:8px; display:none}
   .backup-note.show{display:block}
@@ -223,40 +261,69 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
           课程表
         </h2>
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;font-size:14px;color:var(--muted)">
-          <span id="courseWeekInfo" style="font-weight:700;color:var(--primary);font-size:16px"></span>
-          <span id="courseDateInfo"></span>
+        <div class="schedule-header">
+          <span class="schedule-title" id="courseWeekInfo"></span>
+          <span class="schedule-date" id="courseDateInfo"></span>
         </div>
-        <p class="hint">按星期维护本学期课表，今天高亮显示。上课前这里会提醒你。</p>
-        <div class="week" id="weekGrid"></div>
+        <div class="settings-bar">
+          <label>当前周数</label>
+          <input type="number" id="setWeekNum" min="1" max="52" title="修改后按回车确认">
+          <button class="btn sm ghost" id="btnAutoWeek">自动</button>
+          <span style="color:var(--muted);font-size:12px;margin-left:auto">留空自动计算</span>
+        </div>
+        <div class="week-bar" id="weekBar"></div>
+        <div class="timetable" id="timetable"></div>
         <details style="margin-top:14px">
           <summary style="cursor:pointer;font-size:13px;color:var(--muted);padding:6px 0;font-weight:600">＋ 添加课程</summary>
-          <form id="formCourse" class="form-grid" style="margin-top:8px">
-            <div class="field"><label>星期</label>
-              <select id="cDay">
-                <option value="1">周一</option><option value="2">周二</option><option value="3">周三</option>
-                <option value="4">周四</option><option value="5">周五</option><option value="6">周六</option><option value="7">周日</option>
-              </select>
+          <form id="formCourse" class="cf-list" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">
+            <div class="cf-row">
+              <div class="cf-icon" style="background:#e8f5e9"><svg viewBox="0 0 24 24" fill="none" stroke="#2e9e5b" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+              <div class="cf-body">
+                <label class="cf-label">课程名称</label>
+                <input class="cf-input" id="cName" placeholder="如 高等数学" required>
+              </div>
             </div>
-            <div class="field"><label>节数</label>
-              <select id="cSlot" required>
-                <option value="">请选择</option>
-                <option value="1">第1-2节</option><option value="3">第3-4节</option>
-                <option value="5">第5-6节</option><option value="7">第7-8节</option>
-                <option value="9">第9-10节</option><option value="11">第11-12节</option>
-              </select>
+            <div class="cf-row">
+              <div class="cf-icon" style="background:#fff3e0"><svg viewBox="0 0 24 24" fill="none" stroke="#e8a33d" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+              <div class="cf-body">
+                <label class="cf-label">颜色</label>
+                <div class="cf-colors" id="cColorPicker"></div>
+              </div>
             </div>
-            <div class="field"><label>课程名</label><input type="text" id="cName" placeholder="如 高等数学" required></div>
-            <div class="field"><label>教室</label><input type="text" id="cRoom" placeholder="如 A101"></div>
-            <div class="field"><label>老师</label><input type="text" id="cTeacher" placeholder="如 张教授"></div>
-            <div class="field"><label>颜色</label>
-              <select id="cColor">
-                <option value="#4361ee">蓝</option><option value="#2e9e5b">绿</option>
-                <option value="#e8a33d">橙</option><option value="#9b5de5">紫</option>
-                <option value="#e5484d">红</option>
-              </select>
+            <div class="cf-section">时间段</div>
+            <div class="cf-row">
+              <div class="cf-icon" style="background:#e3f2fd"><svg viewBox="0 0 24 24" fill="none" stroke="#4361ee" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+              <div class="cf-body">
+                <label class="cf-label">星期 · 节数</label>
+                <div class="cf-row-inline">
+                  <select id="cDay">
+                    <option value="1">周一</option><option value="2">周二</option><option value="3">周三</option>
+                    <option value="4">周四</option><option value="5">周五</option><option value="6">周六</option><option value="7">周日</option>
+                  </select>
+                  <select id="cSlot">
+                    <option value="">节数</option>
+                    <option value="1">第1-2节</option><option value="3">第3-4节</option>
+                    <option value="5">第5-6节</option><option value="7">第7-8节</option>
+                    <option value="9">第9-10节</option><option value="11">第11-12节</option>
+                  </select>
+                </div>
+              </div>
             </div>
-            <div class="field" style="justify-content:flex-end"><label>&nbsp;</label>
+            <div class="cf-row">
+              <div class="cf-icon" style="background:#fce4ec"><svg viewBox="0 0 24 24" fill="none" stroke="#e5484d" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+              <div class="cf-body">
+                <label class="cf-label">授课老师（可不填）</label>
+                <input class="cf-input" id="cTeacher" placeholder="如 张教授">
+              </div>
+            </div>
+            <div class="cf-row">
+              <div class="cf-icon" style="background:#f3e5f5"><svg viewBox="0 0 24 24" fill="none" stroke="#9b5de5" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+              <div class="cf-body">
+                <label class="cf-label">上课地点（可不填）</label>
+                <input class="cf-input" id="cRoom" placeholder="如 A304">
+              </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;margin-top:8px">
               <button type="submit" class="btn">添加课程</button>
             </div>
           </form>
@@ -398,7 +465,8 @@
     papers: PREFIX+"papers",
     papergoal: PREFIX+"papergoal",
     wordgoal: PREFIX+"wordgoal",
-    seeded: PREFIX+"seeded"
+    seeded: PREFIX+"seeded",
+    weekOverride: PREFIX+"weekOverride"
   };
   function load(key, def){ try{ var v=localStorage.getItem(key); return v==null?def:JSON.parse(v); }catch(e){ return def; } }
   function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); scheduleSync(); }
@@ -633,34 +701,84 @@
   }
 
   // ---------- render: courses ----------
-  function renderCourses(){
-    var grid=document.getElementById("weekGrid");
-    var courses=load(K.courses,[]);
-    var td=dow();
-    // 周数 & 日期
+  // ---------- render: courses (timetable grid) ----------
+  var SLOT_INFO=[
+    {num:'1',start:'08:00',end:'08:45'},{num:'2',start:'08:45',end:'09:35'},
+    {num:'3',start:'09:55',end:'10:40'},{num:'4',start:'10:40',end:'11:30'},
+    {num:'5',start:'13:30',end:'14:15'},{num:'6',start:'14:15',end:'15:05'},
+    {num:'7',start:'15:25',end:'16:10'},{num:'8',start:'16:10',end:'17:00'},
+    {num:'9',start:'18:00',end:'18:45'},{num:'10',start:'18:45',end:'19:35'},
+    {num:'11',start:'19:55',end:'20:40'},{num:'12',start:'20:40',end:'21:30'}
+  ];
+  var SLOT_TIME={1:["08:00","09:35"],3:["09:55","11:30"],5:["13:30","15:05"],7:["15:25","17:00"],9:["18:00","19:35"],11:["19:55","21:30"]};
+  var COURSE_COLORS=['#4361ee','#2e9e5b','#e8a33d','#9b5de5','#e5484d','#00a3b4','#ff6b6b','#f06292'];
+
+  function getWeekNum(){
+    var manual=load(K.weekOverride,null);
+    if(manual!==null && manual>0) return manual;
     var now=new Date();
     var jan1=new Date(now.getFullYear(),0,1);
-    var firstDay=jan1.getDay()||7;
+    var fd=jan1.getDay()||7;
     var doy=Math.floor((now-jan1)/864e5);
-    var weekNum=Math.ceil((doy+firstDay-1)/7);
-    var m=now.getMonth()+1,d2=now.getDate();
-    document.getElementById("courseWeekInfo").textContent="第 "+weekNum+" 周";
-    document.getElementById("courseDateInfo").textContent=m+"月"+d2+"日";
-    var html="";
-    for(var d=1; d<=7; d++){
-      var cls=courses.filter(function(c){ return c.day===d; }).sort(function(a,b){ return a.start<b.start?-1:1; });
-      var col='<div class="daycol'+(d===td?" today":"")+'"><div class="dh">'+WEEK[d-1]+(d===td?" · 今天":"")+'</div>';
-      if(cls.length){
-        cls.forEach(function(c){
-          col += '<div class="cls" style="border-left-color:'+esc(c.color||"#4361ee")+'"><button class="cx" data-delcourse="'+c.id+'" title="删除">×</button><div class="cn">'+esc(c.name)+'</div><div class="ci">'+esc(c.start)+"-"+esc(c.end)+'</div>'+(c.room?'<div class="ci">'+esc(c.room)+'</div>':'')+(c.teacher?'<div class="ci">'+esc(c.teacher)+'</div>':'')+'</div>';
-        });
-      } else {
-        col += '<div class="empty" style="padding:8px 0;font-size:12px">无课</div>';
-      }
-      col += '</div>';
-      html += col;
+    return Math.ceil((doy+fd-1)/7);
+  }
+
+  function renderCourses(){
+    var courses=load(K.courses,[]);
+    var td=dow(); // 1=Mon..7=Sun
+    var now=new Date();
+    var mon=new Date(now); mon.setDate(now.getDate()-((now.getDay()+6)%7));
+    // header
+    var wn=getWeekNum();
+    document.getElementById("courseWeekInfo").textContent="第 "+wn+" 周";
+    document.getElementById("courseDateInfo").textContent=(now.getMonth()+1)+"/"+now.getDate();
+    document.getElementById("setWeekNum").value=load(K.weekOverride,'');
+    // week bar
+    var wb='';
+    wb+='<div class="wb-cell wb-label">月</div>';
+    for(var d=0;d<7;d++){
+      var dd=new Date(mon);dd.setDate(mon.getDate()+d);
+      var isToday=(d+1===td);
+      wb+='<div class="wb-cell wb-day'+(isToday?' today':'')+'">';
+      wb+='<span class="wbd-name">'+WEEK[d]+'</span>';
+      wb+='<span class="wdd-num">'+dd.getDate()+'</span>';
+      wb+='</div>';
     }
-    grid.innerHTML=html;
+    document.getElementById("weekBar").innerHTML=wb;
+    // timetable grid
+    var tt='<div class="tt-slot"><div class="tt-snum">节</div></div>';
+    for(var d=0;d<7;d++) tt+='<div class="tt-cell'+(d+1===td?' today-col':'')+'"></div>';
+    for(var s=0;s<12;s++){
+      var si=SLOT_INFO[s];
+      tt+='<div class="tt-slot"><div class="tt-snum">'+si.num+'</div><div class="tt-stime">'+si.start+'</div><div class="tt-stime">'+si.end+'</div></div>';
+      for(var d=0;d<7;d++){
+        var dayNum=d+1;
+        var slotKey=Math.floor(s/2)+1; // slot 1,2,3,4,5,6 based on pair
+        if(s%2===0){ // only odd rows (1,3,5,7,9,11) are start of a pair
+          var matches=courses.filter(function(c){
+            return c.day===dayNum && c.start===SLOT_TIME[slotKey][0];
+          });
+          var cellClass='tt-cell'+(dayNum===td?' today-col':'');
+          if(matches.length){
+            var cards='';
+            matches.forEach(function(c){
+              cards+='<div class="tt-card" style="--card-color:'+esc(c.color||'#4361ee')+'" data-delcourse="'+c.id+'" title="'+esc(c.name)+'">';
+              cards+='<div class="tc-name">'+esc(c.name)+'</div>';
+              if(c.room) cards+='<div class="tc-room">'+esc(c.room)+'</div>';
+              cards+='<button class="tc-del" data-delcourse="'+c.id+'" title="删除">×</button>';
+              cards+='</div>';
+            });
+            tt+='<div class="'+cellClass+'">'+cards+'</div>';
+          } else {
+            tt+='<div class="'+cellClass+'"></div>';
+          }
+        } else {
+          // even row: merge with above visually by leaving empty but same styling
+          tt+='<div class="tt-cell'+(dayNum===td?' today-col':'')+'"></div>';
+        }
+      }
+    }
+    document.getElementById("timetable").innerHTML=tt;
   }
 
   // ---------- render: words ----------
@@ -738,8 +856,25 @@
     var b=e.target.closest("[data-go]"); if(b){ showMod(b.getAttribute("data-go")); }
   });
 
-  // course form
-  var SLOT_TIME={1:["08:00","09:35"],3:["09:55","11:30"],5:["13:30","15:05"],7:["15:25","17:00"],9:["18:00","19:35"],11:["19:55","21:30"]};
+  // course form (vertical list style)
+  var selectedColor=COURSE_COLORS[0];
+  function initColorPicker(){
+    var p=document.getElementById("cColorPicker");
+    if(!p) return;
+    var h='';
+    COURSE_COLORS.forEach(function(c,i){
+      h+='<button type="button" class="cf-color-btn'+(i===0?' active':'')+'" data-col="'+c+'" style="background:'+c+'" title="'+c+'"></button>';
+    });
+    p.innerHTML=h;
+    p.addEventListener('click',function(e){
+      var b=e.target.closest('[data-col]');
+      if(!b)return;
+      selectedColor=b.getAttribute('data-col');
+      p.querySelectorAll('.cf-color-btn').forEach(function(x){x.classList.toggle('active',x===b)});
+    });
+  }
+  initColorPicker();
+
   document.getElementById("formCourse").addEventListener("submit", function(e){
     e.preventDefault();
     var slot=+document.getElementById("cSlot").value;
@@ -748,11 +883,23 @@
     var c={ id:uid(), day:+document.getElementById("cDay").value, start:t[0], end:t[1],
       name:document.getElementById("cName").value.trim(),
       room:document.getElementById("cRoom").value.trim(), teacher:document.getElementById("cTeacher").value.trim(),
-      color:document.getElementById("cColor").value, sample:false };
+      color:selectedColor, sample:false };
     var arr=load(K.courses,[]); arr.push(c); save(K.courses,arr);
     this.reset(); renderCourses(); renderTodo(); toast("已添加课程");
   });
-  document.getElementById("weekGrid").addEventListener("click", function(e){
+  // week override settings
+  document.getElementById("setWeekNum").addEventListener("change",function(){
+    var v=this.value.trim();
+    if(v===''){ save(K.weekOverride,null); }
+    else{ var n=parseInt(v,10); if(n>0&&n<=53){save(K.weekOverride,n);} else{toast("请输入1-52");} }
+    renderCourses();
+  });
+  document.getElementById("btnAutoWeek").addEventListener("click",function(){
+    save(K.weekOverride,null);
+    document.getElementById("setWeekNum").value='';
+    renderCourses(); toast("已恢复自动计算");
+  });
+  document.getElementById("timetable").addEventListener("click", function(e){
     var b=e.target.closest("[data-delcourse]"); if(!b) return;
     if(!confirm("确定删除这门课？")) return;
     var arr=load(K.courses,[]).filter(function(x){ return x.id!==b.getAttribute("data-delcourse"); });
