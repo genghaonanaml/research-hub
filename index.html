@@ -493,7 +493,19 @@
     el.textContent=msg; el.className="sync-status"+(cls?(" "+cls):"");
   }
   function buildSyncPayload(){
-    var d={}; Object.keys(K).forEach(function(k){ d[k]=localStorage.getItem(k); }); return d;
+    var d={};
+    Object.keys(K).forEach(function(k){
+      if(k===K.courses||k===K.checkins||k===K.words||k===K.papers){
+        // 只同步用户自建数据，示例模板课永不上传云端（避免旧模板被拉回覆盖）
+        try{
+          var arr=JSON.parse(localStorage.getItem(k)||"[]").filter(function(x){ return x && !x.sample; });
+          d[k]=JSON.stringify(arr);
+        }catch(e){ d[k]=localStorage.getItem(k); }
+      } else {
+        d[k]=localStorage.getItem(k);
+      }
+    });
+    return d;
   }
   function mergePayload(obj){
     Object.keys(K).forEach(function(k){
@@ -501,6 +513,8 @@
       if(k===K.courses||k===K.checkins||k===K.words||k===K.papers){
         var local=load(k,[]); var remote=[];
         try{ remote=JSON.parse(obj[k])||[]; }catch(e){ remote=[]; }
+        // 丢弃云端来的示例模板（本地 seed 会自己种新鲜的那份，避免旧模板污染）
+        remote=remote.filter(function(x){ return x && !x.sample; });
         var map={}; local.forEach(function(x){ if(x&&x.id) map[x.id]=x; });
         remote.forEach(function(x){ if(x&&x.id) map[x.id]=x; });
         var merged=[]; Object.keys(map).forEach(function(id){ merged.push(map[id]); });
