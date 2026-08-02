@@ -191,23 +191,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8"/><path d="M8 17h8"/></svg>
         文献阅读
       </div>
-      <div id="syncMount">
-        <div class="sync-card" id="syncCard">
-          <h3>
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9"/><path d="M21 3v6h-6"/><path d="M3 21v-6h6"/></svg>
-            云同步（自动）
-          </h3>
-          <div class="field"><label>Firebase 数据库地址</label>
-            <input type="text" id="syncToken" placeholder="https://xxx-default-rtdb.firebaseio.com" autocomplete="off" style="font-size:14px">
-          </div>
-          <div class="sync-row">
-            <button class="btn sm" id="btnSaveToken">保存并启用同步</button>
-            <button class="btn sm ghost" id="btnSyncNow">立即同步</button>
-            <label class="field" style="flex-direction:row; align-items:center; gap:6px; font-size:13px; color:var(--muted)"><input type="checkbox" id="syncAuto" style="width:auto" checked> 自动同步</label>
-          </div>
-          <div class="sync-status" id="syncStatus">未配置同步</div>
-          <div class="sync-tip"><b>获取方式（免费，2 分钟）：</b><br>1. 打开 <code>console.firebase.google.com</code> → 创建项目<br>2. 左侧菜单选「Realtime Database 实时数据库」→ 创建数据库<br>3. 地区选离你近的 → 选「测试模式」启动<br>4. 复制上方显示的「数据库地址」粘贴到此处即可<br>⚠️ 数据存在 Google Firebase（非纯本地）；测试模式下任何人知道地址都能读写，建议勿在公开场合分享。</div>
-        </div>
+      <div class="nav-item" data-mod="sync">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9"/><path d="M21 3v6h-6"/><path d="M3 21v-6h6"/></svg>
+        云同步
       </div>
       <a class="side-link" id="btnExportSidebar">导出备份 JSON</a>
     </nav>
@@ -220,7 +206,6 @@
           今天要处理
         </h2>
         <div id="todoList"></div>
-        <div id="syncMountMobile" class="mobile-only"></div>
         <div class="seed-clear hidden" id="seedClear">当前含示例数据，<a id="btnSeedClear">清空示例数据</a></div>
       </section>
 
@@ -329,6 +314,30 @@
         </form>
         <div id="paperList"></div>
       </section>
+
+      <!-- 云同步 -->
+      <section class="card hidden" id="panel-sync">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9"/><path d="M21 3v6h-6"/><path d="M3 21v-6h6"/></svg>
+          云同步设置
+        </h2>
+        <div class="sync-card" id="syncCard">
+          <h3>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9"/><path d="M21 3v6h-6"/><path d="M3 21v-6h6"/></svg>
+            云同步（自动）
+          </h3>
+          <div class="field"><label>Firebase 数据库地址</label>
+            <input type="text" id="syncToken" placeholder="https://xxx-default-rtdb.firebaseio.com" autocomplete="off" style="font-size:16px">
+          </div>
+          <div class="sync-row">
+            <button class="btn sm" id="btnSaveToken">保存并启用同步</button>
+            <button class="btn sm ghost" id="btnSyncNow">立即同步</button>
+            <label class="field" style="flex-direction:row; align-items:center; gap:6px; font-size:13px; color:var(--muted)"><input type="checkbox" id="syncAuto" style="width:auto" checked> 自动同步</label>
+          </div>
+          <div class="sync-status" id="syncStatus">未配置同步</div>
+          <div class="sync-tip"><b>获取方式（免费，2 分钟）：</b><br>1. 打开 <code>console.firebase.google.com</code> → 创建项目<br>2. 左侧菜单选「Realtime Database 实时数据库」→ 创建数据库<br>3. 地区选离你近的 → 选「测试模式」启动<br>4. 复制上方显示的「数据库地址」粘贴到此处即可<br>⚠️ 数据存在 Google Firebase（非纯本地）；测试模式下任何人知道地址都能读写，建议勿在公开场合分享。</div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -348,6 +357,10 @@
     <div class="nav-item" data-mod="papers">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8"/><path d="M8 17h8"/></svg>
       文献
+    </div>
+    <div class="nav-item" data-mod="sync">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9"/><path d="M21 3v6h-6"/><path d="M3 21v-6h6"/></svg>
+      同步
     </div>
   </nav>
 
@@ -632,7 +645,7 @@
 
   // ---------- module switch ----------
   function showMod(mod){
-    ["todo","courses","words","papers"].forEach(function(m){
+    ["todo","courses","words","papers","sync"].forEach(function(m){
       var p=document.getElementById("panel-"+m);
       if(p) p.classList.toggle("hidden", m!==mod);
     });
@@ -774,16 +787,6 @@
   seed();
   document.getElementById("pDate").value=todayStr();
   renderAll();
-  // sync card placement (desktop sidebar / mobile panel)
-  function mountSync(){
-    var card=document.getElementById("syncCard");
-    if(!card) return;
-    var mobile=window.innerWidth<=768;
-    var mount=mobile?document.getElementById("syncMountMobile"):document.getElementById("syncMount");
-    if(mount && card.parentNode!==mount){ mount.appendChild(card); card.style.display=""; }
-  }
-  mountSync();
-  window.addEventListener("resize", mountSync);
   // init sync UI
   (function(){
     var s=getSync();
