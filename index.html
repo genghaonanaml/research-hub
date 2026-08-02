@@ -131,9 +131,12 @@
   .stat .n{font-size:26px; font-weight:800; color:var(--primary)}
   .stat .l{font-size:13px; color:var(--muted); margin-top:2px}
   /* schedule - timetable grid */
-  .schedule-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:6px}
-  .schedule-title{font-size:18px;font-weight:800;color:var(--primary)}
-  .schedule-date{font-size:14px;color:var(--muted)}
+  .course-info-bar{margin-bottom:8px}
+  .ci-week{font-size:22px;font-weight:800;color:var(--text);line-height:1.3}
+  .ci-date{font-size:14px;color:var(--muted);margin-top:2px}
+  .settings-row{display:flex;align-items:center;gap:6px;padding:6px 10px;background:#f7f8fc;border-radius:8px;margin-bottom:10px;font-size:13px}
+  .settings-label{color:var(--muted);font-weight:600;white-space:nowrap}
+  .settings-row input{width:56px;padding:5px 6px;font-size:14px;text-align:center;border:1px solid var(--border);border-radius:6px}
   .week-bar{display:grid;grid-template-columns:40px repeat(7,1fr);gap:2px;margin-bottom:8px;font-size:13px}
   .wb-cell{text-align:center;padding:6px 2px;border-radius:8px}
   .wb-label{color:var(--muted);font-weight:700;font-size:12px}
@@ -178,10 +181,7 @@
   .cf-colors{display:flex;gap:6px;flex-wrap:wrap}
   .cf-color-btn{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer}
   .cf-color-btn.active{border-color:var(--text);box-shadow:0 0 0 2px var(--bg)}
-  /* settings bar */
-  .settings-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f7f8fc;border-radius:10px;margin-bottom:10px;font-size:13px}
-  .settings-bar label{color:var(--muted);font-weight:600;white-space:nowrap}
-  .settings-bar input{width:60px;padding:6px 8px;font-size:14px;text-align:center;border:1px solid var(--border);border-radius:8px}
+  /* week bar */
   .empty{text-align:center; color:var(--muted); padding:24px 10px; font-size:14px}
   .backup-note{font-size:13px; color:var(--amber); font-weight:700; margin-top:8px; display:none}
   .backup-note.show{display:block}
@@ -261,15 +261,16 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
           课程表
         </h2>
-        <div class="schedule-header">
-          <span class="schedule-title" id="courseWeekInfo"></span>
-          <span class="schedule-date" id="courseDateInfo"></span>
+        <!-- 周数+日期 标题区 -->
+        <div class="course-info-bar">
+          <div class="ci-week" id="courseWeekInfo"></div>
+          <div class="ci-date" id="courseDateInfo"></div>
         </div>
-        <div class="settings-bar">
-          <label>当前周数</label>
-          <input type="number" id="setWeekNum" min="1" max="52" title="修改后按回车确认">
+        <!-- 设置行（紧凑） -->
+        <div class="settings-row">
+          <span class="settings-label">当前周数</span>
+          <input type="number" id="setWeekNum" min="1" max="16" placeholder="自动">
           <button class="btn sm ghost" id="btnAutoWeek">自动</button>
-          <span style="color:var(--muted);font-size:12px;margin-left:auto">留空自动计算</span>
         </div>
         <div class="week-bar" id="weekBar"></div>
         <div class="timetable" id="timetable"></div>
@@ -742,11 +743,17 @@
     var td=dow(); // 1=Mon..7=Sun
     var now=new Date();
     var mon=new Date(now); mon.setDate(now.getDate()-((now.getDay()+6)%7));
-    // header
+    // header: 周数+状态 + 日期
     var wn=getWeekNum();
-    document.getElementById("courseWeekInfo").textContent="第 "+wn+" 周";
-    document.getElementById("courseDateInfo").textContent=(now.getMonth()+1)+"/"+now.getDate();
-    document.getElementById("setWeekNum").value=load(K.weekOverride,'');
+    var statusText="";
+    if(wn<1) statusText="(未开学)";
+    else if(wn>16) statusText="(已结课)";
+    else if(wn<=2) statusText="(开学初)";
+    else if(wn>=15) statusText="(临近结课)";
+    document.getElementById("courseWeekInfo").textContent="第"+wn+"周"+statusText;
+    var y=now.getFullYear(), m=now.getMonth()+1, d2=now.getDate();
+    document.getElementById("courseDateInfo").textContent=y+"/"+m+"/"+d2;
+    document.getElementById("setWeekNum").value=load(K.weekOverride,'')||'';
     // week bar
     var wb='';
     wb+='<div class="wb-cell wb-label">月</div>';
@@ -767,7 +774,7 @@
       tt+='<div class="tt-slot"><div class="tt-snum">'+si.num+'</div><div class="tt-stime">'+si.start+'</div><div class="tt-stime">'+si.end+'</div></div>';
       for(var d=0;d<7;d++){
         var dayNum=d+1;
-        var slotKey=Math.floor(s/2)+1; // slot 1,2,3,4,5,6 based on pair
+        var slotKey=(Math.floor(s/2)*2)+1; // s=0→1, s=2→3, s=4→5, s=6→7, s=8→9, s=10→11
         if(s%2===0){ // only odd rows (1,3,5,7,9,11) are start of a pair
           var matches=courses.filter(function(c){
             return c.day===dayNum && c.start===SLOT_TIME[slotKey][0];
@@ -905,7 +912,7 @@
   document.getElementById("setWeekNum").addEventListener("change",function(){
     var v=this.value.trim();
     if(v===''){ save(K.weekOverride,null); }
-    else{ var n=parseInt(v,10); if(n>0&&n<=53){save(K.weekOverride,n);} else{toast("请输入1-52");} }
+    else{ var n=parseInt(v,10); if(n>0&&n<=16){save(K.weekOverride,n);} else{toast("请输入1-16");} }
     renderCourses();
   });
   document.getElementById("btnAutoWeek").addEventListener("click",function(){
