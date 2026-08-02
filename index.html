@@ -204,16 +204,17 @@
   .wp-modes{display:flex;gap:6px;margin-bottom:14px}
   .wp-mode{flex:1;padding:8px;border:1px solid var(--border);border-radius:10px;text-align:center;font-size:13px;font-weight:700;cursor:pointer;background:#fff;color:var(--muted)}
   .wp-mode.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-  /* period picker */
-  .pp-table{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:13px}
-  .pp-table th{padding:8px 3px;font-size:12px;color:var(--muted);font-weight:700;border-bottom:2px solid var(--border)}
-  .pp-table td{padding:3px 2px;text-align:center;vertical-align:middle}
-  .pp-p{display:flex;align-items:center;justify-content:center;width:38px;height:36px;border:2px solid #dde3ef;border-radius:10px;font-size:15px;font-weight:800;color:var(--text);cursor:pointer;background:#fff;transition:all .12s ease;-webkit-tap-highlight-color:transparent;user-select:none}
-  .pp-p:hover{border-color:var(--primary);background:#f0f4ff;transform:scale(1.06)}
-  .pp-p:active{transform:scale(.95)}
-  .pp-p.selected{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 2px 8px rgba(67,97,238,.35)}
-  .pp-p.in-range{background:#c5cefc;color:#fff;border-color:#a8b4f8}
-  .pp-day-label{font-size:12px;font-weight:700;color:var(--muted);padding-right:6px;text-align:right;white-space:nowrap;width:44px}
+  /* inline day / period chips (WakeUp-style) */
+  .settings-input{width:auto;min-width:132px;padding:5px 8px;font-size:14px;border:1px solid var(--border);border-radius:6px;min-height:40px;background:#fff}
+  .week-badge{font-weight:800;font-size:15px;color:var(--primary);min-width:66px;text-align:center}
+  .day-chips{display:flex;gap:6px;flex-wrap:wrap}
+  .day-chip{flex:1;min-width:36px;height:40px;border:2px solid var(--border);border-radius:9px;background:#fff;font-size:14px;font-weight:700;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;-webkit-tap-highlight-color:transparent}
+  .day-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .period-chips{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+  .period-chip{height:36px;border:2px solid var(--border);border-radius:9px;background:#fff;font-size:14px;font-weight:800;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;-webkit-tap-highlight-color:transparent;user-select:none}
+  .period-chip:hover{border-color:var(--primary)}
+  .period-chip.sel-start,.period-chip.sel-end{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 2px 8px rgba(67,97,238,.3)}
+  .period-chip.in-range{background:#c5cefc;color:#fff;border-color:#a8b4f8}
   .modal-actions{display:flex;gap:10px;margin-top:4px}
   .modal-actions button{flex:1;padding:10px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;min-height:44px}
   .modal-actions .btn-cancel{background:#f7f8fc;color:var(--muted);border:1px solid var(--border)}
@@ -305,9 +306,15 @@
         </div>
         <!-- 设置行（紧凑） -->
         <div class="settings-row">
-          <span class="settings-label">当前周数</span>
-          <input type="number" id="setWeekNum" min="1" max="16" placeholder="自动">
+          <span class="settings-label">开学日期</span>
+          <input type="date" id="setTermStart" class="settings-input">
           <button class="btn sm ghost" id="btnAutoWeek">自动</button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">当前周</span>
+          <button class="btn sm ghost" id="btnWeekPrev">‹ 上周</button>
+          <span class="week-badge" id="curWeekBadge">第 1 周</span>
+          <button class="btn sm ghost" id="btnWeekNext">下周 ›</button>
         </div>
         <div class="week-bar" id="weekBar"></div>
         <div class="timetable" id="timetable"></div>
@@ -345,8 +352,15 @@
                 <input class="cf-input" id="cCredits" placeholder="如 3" type="number" min="0" step="0.5">
               </div>
             </div>
-            <div class="cf-section">时间段 <span class="cf-close" id="cfToggleTime" title="收起">×</span></div>
+            <div class="cf-section">上课时间</div>
             <div id="cfTimeSection">
+              <div class="cf-row">
+                <div class="cf-icon" style="background:#e3f2fd"><svg viewBox="0 0 24 24" fill="none" stroke="#4361ee" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+                <div class="cf-body">
+                  <label class="cf-label">星期（点选上课日）</label>
+                  <div class="day-chips" id="cDayChips"></div>
+                </div>
+              </div>
               <div class="cf-row">
                 <div class="cf-icon" style="background:#e3f2fd"><svg viewBox="0 0 24 24" fill="none" stroke="#4361ee" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
                 <div class="cf-body">
@@ -358,8 +372,9 @@
               <div class="cf-row">
                 <div class="cf-icon" style="background:#fff8e1"><svg viewBox="0 0 24 24" fill="none" stroke="#f9a825" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
                 <div class="cf-body">
-                  <label class="cf-label">选择时间</label>
-                  <button type="button" class="cf-picker-btn" id="btnPickPeriod"><span class="cf-pv" id="cPeriodDisplay">点击选择星期和节次</span> ›</button>
+                  <label class="cf-label">节次（先点开始节，再点结束节）</label>
+                  <div class="period-chips" id="cPeriodChips"></div>
+                  <div id="cPeriodDisplay" style="margin-top:6px;color:var(--primary);font-weight:600"></div>
                 </div>
               </div>
               <div class="cf-row">
@@ -406,19 +421,6 @@
           <div class="modal-actions">
             <button class="btn-cancel" id="wpCancel">取消</button>
             <button class="btn-confirm" id="wpConfirm">确定</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 节次选择弹窗 -->
-      <div class="modal-overlay hidden" id="periodModal">
-        <div class="modal-box">
-          <div class="modal-title">请选择时间</div>
-          <div class="modal-subtitle">先点起始节次（高亮蓝），再点结束节次</div>
-          <div id="ppTableWrap"></div>
-          <div class="modal-actions">
-            <button class="btn-cancel" id="ppCancel">取消</button>
-            <button class="btn-confirm" id="ppConfirm">确定</button>
           </div>
         </div>
       </div>
@@ -559,7 +561,8 @@
     papergoal: PREFIX+"papergoal",
     wordgoal: PREFIX+"wordgoal",
     seeded: PREFIX+"seeded",
-    weekOverride: PREFIX+"weekOverride"
+    weekOverride: PREFIX+"weekOverride",
+    termStart: PREFIX+"termStart"
   };
   function load(key, def){ try{ var v=localStorage.getItem(key); return v==null?def:JSON.parse(v); }catch(e){ return def; } }
   function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); scheduleSync(); }
@@ -848,11 +851,13 @@
   function getWeekNum(){
     var manual=load(K.weekOverride,null);
     if(manual!==null && manual>0) return manual;
+    var start=load(K.termStart,null);
+    if(!start) return 1;
+    var sd=new Date(start+"T00:00:00");
     var now=new Date();
-    var jan1=new Date(now.getFullYear(),0,1);
-    var fd=jan1.getDay()||7;
-    var doy=Math.floor((now-jan1)/864e5);
-    return Math.ceil((doy+fd-1)/7);
+    var nowD=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    var diff=Math.floor((nowD-sd)/864e5);
+    return Math.floor(diff/7)+1;
   }
 
   function renderCourses(){
@@ -876,7 +881,8 @@
     document.getElementById("courseWeekInfo").textContent="第"+wn+"周"+statusText;
     var y=now.getFullYear(), m=now.getMonth()+1, d2=now.getDate();
     document.getElementById("courseDateInfo").textContent=y+"/"+m+"/"+d2;
-    document.getElementById("setWeekNum").value=load(K.weekOverride,'')||'';
+    document.getElementById("setTermStart").value=load(K.termStart,'')||'';
+    document.getElementById("curWeekBadge").textContent="第 "+wn+" 周";
     // week bar
     var wb='';
     wb+='<div class="wb-cell wb-label">月</div>';
@@ -1064,6 +1070,8 @@
     document.getElementById("cNote").value='';
     formWeeks={start:1,end:16,mode:'all'};
     formPeriod={day:1,start:1,end:2};
+    ppFirstTap=false;
+    renderDayChips(); renderPeriodChips();
     updateWeeksDisplay();
     updatePeriodDisplay();
   }
@@ -1151,100 +1159,55 @@
     }
   }
 
-  // ---- Period Picker Modal ----
-  var ppSelStart=null; // first click = start period
-  document.getElementById("btnPickPeriod").addEventListener("click",openPeriodPicker);
-  document.getElementById("ppCancel").addEventListener("click",function(){document.getElementById("periodModal").classList.add("hidden")});
-  document.getElementById("ppConfirm").addEventListener("click",confirmPeriodPicker);
-
-  function openPeriodPicker(){
-    ppSelStart=null;
-    renderPPTable();
-    document.getElementById("periodModal").classList.remove("hidden");
-  }
-
-  function renderPPTable(){
-    var wrap=document.getElementById("ppTableWrap");
-    var h='<table class="pp-table"><tr><th></th>';
-    var daysToShow=[1,2,3,4,5,6,7];
-    daysToShow.forEach(function(d){ h+='<th>'+WEEK[d-1]+'</th>'; });
-    h+='</tr>';
-
-    for(var p=1;p<=12;p++){
-      h+='<tr><td class="pp-day-label">第'+p+'节</td>';
-      daysToShow.forEach(function(d){
-        var isStart=(p===formPeriod.start&&d===formPeriod.day);
-        var isEnd=(p===formPeriod.end&&d===formPeriod.day);
-        var cls="pp-p";
-        if(ppSelStart!==null){
-          if(isStart) cls+=" selected";
-          else if(isEnd) cls+=" selected";
-          else if(isInRangePP(p,d)) cls+=" in-range";
-        } else if(formPeriod.start && formPeriod.day===d && p>=formPeriod.start && p<=formPeriod.end){
-          cls+=(isStart||isEnd)?" selected":" in-range";
-        }
-        h+='<td><div class="'+cls+'" data-pd="'+p+'" data-dd="'+d+'">'+p+'</div></td>';
-      });
-      h+='</tr>';
+  // ---- Inline 星期 / 节次 chips (WakeUp style) ----
+  var ppFirstTap=false;
+  function renderDayChips(){
+    var wrap=document.getElementById("cDayChips"); if(!wrap) return;
+    var h='';
+    for(var d=1;d<=7;d++){
+      h+='<div class="day-chip'+(d===formPeriod.day?' active':'')+'" data-d="'+d+'">'+WEEK[d-1]+'</div>';
     }
-    h+='</table>';
     wrap.innerHTML=h;
-
-    // Use event delegation on wrap - attach AFTER innerHTML set
-    wrap.addEventListener("click", function ppClick(e){
-      var cell=e.target.closest(".pp-p");
-      if(!cell)return;
-      e.stopPropagation();
-      var p=+cell.getAttribute("data-pd"), d=+cell.getAttribute("dd");
-      handlePPClick(p,d);
-    });
   }
-
-  function handlePPClick(p,d){
-    if(ppSelStart===null){
-      // First click = select start
-      ppSelStart={p:p, d:d};
-      formPeriod.day=d; formPeriod.start=p; formPeriod.end=p;
-    } else {
-      // Second click = select end
-      var sp=ppSelStart.p, sd=ppSelStart.d;
-      if(d!==sd){
-        // Different day - just use clicked as new start
-        ppSelStart={p:p, d:d};
-        formPeriod.day=d; formPeriod.start=p; formPeriod.end=p;
-      } else {
-        // Same day - determine order
-        if(p<sp){
-          formPeriod.start=p; formPeriod.end=sp;
-        } else {
-          formPeriod.start=sp; formPeriod.end=p;
-        }
-        ppSelStart=null;
-      }
+  function renderPeriodChips(){
+    var wrap=document.getElementById("cPeriodChips"); if(!wrap) return;
+    var h='';
+    for(var p=1;p<=12;p++){
+      var cls="period-chip";
+      if(p===formPeriod.start) cls+=" sel-start";
+      if(p===formPeriod.end && formPeriod.end!==formPeriod.start) cls+=" sel-end";
+      if(p>formPeriod.start && p<formPeriod.end) cls+=" in-range";
+      h+='<div class="'+cls+'" data-p="'+p+'">'+p+'</div>';
     }
-    renderPPTable();
+    wrap.innerHTML=h;
   }
-
-  function isInRangePP(p,d){
-    if(!ppSelStart || d!==ppSelStart.d || d!==formPeriod.day) return false;
-    var sp=formPeriod.start, ep=formPeriod.end;
-    return p>sp && p<ep;
-  }
-
-  function confirmPeriodPicker(){
-    if(!formPeriod.start||!formPeriod.end){ toast("请选择节次"); return; }
-    document.getElementById("periodModal").classList.add("hidden");
-    updatePeriodDisplay();
-  }
-
+  // Delegated listeners attached once (no modal re-render pitfall)
+  document.getElementById("cDayChips").addEventListener("click", function(e){
+    var c=e.target.closest("[data-d]"); if(!c) return;
+    formPeriod.day=+c.getAttribute("data-d");
+    renderDayChips(); updatePeriodDisplay();
+  });
+  document.getElementById("cPeriodChips").addEventListener("click", function(e){
+    var c=e.target.closest("[data-p]"); if(!c) return;
+    var p=+c.getAttribute("data-p");
+    if(!ppFirstTap){ formPeriod.start=p; formPeriod.end=p; ppFirstTap=true; }
+    else {
+      if(p<formPeriod.start) formPeriod.start=p; else formPeriod.end=p;
+      ppFirstTap=false;
+    }
+    if(formPeriod.start>formPeriod.end){ var t=formPeriod.start; formPeriod.start=formPeriod.end; formPeriod.end=t; }
+    renderPeriodChips(); updatePeriodDisplay();
+  });
   function updatePeriodDisplay(){
     var el=document.getElementById("cPeriodDisplay");
+    if(!el) return;
     var d=formPeriod.day, s=formPeriod.start, e=formPeriod.end;
     if(s===e) el.textContent=WEEK[d-1]+" 第"+s+"节";
     else el.textContent=WEEK[d-1]+" 第"+s+"-"+e+"节";
   }
 
   // Initialize displays
+  renderDayChips(); renderPeriodChips();
   updateWeeksDisplay();
   updatePeriodDisplay();
 
@@ -1280,17 +1243,21 @@
     closeAddCourse();
     renderCourses(); renderTodo(); toast("已添加课程");
   });
-  // week override settings
-  document.getElementById("setWeekNum").addEventListener("change",function(){
-    var v=this.value.trim();
-    if(v===''){ save(K.weekOverride,null); }
-    else{ var n=parseInt(v,10); if(n>0&&n<=16){save(K.weekOverride,n);} else{toast("请输入1-16");} }
+  // ---- 学期 / 当前周 settings (WakeUp style) ----
+  document.getElementById("setTermStart").addEventListener("change", function(){
+    var v=this.value;
+    if(v){ save(K.termStart,v); save(K.weekOverride,null); }
     renderCourses();
   });
-  document.getElementById("btnAutoWeek").addEventListener("click",function(){
+  document.getElementById("btnAutoWeek").addEventListener("click", function(){
     save(K.weekOverride,null);
-    document.getElementById("setWeekNum").value='';
-    renderCourses(); toast("已恢复自动计算");
+    renderCourses(); toast("已按开学日期自动计算");
+  });
+  document.getElementById("btnWeekPrev").addEventListener("click", function(){
+    var w=getWeekNum(); save(K.weekOverride, Math.max(1, w-1)); renderCourses();
+  });
+  document.getElementById("btnWeekNext").addEventListener("click", function(){
+    var w=getWeekNum(); save(K.weekOverride, w+1); renderCourses();
   });
   document.getElementById("timetable").addEventListener("click", function(e){
     var b=e.target.closest("[data-delcourse]"); if(!b) return;
@@ -1413,6 +1380,7 @@
 
   // init
   seed();
+  if(!load(K.termStart,null)){ save(K.termStart, todayStr()); }
   document.getElementById("pDate").value=todayStr();
   renderAll();
   // init sync UI
