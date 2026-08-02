@@ -145,7 +145,7 @@
   .wb-day.today .wbd-name{color:#4361ee}
   .wbd-name{display:block;font-size:12px}
   .wbd-num{display:block;font-size:15px;font-weight:800}
-  .timetable{display:grid;grid-template-columns:40px repeat(7,1fr);gap:2px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--border)}
+  .timetable{display:grid;grid-template-columns:40px repeat(7,1fr);gap:2px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--border);min-height:400px}
   .tt-slot{background:#f8f9fc;padding:6px 4px;text-align:center;font-size:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid var(--border)}
   .tt-slot .tt-snum{font-size:14px;font-weight:800;color:var(--text)}
   .tt-slot .tt-stime{font-size:10px;color:var(--muted)}
@@ -907,6 +907,8 @@
       color:selectedColor, sample:false };
     var arr=load(K.courses,[]); arr.push(c); save(K.courses,arr);
     this.reset(); renderCourses(); renderTodo(); toast("已添加课程");
+    // 自动收起添加课程面板
+    var detailsEl=this.closest('details'); if(detailsEl) detailsEl.removeAttribute('open');
   });
   // week override settings
   document.getElementById("setWeekNum").addEventListener("change",function(){
