@@ -458,8 +458,6 @@
 
   // ---------- seed example data ----------
   function seed(){
-    var existingCourses = load(K.courses, []);
-    if(load(K.seeded, false) && existingCourses.length > 0) return;
     var courses = [
       /* ===== 周一 day=1 ===== */
       {"day":1,"start":"08:00","end":"09:35","name":"排球2班","room":"","teacher":"","color":"#9b5de5","sample":true},
@@ -518,6 +516,9 @@
       {"day":7,"start":"13:30","end":"15:05","name":"高等传热传质学（双语人工智能+）","room":"","teacher":"","color":"#e5484d","sample":true}
     ];
     courses.forEach(function(c){ if(!c.id) c.id=uid(); });
+    var keepC = load(K.courses,[]).filter(function(c){ return !c.sample; });
+    save(K.courses, keepC.concat(courses));
+    if(load(K.seeded, false)) return;
     var checkins = [
       {id:uid(), date:addDays(-4), count:30, note:"list 词表", sample:true},
       {id:uid(), date:addDays(-3), count:35, note:"", sample:true},
@@ -533,8 +534,6 @@
       {id:uid(), date:addDays(0), title:"Batch Normalization", source:"arXiv", note:"加速收敛、稳定训练", planDate:"", status:"已读", sample:true},
       {id:uid(), date:"", title:"Attention Is All You Need", source:"arXiv", note:"Transformer 经典，计划精读", planDate:addDays(-2), status:"未读", sample:true}
     ];
-    var keepC = load(K.courses,[]).filter(function(c){ return !c.sample; });
-    save(K.courses, keepC.concat(courses));
     var keepK = load(K.checkins,[]).filter(function(c){ return !c.sample; });
     save(K.checkins, keepK.concat(checkins));
     var keepW = load(K.words,[]).filter(function(c){ return !c.sample; });
