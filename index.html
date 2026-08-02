@@ -852,7 +852,16 @@
     if(!url || !url.startsWith("http")){ toast("请输入 Firebase 数据库地址"); return; }
     var s=getSync(); s.token=url; if(s.auto==null) s.auto=true;
     setSync(s); document.getElementById("syncAuto").checked=!!s.auto;
+    try{ history.replaceState(null,"","#sync="+encodeURIComponent(url)); }catch(e){}
     pushSync(); toast("同步已启用");
+  });
+  // 输入即自动保存，无需点按钮
+  document.getElementById("syncToken").addEventListener("input", function(){
+    var url=this.value.trim().replace(/\/+$/,"");
+    if(!url || !url.startsWith("http")) return;
+    var s=getSync(); s.token=url; if(s.auto==null) s.auto=true;
+    setSync(s); document.getElementById("syncAuto").checked=!!s.auto;
+    try{ history.replaceState(null,"","#sync="+encodeURIComponent(url)); }catch(e){}
   });
   document.getElementById("btnSyncNow").addEventListener("click", function(){
     var s=getSync(); if(!s.token){ toast("请先保存数据库地址"); return; }
@@ -869,6 +878,11 @@
   // init sync UI
   (function(){
     var s=getSync();
+    // 本地没有则从网址 #sync= 参数恢复（防 iOS 清空 localStorage）
+    if(!s.token){
+      var m=location.hash.match(/sync=([^&]+)/);
+      if(m){ try{ s.token=decodeURIComponent(m[1]); setSync(s); }catch(e){} }
+    }
     if(s.token) document.getElementById("syncToken").value=s.token;
     document.getElementById("syncAuto").checked=(s.auto!==false);
     if(s.token){
