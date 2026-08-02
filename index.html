@@ -773,16 +773,29 @@
   function renderTodo(){
     var td=todayStr(), wd=dow();
     var html="";
-    // 今日课程（按当前周过滤，开学日期调整后会跟着变）
-    var wn=getWeekNum();
-    var courses=load(K.courses,[]).filter(function(c){ return c.day===wd && (!c.weeks || matchWeek(c.weeks, wn)); }).sort(function(a,b){ return a.start<b.start?-1:1; });
-    if(courses.length){
-      courses.forEach(function(c){
-        var timeStr = formatCourseTime(c);
-        html += '<div class="todo-item"><span class="todo-dot blue"></span><div class="todo-body"><div class="todo-title">'+esc(timeStr)+" "+esc(c.name)+'</div><div class="todo-sub">'+esc(c.room||"")+(c.teacher?(" · "+esc(c.teacher)):"")+'</div></div><button class="todo-act" data-go="courses">看课表</button></div>';
-      });
+    // 今日课程（只用真实日期算周，不受手动切周影响）
+    var termStart=load(K.termStart,null);
+    var realWn=getRealWeekNum();
+    var today=new Date();
+    var todayStr_fmt=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0");
+
+    if(termStart && todayStr_fmt < termStart){
+      // 未开学
+      html += '<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">距离开学还有 '+Math.ceil((new Date(termStart)-today)/864e5)+' 天</div><div class="todo-sub">开学日期：'+termStart+' · 好好准备！</div></div></div>';
+    } else if(realWn > 16){
+      // 已结课
+      html += '<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">本学期已结束</div><div class="todo-sub">享受假期吧 🎉</div></div></div>';
     } else {
-      html += '<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">今天没有课</div><div class="todo-sub">好好自习或休息一下</div></div></div>';
+      // 学期内：按真实周次过滤课程
+      var courses=load(K.courses,[]).filter(function(c){ return c.day===wd && (!c.weeks || matchWeek(c.weeks, realWn)); }).sort(function(a,b){ return a.start<b.start?-1:1; });
+      if(courses.length){
+        courses.forEach(function(c){
+          var timeStr = formatCourseTime(c);
+          html += '<div class="todo-item"><span class="todo-dot blue"></span><div class="todo-body"><div class="todo-title">'+esc(timeStr)+" "+esc(c.name)+'</div><div class="todo-sub">'+esc(c.room||"")+(c.teacher?(" · "+esc(c.teacher)):"")+'</div></div><button class="todo-act" data-go="courses">看课表</button></div>';
+        });
+      } else {
+        html += '<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">今天没有课</div><div class="todo-sub">好好自习或休息一下</div></div></div>';
+      }
     }
     // 今日背单词
     var cm=checkinMap();
@@ -850,8 +863,14 @@
   var COURSE_COLORS=['#4361ee','#2e9e5b','#e8a33d','#9b5de5','#e5484d','#00a3b4','#ff6b6b','#f06292'];
 
   function getWeekNum(){
+    // For course table: respects manual override (user can browse any week)
     var manual=load(K.weekOverride,null);
     if(manual!==null && manual>0) return manual;
+    return getRealWeekNum();
+  }
+
+  function getRealWeekNum(){
+    // For "今日要处理": ONLY based on real date, ignores manual override
     var start=load(K.termStart,null);
     if(!start) return 1;
     var sd=new Date(start+"T00:00:00");
