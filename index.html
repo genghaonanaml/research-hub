@@ -773,8 +773,9 @@
   function renderTodo(){
     var td=todayStr(), wd=dow();
     var html="";
-    // 今日课程
-    var courses=load(K.courses,[]).filter(function(c){ return c.day===wd; }).sort(function(a,b){ return a.start<b.start?-1:1; });
+    // 今日课程（按当前周过滤，开学日期调整后会跟着变）
+    var wn=getWeekNum();
+    var courses=load(K.courses,[]).filter(function(c){ return c.day===wd && (!c.weeks || matchWeek(c.weeks, wn)); }).sort(function(a,b){ return a.start<b.start?-1:1; });
     if(courses.length){
       courses.forEach(function(c){
         var timeStr = formatCourseTime(c);
@@ -1247,17 +1248,17 @@
   document.getElementById("setTermStart").addEventListener("change", function(){
     var v=this.value;
     if(v){ save(K.termStart,v); save(K.weekOverride,null); }
-    renderCourses();
+    renderCourses(); renderTodo();
   });
   document.getElementById("btnAutoWeek").addEventListener("click", function(){
     save(K.weekOverride,null);
-    renderCourses(); toast("已按开学日期自动计算");
+    renderCourses(); renderTodo(); toast("已按开学日期自动计算");
   });
   document.getElementById("btnWeekPrev").addEventListener("click", function(){
-    var w=getWeekNum(); save(K.weekOverride, Math.max(1, w-1)); renderCourses();
+    var w=getWeekNum(); save(K.weekOverride, Math.max(1, w-1)); renderCourses(); renderTodo();
   });
   document.getElementById("btnWeekNext").addEventListener("click", function(){
-    var w=getWeekNum(); save(K.weekOverride, w+1); renderCourses();
+    var w=getWeekNum(); save(K.weekOverride, w+1); renderCourses(); renderTodo();
   });
   document.getElementById("timetable").addEventListener("click", function(e){
     var b=e.target.closest("[data-delcourse]"); if(!b) return;
