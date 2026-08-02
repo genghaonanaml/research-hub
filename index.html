@@ -645,38 +645,39 @@
     clearTimeout(syncTimer); syncTimer=setTimeout(pushSync, 1200);
   }
 
-  // ---------- seed example data ----------
+  // ---------- seed example data (from 上学期.html 2025-2026学年1学期) ----------
   function seed(){
     var courses = [
     /* ===== 周一 day=1 ===== */
-    {"day":1,"start":"13:30","end":"15:05","name":"清洁能源前沿技术","room":"","teacher":"","color":"#00a3b4","sample":true},
-    {"day":1,"start":"13:30","end":"15:05","name":"清洁能源技术领域案例专题课","room":"","teacher":"","color":"#e8a33d","sample":true},
-    {"day":1,"start":"18:00","end":"19:35","name":"英语水平测试听力&综合训练","room":"","teacher":"","color":"#9b5de5","sample":true},
-    {"day":1,"start":"18:00","end":"19:35","name":"清洁能源前沿技术","room":"","teacher":"","color":"#00a3b4","sample":true},
-    {"day":1,"start":"19:55","end":"21:30","name":"英语水平测试听力&综合训练","room":"","teacher":"","color":"#9b5de5","sample":true},
+    {"day":1,"start":5,"end":6,"name":"清洁能源前沿技术","room":"","teacher":"","color":"#00a3b4","sample":true,"weeks":"2-8"},
+    {"day":1,"start":5,"end":6,"name":"清洁能源技术领域案例专题课","room":"","teacher":"","color":"#e8a33d","sample":true,"weeks":"9-12"},
+    {"day":1,"start":9,"end":10,"name":"英语水平测试听力&综合训练","room":"","teacher":"","color":"#9b5de5","sample":true,"weeks":"3"},
+    {"day":1,"start":9,"end":10,"name":"清洁能源前沿技术","room":"","teacher":"","color":"#00a3b4","sample":true,"weeks":"1"},
+    {"day":1,"start":11,"end":12,"name":"英语水平测试听力&综合训练","room":"","teacher":"","color":"#9b5de5","sample":true,"weeks":"3"},
     /* ===== 周二 day=2 ===== */
-    {"day":2,"start":"08:00","end":"09:35","name":"新时代中国特色社会主义理论与实践","room":"","teacher":"","color":"#4361ee","sample":true},
-    {"day":2,"start":"13:30","end":"15:05","name":"高等传热传质学（双语人工智能+）","room":"","teacher":"","color":"#e5484d","sample":true},
-    {"day":2,"start":"15:25","end":"17:00","name":"论文写作与指导","room":"","teacher":"","color":"#e5484d","sample":true},
-    {"day":2,"start":"18:00","end":"19:35","name":"论文写作与指导","room":"","teacher":"","color":"#e5484d","sample":true},
-    {"day":2,"start":"18:00","end":"19:35","name":"工程伦理","room":"","teacher":"","color":"#2e9e5b","sample":true},
-    {"day":2,"start":"19:55","end":"21:30","name":"工程伦理","room":"","teacher":"","color":"#2e9e5b","sample":true},
+    {"day":2,"start":1,"end":2,"name":"新时代中国特色社会主义理论与实践","room":"","teacher":"","color":"#4361ee","sample":true,"weeks":"1-8"},
+    {"day":2,"start":5,"end":6,"name":"高等传热传质学（双语人工智能+）","room":"","teacher":"","color":"#e5484d","sample":true,"weeks":"5-8"},
+    {"day":2,"start":7,"end":8,"name":"论文写作与指导","room":"","teacher":"","color":"#f97316","sample":true,"weeks":"9"},
+    {"day":2,"start":7,"end":8,"name":"论文写作与指导","room":"","teacher":"","color":"#f97316","sample":true,"weeks":"11-16"},
+    {"day":2,"start":9,"end":10,"name":"论文写作与指导","room":"","teacher":"","color":"#f97316","sample":true,"weeks":"10"},
+    {"day":2,"start":9,"end":10,"name":"工程伦理","room":"","teacher":"","color":"#2e9e5b","sample":true,"weeks":"5-8"},
+    {"day":2,"start":11,"end":12,"name":"工程伦理","room":"","teacher":"","color":"#2e9e5b","sample":true,"weeks":"5-8"},
     /* ===== 周三 day=3 ===== */
-    {"day":3,"start":"09:55","end":"11:30","name":"高等工程热力学","room":"","teacher":"","color":"#4361ee","sample":true},
-    {"day":3,"start":"13:30","end":"15:05","name":"清洁能源技术领域案例专题课","room":"","teacher":"","color":"#e8a33d","sample":true},
-    {"day":3,"start":"18:00","end":"19:35","name":"英语水平测试听力&综合训练","room":"","teacher":"","color":"#9b5de5","sample":true},
+    {"day":3,"start":3,"end":4,"name":"高等工程热力学","room":"","teacher":"","color":"#4361ee","sample":true,"weeks":"1-4"},
+    {"day":3,"start":5,"end":6,"name":"清洁能源技术领域案例专题课","room":"","teacher":"","color":"#e8a33d","sample":true,"weeks":"9-12"},
+    {"day":3,"start":9,"end":10,"name":"英语水平测试听力&综合训练","room":"","teacher":"","color":"#9b5de5","sample":true,"weeks":"3"},
     /* ===== 周四 day=4 ===== */
-    {"day":4,"start":"08:00","end":"09:35","name":"自然辩证法概论","room":"","teacher":"","color":"#e5484d","sample":true},
-    {"day":4,"start":"09:55","end":"11:30","name":"自然辩证法概论","room":"","teacher":"","color":"#e5484d","sample":true},
-    {"day":4,"start":"13:30","end":"15:05","name":"高等工程热力学","room":"","teacher":"","color":"#4361ee","sample":true},
+    {"day":4,"start":1,"end":2,"name":"自然辩证法概论","room":"","teacher":"","color":"#e5484d","sample":true,"weeks":"8"},
+    {"day":4,"start":3,"end":4,"name":"自然辩证法概论","room":"","teacher":"","color":"#e5484d","sample":true,"weeks":"1-7"},
+    {"day":4,"start":5,"end":6,"name":"高等工程热力学","room":"","teacher":"","color":"#4361ee","sample":true,"weeks":"1-4"},
     /* ===== 周五 day=5 ===== */
-    {"day":5,"start":"08:00","end":"09:35","name":"英语水平测试听力&综合训练","room":"","teacher":"","color":"#9b5de5","sample":true},
+    {"day":5,"start":1,"end":2,"name":"英语水平测试听力&综合训练","room":"","teacher":"","color":"#9b5de5","sample":true,"weeks":"1-14"},
     /* ===== 周六 day=6 ===== */
-    {"day":6,"start":"13:30","end":"15:05","name":"新时代中国特色社会主义理论与实践","room":"","teacher":"","color":"#4361ee","sample":true},
-    {"day":6,"start":"13:30","end":"15:05","name":"自然辩证法概论","room":"","teacher":"","color":"#e5484d","sample":true},
-    {"day":6,"start":"15:25","end":"17:00","name":"新时代中国特色社会主义理论与实践","room":"","teacher":"","color":"#4361ee","sample":true},
+    {"day":6,"start":5,"end":6,"name":"新时代中国特色社会主义理论与实践","room":"","teacher":"","color":"#4361ee","sample":true,"weeks":"9"},
+    {"day":6,"start":5,"end":6,"name":"自然辩证法概论","room":"","teacher":"","color":"#e5484d","sample":true,"weeks":"7"},
+    {"day":6,"start":7,"end":8,"name":"新时代中国特色社会主义理论与实践","room":"","teacher":"","color":"#4361ee","sample":true,"weeks":"9"},
     /* ===== 周日 day=7 ===== */
-    {"day":7,"start":"13:30","end":"15:05","name":"高等传热传质学（双语人工智能+）","room":"","teacher":"","color":"#e5484d","sample":true}
+    {"day":7,"start":5,"end":6,"name":"高等传热传质学（双语人工智能+）","room":"","teacher":"","color":"#e5484d","sample":true,"weeks":"5-8"}
     ];
     courses.forEach(function(c){ if(!c.id) c.id=uid(); });
     var keepC = load(K.courses,[]).filter(function(c){ return !c.sample; });
@@ -709,6 +710,23 @@
   }
 
   // ---------- helpers ----------
+  function matchWeek(weekStr, currentWeek){
+    var s = String(weekStr).replace(/周/g,'').trim();
+    if(s.indexOf('-') > -1){
+      var parts = s.split('-');
+      var start = parseInt(parts[0],10), end = parseInt(parts[1],10);
+      return currentWeek >= start && currentWeek <= end;
+    }
+    return parseInt(s,10) === currentWeek;
+  }
+  function formatCourseTime(c){
+    var s = c.start, e = c.end;
+    if(typeof s === 'number'){
+      var sp = PERIOD_INFO[s-1], ep = PERIOD_INFO[e-1];
+      return (sp?sp.start:s)+'-'+(ep?ep.end:e);
+    }
+    return s+'-'+e;
+  }
   function checkinMap(){ var m={}; load(K.checkins,[]).forEach(function(c){ m[c.date]=(m[c.date]||0)+ (+c.count||0); }); return m; }
   function paperMap(){ var m={}; load(K.papers,[]).forEach(function(p){ if(p.status==="已读" && p.date){ m[p.date]=(m[p.date]||0)+1; } }); return m; }
   function calcStreak(map){
@@ -757,7 +775,8 @@
     var courses=load(K.courses,[]).filter(function(c){ return c.day===wd; }).sort(function(a,b){ return a.start<b.start?-1:1; });
     if(courses.length){
       courses.forEach(function(c){
-        html += '<div class="todo-item"><span class="todo-dot blue"></span><div class="todo-body"><div class="todo-title">'+esc(c.start)+"-"+esc(c.end)+" "+esc(c.name)+'</div><div class="todo-sub">'+esc(c.room||"")+(c.teacher?(" · "+esc(c.teacher)):"")+'</div></div><button class="todo-act" data-go="courses">看课表</button></div>';
+        var timeStr = formatCourseTime(c);
+        html += '<div class="todo-item"><span class="todo-dot blue"></span><div class="todo-body"><div class="todo-title">'+esc(timeStr)+" "+esc(c.name)+'</div><div class="todo-sub">'+esc(c.room||"")+(c.teacher?(" · "+esc(c.teacher)):"")+'</div></div><button class="todo-act" data-go="courses">看课表</button></div>';
       });
     } else {
       html += '<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">今天没有课</div><div class="todo-sub">好好自习或休息一下</div></div></div>';
@@ -819,9 +838,10 @@
     {num:9,start:'18:00',end:'18:45'}, {num:10,start:'18:45',end:'19:35'},
     {num:11,start:'19:55',end:'20:40'}, {num:12,start:'20:40',end:'21:30'}
   ];
-  // Map from start time → period index (0-based) for matching
+  // Map from start value → period index (0-based) for matching
+  // Supports both: period number (1,3,5...) and time string ("08:00","09:55"...)
   var START_TO_PERIOD = {};
-  PERIOD_INFO.forEach(function(p,i){ START_TO_PERIOD[p.start]=i; });
+  PERIOD_INFO.forEach(function(p,i){ START_TO_PERIOD[p.start]=i; START_TO_PERIOD[p.num]=i; });
   // Paired slot mapping: period index → pair key (for display grouping)
   var COURSE_COLORS=['#4361ee','#2e9e5b','#e8a33d','#9b5de5','#e5484d','#00a3b4','#ff6b6b','#f06292'];
 
@@ -836,7 +856,13 @@
   }
 
   function renderCourses(){
-    var courses=load(K.courses,[]);
+    var allCourses=load(K.courses,[]);
+    var wn=getWeekNum();
+    // Filter courses by week: if course has 'weeks' field, check if current week matches
+    var courses = allCourses.filter(function(c){
+      if(!c.weeks) return true; // no weeks restriction = show always
+      return matchWeek(c.weeks, wn);
+    });
     var td=dow(); // 1=Mon..7=Sun
     var now=new Date();
     var mon=new Date(now); mon.setDate(now.getDate()-((now.getDay()+6)%7));
@@ -887,11 +913,8 @@
     // 12 period rows
     for(var p=0;p<12;p++){
       var pi = PERIOD_INFO[p];
-      // Left label: show period number; show time only on odd periods (start of each pair)
-      var isPairStart = (p % 2 === 0);
-      var slotHtml = '<div class="tt-snum">'+pi.num+'</div>';
-      if(isPairStart) slotHtml += '<div class="tt-stime">'+pi.start+'-'+PERIOD_INFO[p+1].end+'</div>';
-      tt += '<div class="tt-slot">'+slotHtml+'</div>';
+      // Every row shows its own period number + time
+      tt += '<div class="tt-slot"><div class="tt-snum">'+pi.num+'</div><div class="tt-stime">'+pi.start+'</div></div>';
       for(var d=1;d<=7;d++){
         // If this cell is occupied by a spanning card from above, skip rendering content
         if(occupied[d][p]){
