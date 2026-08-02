@@ -147,6 +147,13 @@
   .empty{text-align:center; color:var(--muted); padding:24px 10px; font-size:14px}
   .backup-note{font-size:13px; color:var(--amber); font-weight:700; margin-top:8px; display:none}
   .backup-note.show{display:block}
+  .week-dates{display:flex; gap:6px; margin:0 0 14px; overflow-x:auto; padding-bottom:4px}
+  .week-dates .wd{flex:1; min-width:52px; text-align:center; background:#f7f8fc; border-radius:10px; padding:8px 4px; border:1px solid var(--border)}
+  .week-dates .wd.today{background:#eef2ff; border-color:#4361ee}
+  .week-dates .wdn{font-size:12px; color:var(--muted); margin-bottom:2px}
+  .week-dates .wd.today .wdn{color:#4361ee; font-weight:600}
+  .week-dates .wdd{font-size:15px; font-weight:700; color:var(--text)}
+  .week-dates .wd.today .wdd{color:#4361ee}
   .seed-clear{font-size:13px; color:var(--muted); margin-top:8px}
   .seed-clear a{color:var(--primary); cursor:pointer; font-weight:700}
   .hidden{display:none}
@@ -206,6 +213,7 @@
           今天要处理
         </h2>
         <div id="todoList"></div>
+        <div id="weekDates" class="week-dates"></div>
         <div class="seed-clear hidden" id="seedClear">当前含示例数据，<a id="btnSeedClear">清空示例数据</a></div>
       </section>
 
@@ -452,11 +460,488 @@
   function seed(){
     if(load(K.seeded, false)) return;
     var courses = [
-      {id:uid(), day:1, start:"08:00", end:"09:40", name:"高等数学", room:"A101", teacher:"张教授", color:"#4361ee", sample:true},
-      {id:uid(), day:3, start:"10:00", end:"11:40", name:"学术英语(六级)", room:"B203", teacher:"李老师", color:"#2e9e5b", sample:true},
-      {id:uid(), day:5, start:"14:00", end:"15:40", name:"机器学习导论", room:"C305", teacher:"王教授", color:"#e8a33d", sample:true},
-      {id:uid(), day:2, start:"15:00", end:"16:40", name:"研究方法论", room:"D102", teacher:"赵老师", color:"#9b5de5", sample:true}
+      {
+        "day": 1,
+        "start": "08:00",
+        "end": "08:50",
+        "name": "排球2班",
+        "room": "",
+        "teacher": "",
+        "color": "#9b5de5",
+        "sample": true
+      },
+      {
+        "day": 1,
+        "start": "08:00",
+        "end": "08:50",
+        "name": "武术1班",
+        "room": "",
+        "teacher": "",
+        "color": "#e5484d",
+        "sample": true
+      },
+      {
+        "day": 1,
+        "start": "08:00",
+        "end": "08:50",
+        "name": "足球1班",
+        "room": "",
+        "teacher": "",
+        "color": "#00a3b4",
+        "sample": true
+      },
+      {
+        "day": 1,
+        "start": "08:00",
+        "end": "08:50",
+        "name": "网球2班",
+        "room": "",
+        "teacher": "",
+        "color": "#4361ee",
+        "sample": true
+      },
+      {
+        "day": 1,
+        "start": "10:00",
+        "end": "10:50",
+        "name": "地热资源的开发与利用1班",
+        "room": "",
+        "teacher": "",
+        "color": "#2e9e5b",
+        "sample": true
+      },
+      {
+        "day": 1,
+        "start": "10:00",
+        "end": "10:50",
+        "name": "建筑清洁能源利用技术1班",
+        "room": "",
+        "teacher": "",
+        "color": "#e8a33d",
+        "sample": true
+      },
+      {
+        "day": 1,
+        "start": "14:00",
+        "end": "14:50",
+        "name": "清洁能源前沿技术",
+        "room": "",
+        "teacher": "",
+        "color": "#4361ee",
+        "sample": true
+      },
+      {
+        "day": 1,
+        "start": "14:00",
+        "end": "14:50",
+        "name": "清洁能源技术领域案例专题课",
+        "room": "",
+        "teacher": "",
+        "color": "#2e9e5b",
+        "sample": true
+      },
+      {
+        "day": 1,
+        "start": "14:00",
+        "end": "14:50",
+        "name": "数学物理方法2班",
+        "room": "",
+        "teacher": "",
+        "color": "#9b5de5",
+        "sample": true
+      },
+      {
+        "day": 1,
+        "start": "14:00",
+        "end": "14:50",
+        "name": "清洁能源技术专题实验1班",
+        "room": "",
+        "teacher": "",
+        "color": "#e5484d",
+        "sample": true
+      },
+      {
+        "day": 1,
+        "start": "16:00",
+        "end": "16:50",
+        "name": "数学物理方法2班",
+        "room": "",
+        "teacher": "",
+        "color": "#9b5de5",
+        "sample": true
+      },
+      {
+        "day": 1,
+        "start": "19:00",
+        "end": "19:50",
+        "name": "英语水平测试听力&综合训练",
+        "room": "",
+        "teacher": "",
+        "color": "#e8a33d",
+        "sample": true
+      },
+      {
+        "day": 1,
+        "start": "19:00",
+        "end": "19:50",
+        "name": "清洁能源前沿技术",
+        "room": "",
+        "teacher": "",
+        "color": "#4361ee",
+        "sample": true
+      },
+      {
+        "day": 1,
+        "start": "19:00",
+        "end": "19:50",
+        "name": "计算传热学（双语）1班",
+        "room": "",
+        "teacher": "",
+        "color": "#00a3b4",
+        "sample": true
+      },
+      {
+        "day": 1,
+        "start": "21:00",
+        "end": "21:50",
+        "name": "英语水平测试听力&综合训练",
+        "room": "",
+        "teacher": "",
+        "color": "#e8a33d",
+        "sample": true
+      },
+      {
+        "day": 1,
+        "start": "21:00",
+        "end": "21:50",
+        "name": "数学物理方法2班",
+        "room": "",
+        "teacher": "",
+        "color": "#9b5de5",
+        "sample": true
+      },
+      {
+        "day": 2,
+        "start": "08:00",
+        "end": "08:50",
+        "name": "新时代中国特色社会主义理论与实践",
+        "room": "",
+        "teacher": "",
+        "color": "#9b5de5",
+        "sample": true
+      },
+      {
+        "day": 2,
+        "start": "10:00",
+        "end": "10:50",
+        "name": "油田太阳能供热技术1班",
+        "room": "",
+        "teacher": "",
+        "color": "#4361ee",
+        "sample": true
+      },
+      {
+        "day": 2,
+        "start": "14:00",
+        "end": "14:50",
+        "name": "高等传热传质学（双语人工智能+）",
+        "room": "",
+        "teacher": "",
+        "color": "#e5484d",
+        "sample": true
+      },
+      {
+        "day": 2,
+        "start": "16:00",
+        "end": "16:50",
+        "name": "论文写作与指导",
+        "room": "",
+        "teacher": "",
+        "color": "#00a3b4",
+        "sample": true
+      },
+      {
+        "day": 2,
+        "start": "16:00",
+        "end": "16:50",
+        "name": "篮球2班",
+        "room": "",
+        "teacher": "",
+        "color": "#2e9e5b",
+        "sample": true
+      },
+      {
+        "day": 2,
+        "start": "16:00",
+        "end": "16:50",
+        "name": "健美操1班",
+        "room": "",
+        "teacher": "",
+        "color": "#e8a33d",
+        "sample": true
+      },
+      {
+        "day": 2,
+        "start": "16:00",
+        "end": "16:50",
+        "name": "定向越野2班",
+        "room": "",
+        "teacher": "",
+        "color": "#9b5de5",
+        "sample": true
+      },
+      {
+        "day": 2,
+        "start": "19:00",
+        "end": "19:50",
+        "name": "论文写作与指导",
+        "room": "",
+        "teacher": "",
+        "color": "#00a3b4",
+        "sample": true
+      },
+      {
+        "day": 2,
+        "start": "19:00",
+        "end": "19:50",
+        "name": "工程伦理",
+        "room": "",
+        "teacher": "",
+        "color": "#4361ee",
+        "sample": true
+      },
+      {
+        "day": 2,
+        "start": "21:00",
+        "end": "21:50",
+        "name": "工程伦理",
+        "room": "",
+        "teacher": "",
+        "color": "#4361ee",
+        "sample": true
+      },
+      {
+        "day": 3,
+        "start": "08:00",
+        "end": "08:50",
+        "name": "数学物理方法2班",
+        "room": "",
+        "teacher": "",
+        "color": "#9b5de5",
+        "sample": true
+      },
+      {
+        "day": 3,
+        "start": "10:00",
+        "end": "10:50",
+        "name": "高等工程热力学",
+        "room": "",
+        "teacher": "",
+        "color": "#2e9e5b",
+        "sample": true
+      },
+      {
+        "day": 3,
+        "start": "10:00",
+        "end": "10:50",
+        "name": "研究生学术外语（日语）1班",
+        "room": "",
+        "teacher": "",
+        "color": "#e5484d",
+        "sample": true
+      },
+      {
+        "day": 3,
+        "start": "14:00",
+        "end": "14:50",
+        "name": "清洁能源技术领域案例专题课",
+        "room": "",
+        "teacher": "",
+        "color": "#2e9e5b",
+        "sample": true
+      },
+      {
+        "day": 3,
+        "start": "14:00",
+        "end": "14:50",
+        "name": "研究生学术外语（英语）1班",
+        "room": "",
+        "teacher": "",
+        "color": "#00a3b4",
+        "sample": true
+      },
+      {
+        "day": 3,
+        "start": "19:00",
+        "end": "19:50",
+        "name": "英语水平测试听力&综合训练",
+        "room": "",
+        "teacher": "",
+        "color": "#e8a33d",
+        "sample": true
+      },
+      {
+        "day": 3,
+        "start": "19:00",
+        "end": "19:50",
+        "name": "计算传热学（双语）1班",
+        "room": "",
+        "teacher": "",
+        "color": "#00a3b4",
+        "sample": true
+      },
+      {
+        "day": 4,
+        "start": "08:00",
+        "end": "08:50",
+        "name": "自然辩证法概论",
+        "room": "",
+        "teacher": "",
+        "color": "#e8a33d",
+        "sample": true
+      },
+      {
+        "day": 4,
+        "start": "10:00",
+        "end": "10:50",
+        "name": "自然辩证法概论",
+        "room": "",
+        "teacher": "",
+        "color": "#e8a33d",
+        "sample": true
+      },
+      {
+        "day": 4,
+        "start": "10:00",
+        "end": "10:50",
+        "name": "油田太阳能供热技术1班",
+        "room": "",
+        "teacher": "",
+        "color": "#4361ee",
+        "sample": true
+      },
+      {
+        "day": 4,
+        "start": "10:00",
+        "end": "10:50",
+        "name": "地热资源的开发与利用1班",
+        "room": "",
+        "teacher": "",
+        "color": "#2e9e5b",
+        "sample": true
+      },
+      {
+        "day": 4,
+        "start": "10:00",
+        "end": "10:50",
+        "name": "清洁能源技术专题实验1班",
+        "room": "",
+        "teacher": "",
+        "color": "#e5484d",
+        "sample": true
+      },
+      {
+        "day": 4,
+        "start": "10:00",
+        "end": "10:50",
+        "name": "建筑清洁能源利用技术1班",
+        "room": "",
+        "teacher": "",
+        "color": "#e8a33d",
+        "sample": true
+      },
+      {
+        "day": 4,
+        "start": "14:00",
+        "end": "14:50",
+        "name": "高等工程热力学",
+        "room": "",
+        "teacher": "",
+        "color": "#2e9e5b",
+        "sample": true
+      },
+      {
+        "day": 4,
+        "start": "16:00",
+        "end": "16:50",
+        "name": "研究生学术外语（英语）1班",
+        "room": "",
+        "teacher": "",
+        "color": "#00a3b4",
+        "sample": true
+      },
+      {
+        "day": 4,
+        "start": "16:00",
+        "end": "16:50",
+        "name": "花式跳绳1班",
+        "room": "",
+        "teacher": "",
+        "color": "#4361ee",
+        "sample": true
+      },
+      {
+        "day": 4,
+        "start": "19:00",
+        "end": "19:50",
+        "name": "建筑清洁能源利用技术1班",
+        "room": "",
+        "teacher": "",
+        "color": "#e8a33d",
+        "sample": true
+      },
+      {
+        "day": 5,
+        "start": "08:00",
+        "end": "08:50",
+        "name": "英语水平测试听力&综合训练",
+        "room": "",
+        "teacher": "",
+        "color": "#e8a33d",
+        "sample": true
+      },
+      {
+        "day": 6,
+        "start": "14:00",
+        "end": "14:50",
+        "name": "新时代中国特色社会主义理论与实践",
+        "room": "",
+        "teacher": "",
+        "color": "#9b5de5",
+        "sample": true
+      },
+      {
+        "day": 6,
+        "start": "14:00",
+        "end": "14:50",
+        "name": "自然辩证法概论",
+        "room": "",
+        "teacher": "",
+        "color": "#e8a33d",
+        "sample": true
+      },
+      {
+        "day": 6,
+        "start": "16:00",
+        "end": "16:50",
+        "name": "新时代中国特色社会主义理论与实践",
+        "room": "",
+        "teacher": "",
+        "color": "#9b5de5",
+        "sample": true
+      },
+      {
+        "day": 7,
+        "start": "14:00",
+        "end": "14:50",
+        "name": "高等传热传质学（双语人工智能+）",
+        "room": "",
+        "teacher": "",
+        "color": "#e5484d",
+        "sample": true
+      }
     ];
+    courses.forEach(function(c){ if(!c.id) c.id=uid(); });
     var checkins = [
       {id:uid(), date:addDays(-4), count:30, note:"list 词表", sample:true},
       {id:uid(), date:addDays(-3), count:35, note:"", sample:true},
@@ -472,12 +957,16 @@
       {id:uid(), date:addDays(0), title:"Batch Normalization", source:"arXiv", note:"加速收敛、稳定训练", planDate:"", status:"已读", sample:true},
       {id:uid(), date:"", title:"Attention Is All You Need", source:"arXiv", note:"Transformer 经典，计划精读", planDate:addDays(-2), status:"未读", sample:true}
     ];
-    save(K.courses, courses);
-    save(K.checkins, checkins);
-    save(K.words, words);
-    save(K.papers, papers);
-    save(K.papergoal, 3);
-    save(K.wordgoal, 30);
+    var keepC = load(K.courses,[]).filter(function(c){ return !c.sample; });
+    save(K.courses, keepC.concat(courses));
+    var keepK = load(K.checkins,[]).filter(function(c){ return !c.sample; });
+    save(K.checkins, keepK.concat(checkins));
+    var keepW = load(K.words,[]).filter(function(c){ return !c.sample; });
+    save(K.words, keepW.concat(words));
+    var keepP = load(K.papers,[]).filter(function(c){ return !c.sample; });
+    save(K.papers, keepP.concat(papers));
+    if(load(K.papergoal,null)==null) save(K.papergoal,3);
+    if(load(K.wordgoal,null)==null) save(K.wordgoal,30);
     save(K.seeded, true);
   }
 
@@ -563,6 +1052,20 @@
     });
     if(!html){ html='<div class="empty">今天暂时没有待处理事项，去各模块添加内容吧。</div>'; }
     document.getElementById("todoList").innerHTML=html;
+
+    // 本周日期
+    (function(){
+      var now=new Date(); now.setHours(0,0,0,0);
+      var wd=dow();
+      var monday=new Date(now); monday.setDate(now.getDate()-(wd-1));
+      var h2="";
+      for(var i=0;i<7;i++){
+        var d=new Date(monday); d.setDate(monday.getDate()+i);
+        var t=(i+1)===wd;
+        h2+='<div class="wd'+(t?" today":"")+'"><div class="wdn">'+WEEK[i]+'</div><div class="wdd">'+(d.getMonth()+1)+'/'+d.getDate()+'</div></div>';
+      }
+      var el=document.getElementById("weekDates"); if(el) el.innerHTML=h2;
+    })();
 
     document.getElementById("seedClear").classList.toggle("hidden", !hasSample());
   }
@@ -759,12 +1262,13 @@
   });
   // clear sample
   document.getElementById("btnSeedClear").addEventListener("click", function(){
-    if(!confirm("仅清空示例数据，保留你自己添加的内容？")) return;
+    if(!confirm("用示例课表（去年课程）重置示例数据？你自行添加的非示例内容会保留。")) return;
     ["courses","checkins","words","papers"].forEach(function(key){
       var arr=load(K[key],[]).filter(function(x){ return !(x && x.sample); });
       save(K[key],arr);
     });
-    renderAll(); toast("已清空示例数据");
+    save(K.seeded, false);
+    location.reload();
   });
 
   // sync events
