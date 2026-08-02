@@ -881,6 +881,7 @@
   }
 
   function renderCourses(){
+    try{
     var allCourses=load(K.courses,[]);
     var wn=getWeekNum();
     // Filter courses by week: if course has 'weeks' field, check if current week matches
@@ -890,27 +891,28 @@
     });
     var td=dow(); // 1=Mon..7=Sun
     var now=new Date();
-    // header: 周数+状态 + 日期
-    var wn=getWeekNum();
+    // header: 周数+状态 + 日期（wn 已在上面算过，不再重复调用）
     var statusText="";
     if(wn<1) statusText="(未开学)";
     else if(wn>16) statusText="(已结课)";
     else if(wn<=2) statusText="(开学初)";
     else if(wn>=15) statusText="(临近结课)";
-    document.getElementById("courseWeekInfo").textContent="第"+wn+"周"+statusText;
+    try{ document.getElementById("courseWeekInfo").textContent="第"+wn+"周"+statusText; }catch(e){}
     var y=now.getFullYear(), m=now.getMonth()+1, d2=now.getDate();
-    document.getElementById("courseDateInfo").textContent=y+"/"+m+"/"+d2;
-    document.getElementById("setTermStart").value=load(K.termStart,'')||'';
-    document.getElementById("curWeekBadge").textContent="第 "+wn+" 周";
+    try{ document.getElementById("courseDateInfo").textContent=y+"/"+m+"/"+d2; }catch(e){}
+    try{ document.getElementById("setTermStart").value=load(K.termStart,'')||''; }catch(e){}
+    try{ document.getElementById("curWeekBadge").textContent="第 "+wn+" 周"; }catch(e){}
     // week bar: 根据当前选择的周数算那一周的周一（切周时日期跟着变）
     var termStart=load(K.termStart,null);
+    var mon;
     if(termStart){
-      // 从开学日期 + (wn-1)*7 天 算出该周周一
       mon=new Date(termStart+"T00:00:00");
-      mon.setDate(mon.getDate()+(wn-1)*7);
-    } else {
-      // 没设开学日期，用今天所在周的周一
+      if(isNaN(mon.getTime())) mon=null;
+    }
+    if(!mon){
       mon=new Date(now); mon.setDate(now.getDate()-((now.getDay()+6)%7));
+    } else {
+      mon.setDate(mon.getDate()+(wn-1)*7);
     }
     // week bar
     var wb='';
@@ -923,7 +925,7 @@
       wb+='<span class="wdd-num">'+dd.getDate()+'</span>';
       wb+='</div>';
     }
-    document.getElementById("weekBar").innerHTML=wb;
+    try{ document.getElementById("weekBar").innerHTML=wb; }catch(e){}
     // Build course map: for each (day, periodIndex), which courses go here
     // A course matches if its start time == the period's start time
     // Then it spans 2 rows (this period + next)
@@ -979,7 +981,8 @@
       }
     }
     document.getElementById("timetable").innerHTML = tt;
-  }
+  } catch(e){ console.error("renderCourses error:",e); }
+}
 
   // ---------- render: words ----------
   function renderWords(){
