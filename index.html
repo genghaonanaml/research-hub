@@ -193,7 +193,7 @@
   /* modals */
   .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center}
   .modal-overlay.hidden{display:none}
-  .modal-box{background:#fff;border-radius:16px;width:340px;max-width:92vw;max-height:85vh;overflow-y:auto;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.15)}
+  .modal-box{background:#fff;border-radius:16px;width:420px;max-width:94vw;max-height:85vh;overflow-y:auto;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.15)}
   .modal-title{font-size:17px;font-weight:800;text-align:center;margin-bottom:16px;color:var(--text)}
   .modal-subtitle{font-size:13px;color:var(--muted);text-align:center;margin-bottom:14px}
   /* week picker */
@@ -205,16 +205,15 @@
   .wp-mode{flex:1;padding:8px;border:1px solid var(--border);border-radius:10px;text-align:center;font-size:13px;font-weight:700;cursor:pointer;background:#fff;color:var(--muted)}
   .wp-mode.active{background:var(--primary);color:#fff;border-color:var(--primary)}
   /* period picker */
-  .pp-table{width:100%;border-collapse:collapse;margin-bottom:14px}
-  .pp-table th{padding:6px 4px;font-size:12px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--border)}
-  .pp-table td{padding:5px 2px;text-align:center}
-  .pp-p{display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:32px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;background:#fff;color:var(--text);transition:all .15s}
-  .pp-p:hover{border-color:var(--primary)}
-  .pp-p.selected{background:var(--primary);color:#fff;border-color:var(--primary)}
-  .pp-p.range-start{background:var(--primary);color:#fff;border-color:var(--primary);border-radius:8px 0 0 8px}
-  .pp-p.range-end{background:var(--primary);color:#fff;border-color:var(--primary);border-radius:0 8px 8px 0}
-  .pp-p.in-range{background:#a8b4f8;color:#fff;border-color:#a8b4f8}
-  .pp-day-label{font-size:13px;font-weight:700;color:var(--muted);padding-right:8px;text-align:right;white-space:nowrap;width:42px}
+  .pp-table{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:13px}
+  .pp-table th{padding:8px 3px;font-size:12px;color:var(--muted);font-weight:700;border-bottom:2px solid var(--border)}
+  .pp-table td{padding:3px 2px;text-align:center;vertical-align:middle}
+  .pp-p{display:flex;align-items:center;justify-content:center;width:38px;height:36px;border:2px solid #dde3ef;border-radius:10px;font-size:15px;font-weight:800;color:var(--text);cursor:pointer;background:#fff;transition:all .12s ease;-webkit-tap-highlight-color:transparent;user-select:none}
+  .pp-p:hover{border-color:var(--primary);background:#f0f4ff;transform:scale(1.06)}
+  .pp-p:active{transform:scale(.95)}
+  .pp-p.selected{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 2px 8px rgba(67,97,238,.35)}
+  .pp-p.in-range{background:#c5cefc;color:#fff;border-color:#a8b4f8}
+  .pp-day-label{font-size:12px;font-weight:700;color:var(--muted);padding-right:6px;text-align:right;white-space:nowrap;width:44px}
   .modal-actions{display:flex;gap:10px;margin-top:4px}
   .modal-actions button{flex:1;padding:10px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;min-height:44px}
   .modal-actions .btn-cancel{background:#f7f8fc;color:var(--muted);border:1px solid var(--border)}
@@ -415,7 +414,7 @@
       <div class="modal-overlay hidden" id="periodModal">
         <div class="modal-box">
           <div class="modal-title">请选择时间</div>
-          <div class="modal-subtitle">点击选择起始节次，再点结束节次</div>
+          <div class="modal-subtitle">先点起始节次（高亮蓝），再点结束节次</div>
           <div id="ppTableWrap"></div>
           <div class="modal-actions">
             <button class="btn-cancel" id="ppCancel">取消</button>
@@ -1167,25 +1166,22 @@
   function renderPPTable(){
     var wrap=document.getElementById("ppTableWrap");
     var h='<table class="pp-table"><tr><th></th>';
-    // Show day headers (skip empty days or show all)
     var daysToShow=[1,2,3,4,5,6,7];
     daysToShow.forEach(function(d){ h+='<th>'+WEEK[d-1]+'</th>'; });
     h+='</tr>';
 
-    // Show rows by period pairs for readability
-    // Row layout: each row shows one period across all days
     for(var p=1;p<=12;p++){
       h+='<tr><td class="pp-day-label">第'+p+'节</td>';
       daysToShow.forEach(function(d){
         var isStart=(p===formPeriod.start&&d===formPeriod.day);
         var isEnd=(p===formPeriod.end&&d===formPeriod.day);
-        var isInRange=(ppSelStart!==null&&isBetween(p,d));
         var cls="pp-p";
         if(ppSelStart!==null){
-          if(isStart||isEnd) cls+=" selected";
-          else if(isInRange) cls+=" in-range";
-        } else if(isStart&&isEnd) {
-          cls+=" selected"; // pre-selected current value
+          if(isStart) cls+=" selected";
+          else if(isEnd) cls+=" selected";
+          else if(isInRangePP(p,d)) cls+=" in-range";
+        } else if(formPeriod.start && formPeriod.day===d && p>=formPeriod.start && p<=formPeriod.end){
+          cls+=(isStart||isEnd)?" selected":" in-range";
         }
         h+='<td><div class="'+cls+'" data-pd="'+p+'" data-dd="'+d+'">'+p+'</div></td>';
       });
@@ -1194,39 +1190,45 @@
     h+='</table>';
     wrap.innerHTML=h;
 
-    // Click handlers
-    wrap.onclick=function(e){
-      var cell=e.target.closest("[data-pd]");
+    // Use event delegation on wrap - attach AFTER innerHTML set
+    wrap.addEventListener("click", function ppClick(e){
+      var cell=e.target.closest(".pp-p");
       if(!cell)return;
+      e.stopPropagation();
       var p=+cell.getAttribute("data-pd"), d=+cell.getAttribute("dd");
-      if(ppSelStart===null){
-        // First click - select start
+      handlePPClick(p,d);
+    });
+  }
+
+  function handlePPClick(p,d){
+    if(ppSelStart===null){
+      // First click = select start
+      ppSelStart={p:p, d:d};
+      formPeriod.day=d; formPeriod.start=p; formPeriod.end=p;
+    } else {
+      // Second click = select end
+      var sp=ppSelStart.p, sd=ppSelStart.d;
+      if(d!==sd){
+        // Different day - just use clicked as new start
         ppSelStart={p:p, d:d};
         formPeriod.day=d; formPeriod.start=p; formPeriod.end=p;
       } else {
-        // Second click - select end (must be after start)
-        var sp=ppSelStart.p, sd=ppSelStart.d;
-        // Convert to linear order for comparison
-        var startLinear=sd*100+sp, endLinear=d*100+p;
-        if(endLinear < startLinear){
-          // Swap: clicked before start, make this the new start
-          formPeriod.day=d; formPeriod.start=p; formPeriod.end=sp;
+        // Same day - determine order
+        if(p<sp){
+          formPeriod.start=p; formPeriod.end=sp;
         } else {
-          formPeriod.day=sd; formPeriod.start=sp; formPeriod.end=p;
+          formPeriod.start=sp; formPeriod.end=p;
         }
-        ppSelStart=null; // reset for next selection
+        ppSelStart=null;
       }
-      renderPPTable();
-    };
+    }
+    renderPPTable();
   }
 
-  function isBetween(p,d){
-    if(!ppSelStart) return false;
-    var sd=formPeriod.day, sp=formPeriod.start;
-    // Simple same-day between check for now
-    if(d!==sd) return false;
-    var ep=formPeriod.end;
-    return p>sp&&p<ep;
+  function isInRangePP(p,d){
+    if(!ppSelStart || d!==ppSelStart.d || d!==formPeriod.day) return false;
+    var sp=formPeriod.start, ep=formPeriod.end;
+    return p>sp && p<ep;
   }
 
   function confirmPeriodPicker(){
