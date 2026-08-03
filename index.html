@@ -993,8 +993,10 @@
           // Mark covered cells as occupied
           for(var oc=p+1; oc<p+spanRows && oc<12; oc++) occupied[d][oc] = true;
           // Build cell with EXPLICIT position + optional span
-          var cellStyle = 'position:relative;grid-column:'+gc+';grid-row:'+gi;
-          if(spanRows > 1) cellStyle += ';grid-row:span '+spanRows;
+          // Use "grid-row: start / span N" syntax — NOT separate declarations (span would override start!)
+          var cellStyle = 'position:relative;grid-column:'+gc;
+          if(spanRows > 1) cellStyle += ';grid-row:'+gi+'/ span '+spanRows;
+          else cellStyle += ';grid-row:'+gi;
           var cardsHtml = '';
           matches.forEach(function(c){
             cardsHtml += '<div class="tt-card" style="--card-color:'+esc(c.color||'#4361ee')+'" data-delcourse="'+c.id+'" title="'+esc(c.name)+'">';
