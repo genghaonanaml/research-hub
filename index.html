@@ -908,7 +908,13 @@
       if(!c.weeks) return true; // no weeks restriction = show always
       return matchWeek(c.weeks, wn);
     });
-    var td=dow(); // 1=Mon..7=Sun
+    // 只有当天真实日期那一列才高亮（切到其他周时没有任何列高亮）
+    var todayDateStr = todayStr(); // e.g. "2026-08-03"
+    var todayCol = -1; // 0-6 = 哪列是今天，-1 = 本周没有今天
+    for(var tc=0;tc<7;tc++){
+      var tdCheck=new Date(mon); tdCheck.setDate(mon.getDate()+tc);
+      if(fmt(tdCheck) === todayDateStr){ todayCol=tc; break; }
+    }
     var now=new Date();
     // header: 周数+状态 + 日期（wn 已在上面算过，不再重复调用）
     var statusText="";
@@ -938,7 +944,7 @@
     wb+='<div class="wb-cell wb-label">月</div>';
     for(var d=0;d<7;d++){
       var dd=new Date(mon);dd.setDate(mon.getDate()+d);
-      var isToday=(d+1===td);
+      var isToday=(d===todayCol);
       wb+='<div class="wb-cell wb-day'+(isToday?' today':'')+'">';
       wb+='<span class="wbd-name">'+WEEK[d]+'</span>';
       wb+='<span class="wbd-num">'+dd.getDate()+'</span>';
@@ -964,7 +970,7 @@
     var tt = '';
     // === Row 0: Header ===
     tt += '<div class="tt-slot" style="grid-column:1;grid-row:1"><div class="tt-snum">节</div></div>';
-    for(var d=0;d<7;d++) tt += '<div class="tt-cell'+(d+1===td?' today-col':'')+'" style="grid-column:'+(d+2)+';grid-row:1"></div>';
+    for(var d=0;d<7;d++) tt += '<div class="tt-cell'+(d===todayCol?' today-col':'')+'" style="grid-column:'+(d+2)+';grid-row:1"></div>';
     // === Rows 1-12: Period rows ===
     for(var p=0;p<12;p++){
       var gi = p + 2; // grid row index (1-based): period 0 → row 2, period 1 → row 3, ...
@@ -976,12 +982,12 @@
         var gc = d + 1; // grid column: day1→col2, day2→col3, ...
         if(occupied[d][p]){
           // Covered by a spanning card above — emit invisible placeholder
-          tt += '<div class="tt-cell'+(d===td?' today-col':'')+'" style="grid-column:'+gc+';grid-row:'+gi+';visibility:hidden"></div>';
+          tt += '<div class="tt-cell'+(d-1===todayCol?' today-col':'')+'" style="grid-column:'+gc+';grid-row:'+gi+';visibility:hidden"></div>';
           continue;
         }
         var key = d + "_" + p;
         var matches = cellCourses[key] || [];
-        var cellClass = 'tt-cell' + (d===td?' today-col':'');
+        var cellClass = 'tt-cell' + (d-1===todayCol?' today-col':'');
         if(matches.length > 0){
           // Calculate span
           var spanRows = 1;
