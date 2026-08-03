@@ -526,10 +526,11 @@
           <div class="sync-row">
             <button class="btn sm" id="btnSaveToken">保存并启用同步</button>
             <button class="btn sm ghost" id="btnSyncNow">立即同步</button>
+            <button class="btn sm ghost" id="btnCopySyncLink">复制同步链接</button>
             <label class="field" style="flex-direction:row; align-items:center; gap:6px; font-size:13px; color:var(--muted)"><input type="checkbox" id="syncAuto" style="width:auto" checked> 自动同步</label>
           </div>
           <div class="sync-status" id="syncStatus">未配置同步</div>
-          <div class="sync-tip"><b>获取方式（免费，2 分钟）：</b><br>1. 打开 <code>console.firebase.google.com</code> → 创建项目<br>2. 左侧菜单选「Realtime Database 实时数据库」→ 创建数据库<br>3. 地区选离你近的 → 选「测试模式」启动<br>4. 复制上方显示的「数据库地址」粘贴到此处即可<br>⚠️ 数据存在 Google Firebase（非纯本地）；测试模式下任何人知道地址都能读写，建议勿在公开场合分享。</div>
+          <div class="sync-tip"><b>获取方式（免费，2 分钟）：</b><br>1. 打开 <code>console.firebase.google.com</code> → 创建项目<br>2. 左侧菜单选「Realtime Database 实时数据库」→ 创建数据库<br>3. 地区选离你近的 → 选「测试模式」启动<br>4. 复制上方显示的「数据库地址」粘贴到此处即可<br>📱 <b>手机端怎么用：</b>在电脑点「复制同步链接」→ 把链接发到手机微信/QQ → 手机用浏览器打开该链接 → 自动恢复配置并拉取数据（可再「添加到主屏幕」）。<b>别直接打开裸的 GitHub 链接</b>，那样手机没有同步配置。<br>⚠️ 数据存在 Google Firebase（非纯本地）；测试模式下任何人知道地址都能读写，建议勿在公开场合分享。</div>
         </div>
       </section>
     </main>
@@ -631,7 +632,7 @@
       }
     });
   }
-  function fbUrl(){ var s=getSync(); var base=(s.token||"").trim().replace(/\/+$/,""); return base?base+"/sync/data.json":""; }
+  function fbUrl(){ var s=getSync(); var raw=(s.token||"").trim(); if(!raw) return ""; var base=raw; if(base.indexOf("://")<0) base="https://"+base; base=base.replace(/\/+$/,"").replace(/\/sync\/data\.json$/,""); return base+"/sync/data.json"; }
   function pushSync(){
     var url=fbUrl(); if(!url) return;
     var s=getSync(); if(!s.auto) return;
@@ -1480,8 +1481,25 @@
   });
   document.getElementById("btnSyncNow").addEventListener("click", function(){
     var s=getSync(); if(!s.token){ toast("请先保存数据库地址"); return; }
-    pullSync().then(function(){ pushSync(); });
+    pullSync().then(function(){ pushSync(); toast("已同步：先拉取云端，再上传本地"); });
   });
+  document.getElementById("btnCopySyncLink").addEventListener("click", function(){
+    var s=getSync();
+    if(!s.token){ toast("请先保存数据库地址"); return; }
+    var link=location.origin+location.pathname+"#sync="+encodeURIComponent(s.token);
+    var done=function(){ toast("已复制同步链接，发到手机打开即可自动同步"); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(link).then(done, function(){ fallbackCopy(link); done(); });
+    } else { fallbackCopy(link); done(); }
+    // 同时把链接放进输入框，方便手动复制
+    try{ document.getElementById("syncToken").value=s.token; }catch(e){}
+  });
+  function fallbackCopy(text){
+    try{
+      var ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
+      document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+    }catch(e){}
+  }
   document.getElementById("syncAuto").addEventListener("change", function(){
     var s=getSync(); s.auto=this.checked; setSync(s); if(s.auto) pushSync();
   });
