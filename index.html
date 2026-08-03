@@ -776,12 +776,15 @@
     // 今日课程（只用真实日期算周，不受手动切周影响）
     var termStart=load(K.termStart,null);
     var realWn=getRealWeekNum();
-    var today=new Date();
-    var todayStr_fmt=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0");
+    var now=new Date();
+    var today=new Date(now.getFullYear(),now.getMonth(),now.getDate()); // 本地午夜
+    var todayStr_fmt=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");
 
     if(termStart && todayStr_fmt < termStart){
-      // 未开学
-      html += '<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">距离开学还有 '+Math.ceil((new Date(termStart)-today)/864e5)+' 天</div><div class="todo-sub">开学日期：'+termStart+' · 好好准备！</div></div></div>';
+      // 未开学（用本地午夜避免时区偏差）
+      var sd=new Date(termStart+"T00:00:00");
+      var daysLeft=Math.round((sd-today)/864e5);
+      html += '<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">距离开学还有 '+Math.max(0,daysLeft)+' 天</div><div class="todo-sub">开学日期：'+termStart+' · 好好准备！</div></div></div>';
     } else if(realWn > 16){
       // 已结课
       html += '<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">本学期已结束</div><div class="todo-sub">享受假期吧 🎉</div></div></div>';
