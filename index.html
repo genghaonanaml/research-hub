@@ -884,7 +884,7 @@
   function getWeekNum(){
     // For course table: respects manual override (user can browse any week)
     var manual=load(K.weekOverride,null);
-    if(manual!==null && manual>0) return manual;
+    if(manual!==null) return manual;
     return getRealWeekNum();
   }
 
@@ -1346,7 +1346,7 @@
     var w=getWeekNum(); save(K.weekOverride, Math.max(1, w-1)); renderCourses(); renderTodo();
   });
   document.getElementById("btnWeekNext").addEventListener("click", function(){
-    var w=getWeekNum(); save(K.weekOverride, w+1); renderCourses(); renderTodo();
+    var w=getWeekNum(); save(K.weekOverride, Math.min(18, w+1)); renderCourses(); renderTodo();
   });
   document.getElementById("timetable").addEventListener("click", function(e){
     var b=e.target.closest("[data-delcourse]"); if(!b) return;
