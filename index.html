@@ -649,7 +649,7 @@
 
   // ---------- seed example data (from 上学期.html 2025-2026学年1学期) ----------
   function seed(){
-    var courses = [
+        var courses = [
     /* ===== 周一 day=1 ===== */
     {"day":1,"start":5,"end":6,"name":"清洁能源前沿技术","room":"","teacher":"","color":"#00a3b4","sample":true,"weeks":"2-8"},
     {"day":1,"start":5,"end":6,"name":"清洁能源技术领域案例专题课","room":"","teacher":"","color":"#e8a33d","sample":true,"weeks":"9-12"},
@@ -679,7 +679,7 @@
     {"day":6,"start":5,"end":6,"name":"自然辩证法概论","room":"","teacher":"","color":"#e5484d","sample":true,"weeks":"7"},
     {"day":6,"start":7,"end":8,"name":"新时代中国特色社会主义理论与实践","room":"","teacher":"","color":"#4361ee","sample":true,"weeks":"9"},
     /* ===== 周日 day=7 ===== */
-    {"day":7,"start":5,"end":6,"name":"高等传热传质学（双语人工智能+）","room":"","teacher":"","color":"#e5484d","sample":true,"weeks":"5-8"}
+    {"day":7,"start":5,"end":6,"name":"高等传热传质学（双语人工智能+）","room":"","teacher":"","color":"#e5484d","sample":true,"weeks":"5-8"},
     ];
     courses.forEach(function(c){ if(!c.id) c.id=uid(); });
     var keepC = load(K.courses,[]).filter(function(c){ return !c.sample; });
