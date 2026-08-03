@@ -151,15 +151,16 @@
   .wb-day.today .wbd-name{color:#4361ee}
   .wbd-name{display:block;font-size:12px}
   .wbd-num{display:block;font-size:15px;font-weight:800}
-  .timetable{display:grid;grid-template-columns:40px repeat(7,1fr);grid-template-rows:auto repeat(12,1fr);gap:1px;border:1px solid #dde3ef;border-radius:12px;overflow:hidden;background:#e9ecf2}
-  .tt-slot{background:#f8f9fc;padding:0;text-align:center;font-size:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid var(--border);min-height:42px}
+  .timetable{display:grid;grid-template-columns:40px repeat(7,1fr);grid-template-rows:auto repeat(12,1fr);border:1px solid #dde3ef;border-radius:12px;overflow:hidden;background:#fff}
+  .tt-slot{background:#f8f9fc;padding:0;text-align:center;font-size:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid #dde3ef;border-bottom:1px solid #dde3ef;min-height:42px}
   .tt-slot .tt-snum{font-size:14px;font-weight:800;color:var(--text);line-height:1}
   .tt-slot .tt-stime{font-size:8px;color:var(--muted);line-height:1.1;margin-top:1px}
-  .tt-cell{background:#fff;min-height:42px;padding:0;position:relative;display:flex;flex-direction:column;gap:0}
+  .tt-cell{background:#fff;min-height:42px;padding:0;position:relative;display:flex;flex-direction:column;gap:0;border-right:1px solid #dde3ef;border-bottom:1px solid #dde3ef}
+  /* 跨行单元格内部的网格横线：在卡片背后(z-index:0)，补上被span吃掉的gap线 */
+  .tt-cell-gridline{position:absolute;left:0;right:0;height:1px;background:#dde3ef;z-index:0;pointer-events:none}
   .tt-cell.today-col{background:linear-gradient(180deg,rgba(67,97,238,.04) 0%,transparent 100%)}
   .tt-card{background:var(--card-color,#4361ee);color:#fff;border-radius:6px;padding:3px 5px;font-size:11px;line-height:1.25;cursor:pointer;position:absolute;top:1px;left:1px;right:1px;bottom:1px;display:flex;flex-direction:column;justify-content:center;z-index:2;box-shadow:0 1px 3px rgba(0,0,0,.1);overflow:hidden}
   .tt-card:hover{opacity:.92}
-  .tt-card-sep{position:absolute;left:0;right:0;border-top:1px solid rgba(255,255,255,.55);pointer-events:none;z-index:1}
   .tt-card .tc-name{font-weight:700;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .tt-card .tc-room{font-size:9px;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .tt-card .tc-del{position:absolute;top:1px;right:2px;width:15px;height:15px;border-radius:50%;background:rgba(255,255,255,.35);color:#fff;border:none;font-size:11px;line-height:15px;text-align:center;cursor:pointer;display:none}
@@ -1019,20 +1020,21 @@
           if(spanRows > 1) cellStyle += ';grid-row:'+gi+'/ span '+spanRows;
           else cellStyle += ';grid-row:'+gi;
           var cardsHtml = '';
-          // Inside spanning cards, draw separators at each row boundary so双节/多节卡片内部也有横线
-          var sepHtml = '';
-          for(var s=1;s<spanRows;s++){
-            sepHtml += '<div class="tt-card-sep" style="top:'+(100*s/spanRows)+'%"></div>';
+          // 在跨行单元格内部、卡片背后画网格横线（补上被span吃掉的gap）
+          var glHtml = '';
+          if(spanRows > 1){
+            for(var gl=1;gl<spanRows;gl++){
+              glHtml += '<div class="tt-cell-gridline" style="top:'+(100*gl/spanRows)+'%"></div>';
+            }
           }
           matches.forEach(function(c){
             cardsHtml += '<div class="tt-card" style="--card-color:'+esc(c.color||'#4361ee')+'" data-delcourse="'+c.id+'" title="'+esc(c.name)+'">';
-            cardsHtml += sepHtml;
             cardsHtml += '<div class="tc-name">'+esc(c.name)+'</div>';
             if(c.room) cardsHtml += '<div class="tc-room">'+esc(c.room)+'</div>';
             cardsHtml += '<button class="tc-del" data-delcourse="'+c.id+'" title="删除">×</button>';
             cardsHtml += '</div>';
           });
-          tt += '<div class="'+cellClass+'" style="'+cellStyle+'">' + cardsHtml + '</div>';
+          tt += '<div class="'+cellClass+'" style="'+cellStyle+'">' + glHtml + cardsHtml + '</div>';
         } else {
           tt += '<div class="'+cellClass+'" style="grid-column:'+gc+';grid-row:'+gi+'"></div>';
         }
