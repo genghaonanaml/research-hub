@@ -937,63 +937,63 @@
       var isToday=(d+1===td);
       wb+='<div class="wb-cell wb-day'+(isToday?' today':'')+'">';
       wb+='<span class="wbd-name">'+WEEK[d]+'</span>';
-      wb+='<span class="wdd-num">'+dd.getDate()+'</span>';
+      wb+='<span class="wbd-num">'+dd.getDate()+'</span>';
       wb+='</div>';
     }
     try{ document.getElementById("weekBar").innerHTML=wb; }catch(e){}
     // Build course map: for each (day, periodIndex), which courses go here
-    // A course matches if its start time == the period's start time
-    // Then it spans 2 rows (this period + next)
     var cellCourses = {}; // key: "d_p" → array of courses
     courses.forEach(function(c){
       var pi = START_TO_PERIOD[c.start];
-      if(pi === undefined) return; // unknown start time, skip
+      if(pi === undefined) return;
       var key = c.day + "_" + pi;
       if(!cellCourses[key]) cellCourses[key] = [];
       cellCourses[key].push(c);
     });
     // Track occupied cells (for spanning cards)
-    // occupied[d][p] = true means this cell is covered by a card from above
     var occupied = {};
     for(var d=1;d<=7;d++) occupied[d]={};
 
-    // Render grid: header row + 12 period rows × 8 cols
+    // Render grid with EXPLICIT grid-column + grid-row for every cell
+    // Grid: col1=slot, col2-8=Mon-Sun | row0=header, row1-12=periods 1-12
+    // This eliminates CSS Grid auto-flow confusion with span
     var tt = '';
-    // Header row
-    tt += '<div class="tt-slot"><div class="tt-snum">节</div></div>';
-    for(var d=0;d<7;d++) tt += '<div class="tt-cell'+(d+1===td?' today-col':'')+'"></div>';
-    // 12 period rows
+    // === Row 0: Header ===
+    tt += '<div class="tt-slot" style="grid-column:1;grid-row:1"><div class="tt-snum">节</div></div>';
+    for(var d=0;d<7;d++) tt += '<div class="tt-cell'+(d+1===td?' today-col':'')+'" style="grid-column:'+(d+2)+';grid-row:1"></div>';
+    // === Rows 1-12: Period rows ===
     for(var p=0;p<12;p++){
+      var gi = p + 2; // grid row index (1-based): period 0 → row 2, period 1 → row 3, ...
       var pi = PERIOD_INFO[p];
-      // Every row shows its own period number + full time range (start / end)
-      tt += '<div class="tt-slot"><div class="tt-snum">'+pi.num+'</div><div class="tt-stime">'+pi.start+'</div><div class="tt-stime">'+pi.end+'</div></div>';
+      // Left slot: period number + time
+      tt += '<div class="tt-slot" style="grid-column:1;grid-row:'+gi+'"><div class="tt-snum">'+pi.num+'</div><div class="tt-stime">'+pi.start+'</div><div class="tt-stime">'+pi.end+'</div></div>';
+      // 7 day columns
       for(var d=1;d<=7;d++){
-        // If this cell is occupied by a spanning card from above, skip rendering content
+        var gc = d + 1; // grid column: day1→col2, day2→col3, ...
         if(occupied[d][p]){
-          tt += '<div class="tt-cell'+(d===td?' today-col':'')+'" style="visibility:hidden"></div>';
+          // Covered by a spanning card above — emit invisible placeholder
+          tt += '<div class="tt-cell'+(d===td?' today-col':'')+'" style="grid-column:'+gc+';grid-row:'+gi+';visibility:hidden"></div>';
           continue;
         }
         var key = d + "_" + p;
         var matches = cellCourses[key] || [];
         var cellClass = 'tt-cell' + (d===td?' today-col':'');
         if(matches.length > 0){
-          // Determine span: new courses have periodStart/periodEnd; old seed courses are always 双节=span 2
+          // Calculate span
           var spanRows = 1;
           matches.forEach(function(c){
             if(c.periodStart !== undefined && c.periodEnd !== undefined){
               var cs = c.periodEnd - c.periodStart + 1;
               if(cs > spanRows) spanRows = cs;
             } else {
-              // Old format: all real courses are 双节连上 → span 2
               if(spanRows < 2) spanRows = 2;
             }
           });
-          // Clamp span to not exceed grid
           if(p + spanRows > 12) spanRows = 12 - p;
-          // Mark cells below as occupied
+          // Mark covered cells as occupied
           for(var oc=p+1; oc<p+spanRows && oc<12; oc++) occupied[d][oc] = true;
-          // Cell spans rows so absolute card fills full height
-          var cellStyle = 'position:relative';
+          // Build cell with EXPLICIT position + optional span
+          var cellStyle = 'position:relative;grid-column:'+gc+';grid-row:'+gi;
           if(spanRows > 1) cellStyle += ';grid-row:span '+spanRows;
           var cardsHtml = '';
           matches.forEach(function(c){
@@ -1005,7 +1005,7 @@
           });
           tt += '<div class="'+cellClass+'" style="'+cellStyle+'">' + cardsHtml + '</div>';
         } else {
-          tt += '<div class="'+cellClass+'"></div>';
+          tt += '<div class="'+cellClass+'" style="grid-column:'+gc+';grid-row:'+gi+'"></div>';
         }
       }
     }
