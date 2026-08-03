@@ -135,6 +135,12 @@
   .ci-week{font-size:22px;font-weight:800;color:var(--text);line-height:1.3}
   .ci-date{font-size:14px;color:var(--muted);margin-top:2px}
   .settings-row{display:flex;align-items:center;gap:6px;padding:6px 10px;background:#f7f8fc;border-radius:8px;margin-bottom:10px;font-size:13px}
+  .term-settings{margin-bottom:10px;border:1px solid var(--border);border-radius:8px;background:#fafbfe;overflow:hidden}
+  .term-settings summary{cursor:pointer;padding:8px 12px;font-size:13px;font-weight:600;color:var(--muted);list-style:none;user-select:none}
+  .term-settings summary::-webkit-details-marker{display:none}
+  .term-settings summary::before{content:"▸ ";color:var(--primary)}
+  .term-settings[open] summary::before{content:"▾ "}
+  .term-settings .settings-row{border-radius:0;margin:0;border-top:1px solid var(--border)}
   .settings-label{color:var(--muted);font-weight:600;white-space:nowrap}
   .settings-row input{width:56px;padding:5px 6px;font-size:14px;text-align:center;border:1px solid var(--border);border-radius:6px}
   .week-bar{display:grid;grid-template-columns:40px repeat(7,1fr);gap:2px;margin-bottom:8px;font-size:13px}
@@ -304,12 +310,15 @@
           <div class="ci-week" id="courseWeekInfo"></div>
           <div class="ci-date" id="courseDateInfo"></div>
         </div>
-        <!-- 设置行（紧凑） -->
-        <div class="settings-row">
-          <span class="settings-label">开学日期</span>
-          <input type="date" id="setTermStart" class="settings-input">
-          <button class="btn sm ghost" id="btnAutoWeek">自动</button>
-        </div>
+        <!-- 学期设置：仅初次设置用，默认收起 -->
+        <details class="term-settings">
+          <summary>学期设置（开学日期 / 自动）</summary>
+          <div class="settings-row">
+            <span class="settings-label">开学日期</span>
+            <input type="date" id="setTermStart" class="settings-input">
+            <button class="btn sm ghost" id="btnAutoWeek">自动</button>
+          </div>
+        </details>
         <div class="settings-row">
           <span class="settings-label">当前周</span>
           <button class="btn sm ghost" id="btnWeekPrev">‹ 上周</button>
