@@ -713,8 +713,12 @@
 
   // ---------- helpers ----------
   function matchWeek(weekStr, currentWeek){
-    // 兼容对象格式 {start,end,mode}（添加课程表单提交）和字符串格式 "1-16周"（seed 模板）
+    // 兼容对象格式 {start,end,mode,list}（添加课程表单提交）和字符串格式 "1-16周"（seed 模板）
     if(weekStr && typeof weekStr === 'object'){
+      // 离散周数列表（如选了 1,3,4 周）
+      if(weekStr.list && Array.isArray(weekStr.list)){
+        return weekStr.list.indexOf(currentWeek) > -1;
+      }
       var s = weekStr.start, e = weekStr.end, mode = weekStr.mode || 'all';
       if(currentWeek < s || currentWeek > e) return false;
       if(mode === 'odd') return (currentWeek % 2 === 1);
@@ -1131,7 +1135,7 @@
     document.getElementById("cRoom").value='';
     document.getElementById("cCredits").value='';
     document.getElementById("cNote").value='';
-    formWeeks={start:1,end:16,mode:'all'};
+    formWeeks={start:1,end:16,mode:'all',list:null};
     formPeriod={day:1,start:1,end:2};
     ppFirstTap=false;
     renderDayChips(); renderPeriodChips();
@@ -1154,9 +1158,12 @@
   });
 
   function openWeekPicker(){
-    // Pre-select based on current formWeeks
+    // Pre-select based on current formWeeks (支持离散列表恢复)
     wpSelected=[];
-    if(formWeeks.mode==="all"){ for(var i=1;i<=16;i++) wpSelected.push(i); }
+    if(formWeeks.list && Array.isArray(formWeeks.list)){
+      // 离散列表：直接恢复
+      wpSelected = formWeeks.list.slice();
+    } else if(formWeeks.mode==="all"){ for(var i=1;i<=16;i++) wpSelected.push(i); }
     else if(formWeeks.mode==="odd"){ for(var i=1;i<=16;i+=2) wpSelected.push(i); }
     else { for(var i=2;i<=16;i+=2) wpSelected.push(i); }
     renderWPGrid();
@@ -1201,17 +1208,30 @@
   }
   function confirmWeekPicker(){
     if(wpSelected.length===0){ toast("请至少选择一周"); return; }
-    formWeeks.start=wpSelected[0];
-    formWeeks.end=wpSelected[wpSelected.length-1];
-    // Determine mode
-    var m=document.querySelector(".wp-mode.active");
-    formWeeks.mode=m?m.getAttribute("data-mode"):"all";
+    // 存储实际选择的周数列表（支持离散选择如 1,3,4）
+    formWeeks.list = wpSelected.slice();
+    formWeeks.start = wpSelected[0];
+    formWeeks.end = wpSelected[wpSelected.length-1];
+    // 检测是否为连续范围
+    var isContinuous = true;
+    for(var i=1;i<wpSelected.length;i++){ if(wpSelected[i] !== wpSelected[i-1]+1){ isContinuous=false; break; } }
+    var m = document.querySelector(".wp-mode.active");
+    formWeeks.mode = m ? m.getAttribute("data-mode") : "all";
+    // 离散选择强制标记为 list 模式
+    if(!isContinuous) formWeeks.mode = "list";
     document.getElementById("weekModal").classList.add("hidden");
     updateWeeksDisplay();
   }
   function updateWeeksDisplay(){
     var el=document.getElementById("cWeeksDisplay");
     var tagEl=document.getElementById("cWeeksTags");
+    // 离散列表模式（如选了 1,3,4）
+    if(formWeeks.mode === "list" && formWeeks.list && formWeeks.list.length > 0){
+      var listTxt = formWeeks.list.join(",");
+      el.textContent="第 "+listTxt+" 周";
+      tagEl.innerHTML='<span class="cf-tag">第'+listTxt+'周<span class="cf-tag-del">×</span></span>';
+      return;
+    }
     if(formWeeks.start===1&&formWeeks.end===16&&formWeeks.mode==="all"){
       el.textContent="第 1 - 16 周";
       tagEl.innerHTML='<span class="cf-tag">全周<span class="cf-tag-del">×</span></span>';
