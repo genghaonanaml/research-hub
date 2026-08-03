@@ -903,8 +903,6 @@
     try{
     var allCourses=load(K.courses,[]);
     var wn=getWeekNum();
-    // 显示用的周数：永远不显示 0 或负数（但过滤逻辑仍用真实 wn）
-    var displayWn = Math.max(1, wn);
     // Filter courses by week: if course has 'weeks' field, check if current week matches
     var courses = allCourses.filter(function(c){
       if(!c.weeks) return true; // no weeks restriction = show always
@@ -913,15 +911,16 @@
     var now=new Date();
     // header: 周数+状态 + 日期（wn 已在上面算过，不再重复调用）
     var statusText="";
-    if(wn<1) statusText="(未开学)";
-    else if(wn>16) statusText="(已结课)";
+    if(wn>16) statusText="(已结课)";
     else if(wn<=2) statusText="(开学初)";
     else if(wn>=15) statusText="(临近结课)";
-    try{ document.getElementById("courseWeekInfo").textContent="第"+displayWn+"周"+statusText; }catch(e){}
+    // 开学前（wn<1）：只显示"未开学"，不写第几周
+    var weekInfoText = (wn<1) ? "未开学" : ("第"+wn+"周"+statusText);
+    try{ document.getElementById("courseWeekInfo").textContent=weekInfoText; }catch(e){}
     var y=now.getFullYear(), m=now.getMonth()+1, d2=now.getDate();
     try{ document.getElementById("courseDateInfo").textContent=y+"/"+m+"/"+d2; }catch(e){}
     try{ document.getElementById("setTermStart").value=load(K.termStart,'')||''; }catch(e){}
-    try{ document.getElementById("curWeekBadge").textContent="第 "+displayWn+" 周"; }catch(e){}
+    try{ document.getElementById("curWeekBadge").textContent=(wn<1) ? "未开学" : ("第 "+wn+" 周"); }catch(e){}
     // week bar: 根据当前选择的周数算那一周的周一（切周时日期跟着变）
     var termStart=load(K.termStart,null);
     var mon;
