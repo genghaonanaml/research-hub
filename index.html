@@ -991,8 +991,8 @@
       for(var d=1;d<=7;d++){
         var gc = d + 1; // grid column: day1→col2, day2→col3, ...
         if(occupied[d][p]){
-          // Covered by a spanning card above — emit invisible placeholder
-          tt += '<div class="tt-cell'+(d-1===todayCol?' today-col':'')+'" style="grid-column:'+gc+';grid-row:'+gi+';visibility:hidden"></div>';
+          // Covered by a spanning card above — emit empty placeholder (keep gap for grid lines)
+          tt += '<div class="tt-cell'+(d-1===todayCol?' today-col':'')+'" style="grid-column:'+gc+';grid-row:'+gi+'"></div>';
           continue;
         }
         var key = d + "_" + p;
