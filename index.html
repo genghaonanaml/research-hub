@@ -159,6 +159,7 @@
   .tt-cell.today-col{background:linear-gradient(180deg,rgba(67,97,238,.04) 0%,transparent 100%)}
   .tt-card{background:var(--card-color,#4361ee);color:#fff;border-radius:6px;padding:3px 5px;font-size:11px;line-height:1.25;cursor:pointer;position:absolute;top:1px;left:1px;right:1px;bottom:1px;display:flex;flex-direction:column;justify-content:center;z-index:2;box-shadow:0 1px 3px rgba(0,0,0,.1);overflow:hidden}
   .tt-card:hover{opacity:.92}
+  .tt-card-sep{position:absolute;left:0;right:0;border-top:1px solid rgba(255,255,255,.55);pointer-events:none;z-index:1}
   .tt-card .tc-name{font-weight:700;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .tt-card .tc-room{font-size:9px;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .tt-card .tc-del{position:absolute;top:1px;right:2px;width:15px;height:15px;border-radius:50%;background:rgba(255,255,255,.35);color:#fff;border:none;font-size:11px;line-height:15px;text-align:center;cursor:pointer;display:none}
@@ -1018,8 +1019,14 @@
           if(spanRows > 1) cellStyle += ';grid-row:'+gi+'/ span '+spanRows;
           else cellStyle += ';grid-row:'+gi;
           var cardsHtml = '';
+          // Inside spanning cards, draw separators at each row boundary so双节/多节卡片内部也有横线
+          var sepHtml = '';
+          for(var s=1;s<spanRows;s++){
+            sepHtml += '<div class="tt-card-sep" style="top:'+(100*s/spanRows)+'%"></div>';
+          }
           matches.forEach(function(c){
             cardsHtml += '<div class="tt-card" style="--card-color:'+esc(c.color||'#4361ee')+'" data-delcourse="'+c.id+'" title="'+esc(c.name)+'">';
+            cardsHtml += sepHtml;
             cardsHtml += '<div class="tc-name">'+esc(c.name)+'</div>';
             if(c.room) cardsHtml += '<div class="tc-room">'+esc(c.room)+'</div>';
             cardsHtml += '<button class="tc-del" data-delcourse="'+c.id+'" title="删除">×</button>';
