@@ -903,6 +903,8 @@
     try{
     var allCourses=load(K.courses,[]);
     var wn=getWeekNum();
+    // 显示用的周数：永远不显示 0 或负数（但过滤逻辑仍用真实 wn）
+    var displayWn = Math.max(1, wn);
     // Filter courses by week: if course has 'weeks' field, check if current week matches
     var courses = allCourses.filter(function(c){
       if(!c.weeks) return true; // no weeks restriction = show always
@@ -915,11 +917,11 @@
     else if(wn>16) statusText="(已结课)";
     else if(wn<=2) statusText="(开学初)";
     else if(wn>=15) statusText="(临近结课)";
-    try{ document.getElementById("courseWeekInfo").textContent="第"+wn+"周"+statusText; }catch(e){}
+    try{ document.getElementById("courseWeekInfo").textContent="第"+displayWn+"周"+statusText; }catch(e){}
     var y=now.getFullYear(), m=now.getMonth()+1, d2=now.getDate();
     try{ document.getElementById("courseDateInfo").textContent=y+"/"+m+"/"+d2; }catch(e){}
     try{ document.getElementById("setTermStart").value=load(K.termStart,'')||''; }catch(e){}
-    try{ document.getElementById("curWeekBadge").textContent="第 "+wn+" 周"; }catch(e){}
+    try{ document.getElementById("curWeekBadge").textContent="第 "+displayWn+" 周"; }catch(e){}
     // week bar: 根据当前选择的周数算那一周的周一（切周时日期跟着变）
     var termStart=load(K.termStart,null);
     var mon;
@@ -1346,7 +1348,7 @@
     var w=getWeekNum(); save(K.weekOverride, Math.max(1, w-1)); renderCourses(); renderTodo();
   });
   document.getElementById("btnWeekNext").addEventListener("click", function(){
-    var w=getWeekNum(); save(K.weekOverride, Math.min(18, w+1)); renderCourses(); renderTodo();
+    var w=getWeekNum(); save(K.weekOverride, w<1?1:Math.min(18,w+1)); renderCourses(); renderTodo();
   });
   document.getElementById("timetable").addEventListener("click", function(e){
     var b=e.target.closest("[data-delcourse]"); if(!b) return;
