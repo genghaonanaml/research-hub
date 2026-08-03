@@ -908,13 +908,6 @@
       if(!c.weeks) return true; // no weeks restriction = show always
       return matchWeek(c.weeks, wn);
     });
-    // 只有当天真实日期那一列才高亮（切到其他周时没有任何列高亮）
-    var todayDateStr = todayStr(); // e.g. "2026-08-03"
-    var todayCol = -1; // 0-6 = 哪列是今天，-1 = 本周没有今天
-    for(var tc=0;tc<7;tc++){
-      var tdCheck=new Date(mon); tdCheck.setDate(mon.getDate()+tc);
-      if(fmt(tdCheck) === todayDateStr){ todayCol=tc; break; }
-    }
     var now=new Date();
     // header: 周数+状态 + 日期（wn 已在上面算过，不再重复调用）
     var statusText="";
@@ -938,6 +931,13 @@
       mon=new Date(now); mon.setDate(now.getDate()-((now.getDay()+6)%7));
     } else {
       mon.setDate(mon.getDate()+(wn-1)*7);
+    }
+    // 只有当天真实日期那一列才高亮（切到其他周时没有任何列高亮）
+    var todayDateStr = todayStr(); // e.g. "2026-08-03"
+    var todayCol = -1; // 0-6 = 哪列是今天，-1 = 本周没有今天
+    for(var tc=0;tc<7;tc++){
+      var tdCheck=new Date(mon); tdCheck.setDate(mon.getDate()+tc);
+      if(fmt(tdCheck) === todayDateStr){ todayCol=tc; break; }
     }
     // week bar
     var wb='';
