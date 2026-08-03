@@ -977,34 +977,22 @@
         var matches = cellCourses[key] || [];
         var cellClass = 'tt-cell' + (d===td?' today-col':'');
         if(matches.length > 0){
-          // This cell has courses — determine span
-          // Odd index (0,2,4...) = first of a pair → span 2; also handle even start if user picked e.g. 节2-3
+          // Determine span: new courses have periodStart/periodEnd; old seed courses are always 双节=span 2
           var spanRows = 1;
-          var maxEnd = p;
           matches.forEach(function(c){
-            // Use periodStart/periodEnd if available (from form), else calculate from start time
-            var cSpan = 1;
             if(c.periodStart !== undefined && c.periodEnd !== undefined){
-              cSpan = c.periodEnd - c.periodStart + 1;
+              var cs = c.periodEnd - c.periodStart + 1;
+              if(cs > spanRows) spanRows = cs;
             } else {
-              // Fallback: estimate from START_TO_PERIOD mapping
-              var piStart = START_TO_PERIOD[c.start] !== undefined ? START_TO_PERIOD[c.start] : p;
-              // Find end period by matching end time
-              var piEnd = p;
-              for(var ep=p+1;ep<12;ep++){
-                if(PERIOD_INFO[ep].start === c.end || PERIOD_INFO[ep].end === c.end){ piEnd=ep; break; }
-                // Also check if end time matches any period's end
-                if(c.end && PERIOD_INFO[ep].end === c.end){ piEnd=ep; break; }
-              }
-              cSpan = piEnd - piStart + 1;
+              // Old format: all real courses are 双节连上 → span 2
+              if(spanRows < 2) spanRows = 2;
             }
-            if(cSpan > spanRows) spanRows = cSpan;
-            var pe = piStart + cSpan - 1;
-            if(pe > maxEnd) maxEnd = pe;
           });
-          // Mark occupied cells below
-          for(var oc=p+1; oc<=maxEnd && oc<12; oc++) occupied[d][oc] = true;
-          // Cell itself spans the rows (so absolute-positioned card fills the full height)
+          // Clamp span to not exceed grid
+          if(p + spanRows > 12) spanRows = 12 - p;
+          // Mark cells below as occupied
+          for(var oc=p+1; oc<p+spanRows && oc<12; oc++) occupied[d][oc] = true;
+          // Cell spans rows so absolute card fills full height
           var cellStyle = 'position:relative';
           if(spanRows > 1) cellStyle += ';grid-row:span '+spanRows;
           var cardsHtml = '';
