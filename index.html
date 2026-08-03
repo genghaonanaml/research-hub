@@ -713,13 +713,21 @@
 
   // ---------- helpers ----------
   function matchWeek(weekStr, currentWeek){
-    var s = String(weekStr).replace(/周/g,'').trim();
-    if(s.indexOf('-') > -1){
-      var parts = s.split('-');
+    // 兼容对象格式 {start,end,mode}（添加课程表单提交）和字符串格式 "1-16周"（seed 模板）
+    if(weekStr && typeof weekStr === 'object'){
+      var s = weekStr.start, e = weekStr.end, mode = weekStr.mode || 'all';
+      if(currentWeek < s || currentWeek > e) return false;
+      if(mode === 'odd') return (currentWeek % 2 === 1);
+      if(mode === 'even') return (currentWeek % 2 === 0);
+      return true;
+    }
+    var s2 = String(weekStr).replace(/周/g,'').trim();
+    if(s2.indexOf('-') > -1){
+      var parts = s2.split('-');
       var start = parseInt(parts[0],10), end = parseInt(parts[1],10);
       return currentWeek >= start && currentWeek <= end;
     }
-    return parseInt(s,10) === currentWeek;
+    return parseInt(s2,10) === currentWeek;
   }
   function formatCourseTime(c){
     var s = c.start, e = c.end;
