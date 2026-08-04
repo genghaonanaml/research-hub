@@ -520,8 +520,11 @@
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9"/><path d="M21 3v6h-6"/><path d="M3 21v-6h6"/></svg>
             云同步（自动）
           </h3>
-          <div class="field"><label>Firebase 数据库地址</label>
-            <input type="text" id="syncToken" placeholder="https://xxx-default-rtdb.firebaseio.com" autocomplete="off" style="font-size:16px">
+          <div class="field"><label>GitHub 仓库 (owner/repo)</label>
+            <input type="text" id="syncRepo" placeholder="genghaonanaml/research-hub" autocomplete="off" style="font-size:16px" value="genghaonanaml/research-hub">
+          </div>
+          <div class="field"><label>Token (PAT) · 仅电脑端填</label>
+            <input type="password" id="syncToken" placeholder="ghp_xxx（手机端不用填）" autocomplete="off" style="font-size:16px">
           </div>
           <div class="sync-row">
             <button class="btn sm" id="btnSaveToken">保存并启用同步</button>
@@ -531,7 +534,7 @@
             <label class="field" style="flex-direction:row; align-items:center; gap:6px; font-size:13px; color:var(--muted)"><input type="checkbox" id="syncAuto" style="width:auto" checked> 自动同步</label>
           </div>
           <div class="sync-status" id="syncStatus">未配置同步</div>
-          <div class="sync-tip"><b>获取方式（免费，2 分钟）：</b><br>1. 打开 <code>console.firebase.google.com</code> → 创建项目<br>2. 左侧菜单选「Realtime Database 实时数据库」→ 创建数据库<br>3. 地区选离你近的 → 选「测试模式」启动<br>4. 复制上方显示的「数据库地址」粘贴到此处即可<br>📱 <b>手机端怎么用：</b>在电脑点「复制同步链接」→ 把链接发到手机微信/QQ → 手机用浏览器打开该链接 → 自动恢复配置并拉取数据（可再「添加到主屏幕」）。<b>别直接打开裸的 GitHub 链接</b>，那样手机没有同步配置。<br>⚠️ 数据存在 Google Firebase（非纯本地）；测试模式下任何人知道地址都能读写，建议勿在公开场合分享。</div>
+          <div class="sync-tip"><b>为什么用 GitHub：</b>Firebase(Google) 在中国大陆手机网络常被墙，改用你已在用的 GitHub 做同步后端，国内访问稳定。<br><b>① 电脑端（一次性）：</b>GitHub 头像 → Settings → Developer settings → Personal access tokens → 新建 <b>classic token</b>，勾选 <code>repo</code> 权限 → 复制粘贴到上方「Token」框（仓库已预填）。点「保存并启用」「立即同步」上传数据。<br>📱 <b>② 手机端（免 Token）：</b>电脑点「复制同步链接」→ 发到手机 → 手机浏览器打开 → 自动只读拉取（公开仓库无需 Token）。<br>⚠️ Token 只存在你本机浏览器，不上传；手机只读不写。同步数据文件存于仓库 <code>sync/data.json</code>（公开可读，介意隐私可换私有仓库）。</div>
         </div>
       </section>
     </main>
@@ -593,7 +596,7 @@
   var toastT;
   function toast(msg){ var el=document.getElementById("toast"); el.textContent=msg; el.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(function(){ el.classList.remove("show"); },1800); }
 
-  // ---------- cloud sync (Firebase Realtime Database) ----------
+  // ---------- cloud sync (GitHub repo, China-friendly) ----------
   var SYNC_KEY = PREFIX+"sync";
   function getSync(){ try{ return JSON.parse(localStorage.getItem(SYNC_KEY))||{}; }catch(e){ return {}; } }
   function setSync(obj){ localStorage.setItem(SYNC_KEY, JSON.stringify(obj)); }
@@ -633,31 +636,57 @@
       }
     });
   }
-  function fbUrl(){ var s=getSync(); var raw=(s.token||"").trim(); if(!raw) return ""; var base=raw; if(base.indexOf("://")<0) base="https://"+base; base=base.replace(/\/+$/,"").replace(/\/sync\/data\.json$/,""); return base+"/sync/data.json"; }
-  function pushSync(){
-    var url=fbUrl(); if(!url) return;
-    var s=getSync(); if(!s.auto) return;
+  function ghApiUrl(){
+    var s=getSync();
+    if(!s.repo) return "";
+    return "https://api.github.com/repos/"+s.repo.trim()+"/contents/"+encodeURIComponent(s.path||"sync/data.json");
+  }
+  function ghHeaders(auth){
+    var h={"Accept":"application/vnd.github+json","Content-Type":"application/json"};
+    var s=getSync();
+    if(auth && s.token) h["Authorization"]="Bearer "+s.token.trim();
+    return h;
+  }
+  function b64utf8(str){ return btoa(unescape(encodeURIComponent(str))); }
+  function pushGitHub(){
+    var url=ghApiUrl(); if(!url) return;
+    var s=getSync(); if(!s.token){ setSyncStatus("未填 Token，无法上传（手机端只读）","err"); return; }
     var payload=buildSyncPayload();
     setSyncStatus("同步中…", "busy");
-    fetch(url,{ method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload) })
+    fetch(url, {headers:ghHeaders(false)})
+      .then(function(r){ if(r.status===404) return null; if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(data){
+        var sha = data && data.sha ? data.sha : undefined;
+        return fetch(url, {
+          method:"PUT",
+          headers:ghHeaders(true),
+          body:JSON.stringify({ message:"sync update", content:b64utf8(JSON.stringify(payload)), sha:sha })
+        });
+      })
       .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); setSyncStatus("已同步 ✓ "+new Date().toLocaleTimeString(), "ok"); })
       .catch(function(e){ setSyncStatus("同步失败："+e.message, "err"); });
   }
-  function pullSync(){
-    var url=fbUrl(); if(!url) return Promise.resolve();
+  function pullGitHub(){
+    var url=ghApiUrl(); if(!url) return Promise.resolve();
     setSyncStatus("拉取中…", "busy");
-    return fetch(url)
-      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+    return fetch(url, {headers:ghHeaders(false)})
+      .then(function(r){ if(r.status===404) return null; if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
       .then(function(data){
-        if(data&&typeof data==="object"){ mergePayload(data); renderAll(); }
-        setSyncStatus("已拉取 ✓ "+new Date().toLocaleTimeString(), "ok");
+        if(data && data.content){
+          var txt=decodeURIComponent(escape(atob(data.content.replace(/\s/g,""))));
+          var obj; try{ obj=JSON.parse(txt); }catch(e){ obj=null; }
+          if(obj && typeof obj==="object"){ mergePayload(obj); renderAll(); }
+          setSyncStatus("已拉取 ✓ "+new Date().toLocaleTimeString(), "ok");
+        } else {
+          setSyncStatus("云端暂无数据（首次使用）","");
+        }
       })
       .catch(function(e){ setSyncStatus("拉取失败："+e.message, "err"); });
   }
   var syncTimer;
   function scheduleSync(){
     var s=getSync(); if(!s.token||!s.auto) return;
-    clearTimeout(syncTimer); syncTimer=setTimeout(pushSync, 1200);
+    clearTimeout(syncTimer); syncTimer=setTimeout(pushGitHub, 1200);
   }
 
   // ---------- seed example data (from 上学期.html 2025-2026学年1学期) ----------
@@ -1464,36 +1493,43 @@
   });
 
   // sync events
+  function readSyncForm(){
+    var repo=document.getElementById("syncRepo").value.trim();
+    var token=document.getElementById("syncToken").value.trim();
+    var s=getSync();
+    if(repo) s.repo=repo;
+    if(token) s.token=token;
+    if(s.auto==null) s.auto=true;
+    s.path=s.path||"sync/data.json";
+    setSync(s);
+    document.getElementById("syncAuto").checked=!!s.auto;
+    return s;
+  }
   document.getElementById("btnSaveToken").addEventListener("click", function(){
-    var url=document.getElementById("syncToken").value.trim().replace(/\/+$/,"");
-    if(!url || !url.startsWith("http")){ toast("请输入 Firebase 数据库地址"); return; }
-    var s=getSync(); s.token=url; if(s.auto==null) s.auto=true;
-    setSync(s); document.getElementById("syncAuto").checked=!!s.auto;
-    try{ history.replaceState(null,"","#sync="+encodeURIComponent(url)); }catch(e){}
-    pushSync(); toast("同步已启用");
+    var s=readSyncForm();
+    if(!s.repo){ toast("请输入 GitHub 仓库 (owner/repo)"); return; }
+    if(!s.token){ toast("请填入 Token（电脑端需要）"); return; }
+    pushGitHub(); toast("同步已启用，已上传");
   });
-  // 输入即自动保存，无需点按钮
-  document.getElementById("syncToken").addEventListener("input", function(){
-    var url=this.value.trim().replace(/\/+$/,"");
-    if(!url || !url.startsWith("http")) return;
-    var s=getSync(); s.token=url; if(s.auto==null) s.auto=true;
-    setSync(s); document.getElementById("syncAuto").checked=!!s.auto;
-    try{ history.replaceState(null,"","#sync="+encodeURIComponent(url)); }catch(e){}
+  // 仓库输入框：输入即自动保存（不影响 Token）
+  document.getElementById("syncRepo").addEventListener("input", function(){
+    var s=getSync(); s.repo=this.value.trim(); if(s.auto==null)s.auto=true; s.path=s.path||"sync/data.json"; setSync(s);
   });
   document.getElementById("btnSyncNow").addEventListener("click", function(){
-    var s=getSync(); if(!s.token){ toast("请先保存数据库地址"); return; }
-    pullSync().then(function(){ pushSync(); toast("已同步：先拉取云端，再上传本地"); });
+    pullGitHub().then(function(){
+      var s=getSync();
+      if(s.token){ pushGitHub(); toast("已同步：先拉取云端，再上传本地"); }
+      else { toast("已从云端拉取（手机端只读）"); }
+    });
   });
   document.getElementById("btnCopySyncLink").addEventListener("click", function(){
     var s=getSync();
-    if(!s.token){ toast("请先保存数据库地址"); return; }
-    var link=location.origin+location.pathname+"#sync="+encodeURIComponent(s.token);
-    var done=function(){ toast("已复制同步链接，发到手机打开即可自动同步"); };
+    if(!s.repo){ toast("请先保存仓库地址"); return; }
+    var link=location.origin+location.pathname+"?s="+encodeURIComponent(s.repo+"|"+(s.path||"sync/data.json"));
+    var done=function(){ toast("已复制同步链接，发到手机打开即可自动拉取"); };
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(link).then(done, function(){ fallbackCopy(link); done(); });
     } else { fallbackCopy(link); done(); }
-    // 同时把链接放进输入框，方便手动复制
-    try{ document.getElementById("syncToken").value=s.token; }catch(e){}
   });
   function fallbackCopy(text){
     try{
@@ -1501,28 +1537,20 @@
       document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
     }catch(e){}
   }
-  // 测试云端连接：写一条探针数据再读回，确认地址可用（Realtime Database 才行）
-  // 注意：探针写到 /sync/_probe.json 子路径，绝不动根数据 /sync/data.json，避免覆盖真实同步内容
+  // 测试 GitHub 仓库是否可达（公开仓库无需 Token 也能查）
   function testSync(){
-    var url=fbUrl(); if(!url){ toast("请先保存数据库地址"); return; }
-    setSyncStatus("测试连接中…", "busy");
-    var probeUrl=url.replace(/data\.json$/,"_probe.json");
-    var probe={_probe:new Date().toISOString()};
-    fetch(probeUrl,{ method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify(probe) })
-      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return fetch(probeUrl); })
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        if(d && d._probe){ setSyncStatus("连接成功 ✓ 可正常读写云端", "ok"); toast("同步连接测试成功，地址有效"); }
-        else { throw new Error("读回为空"); }
-      })
-      .catch(function(e){
-        setSyncStatus("连接失败："+e.message+"（确认建的是 Realtime Database 而非 Firestore）", "err");
-        toast("连接失败，请检查数据库地址类型");
-      });
+    var s=getSync();
+    var repo=(s.repo||document.getElementById("syncRepo").value.trim());
+    if(!repo){ toast("请先输入仓库地址"); return; }
+    setSyncStatus("测试连接中…","busy");
+    fetch("https://api.github.com/repos/"+repo.trim(), {headers:{"Accept":"application/vnd.github+json"}})
+      .then(function(r){ if(r.status===404) throw new Error("仓库不存在(404)"); if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(d){ if(d && d.full_name){ setSyncStatus("仓库可达 ✓ "+d.full_name, "ok"); toast("GitHub 仓库连接成功"); } else throw new Error("未知返回"); })
+      .catch(function(e){ setSyncStatus("连接失败："+e.message+"（确认仓库名/网络/是否被墙）","err"); toast("连接失败"); });
   }
   document.getElementById("btnTestSync").addEventListener("click", testSync);
   document.getElementById("syncAuto").addEventListener("change", function(){
-    var s=getSync(); s.auto=this.checked; setSync(s); if(s.auto) pushSync();
+    var s=getSync(); s.auto=this.checked; setSync(s); if(s.auto && s.token) pushGitHub();
   });
 
   // init
@@ -1533,16 +1561,17 @@
   // init sync UI
   (function(){
     var s=getSync();
-    // 本地没有则从网址 #sync= 参数恢复（防 iOS 清空 localStorage）
-    if(!s.token){
-      var m=location.hash.match(/sync=([^&]+)/);
-      if(m){ try{ s.token=decodeURIComponent(m[1]); setSync(s); }catch(e){} }
+    // 本地没有则从网址 ?s=repo|path 恢复（防 iOS 清空 localStorage；手机端只读，无需 Token）
+    if(!s.repo){
+      var q=location.search.match(/[?&]s=([^&]+)/);
+      if(q){ try{ var parts=decodeURIComponent(q[1]).split("|"); s.repo=parts[0]; if(parts[1]) s.path=parts[1]; if(s.auto==null)s.auto=true; setSync(s); }catch(e){} }
     }
+    if(s.repo) document.getElementById("syncRepo").value=s.repo;
     if(s.token) document.getElementById("syncToken").value=s.token;
     document.getElementById("syncAuto").checked=(s.auto!==false);
-    if(s.token){
+    if(s.repo){
       setSyncStatus("已配置，打开时自动同步","ok");
-      pullSync();
+      pullGitHub();
     } else {
       setSyncStatus("未配置同步","");
     }
