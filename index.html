@@ -695,9 +695,10 @@
           method:"PUT",
           headers:ghHeaders(true),
           body:JSON.stringify({ message:"sync update", content:b64utf8(JSON.stringify(payload)), sha: data && data.sha ? data.sha : undefined })
-        });
+        }).then(function(r){
+          if(!r.ok) return r.text().then(function(t){ throw new Error("HTTP "+r.status+" GitHub原因: "+(t||"无详情")); });
+          renderAll(); setSyncStatus("已同步 ✓ "+new Date().toLocaleTimeString(), "ok"); })
       })
-      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status+"（"+guessGithubError(r.status)+"）"); renderAll(); setSyncStatus("已同步 ✓ "+new Date().toLocaleTimeString(), "ok"); })
       .catch(function(e){ setSyncStatus("同步失败："+e.message, "err"); });
   }
   function pullGitHub(){
