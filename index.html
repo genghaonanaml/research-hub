@@ -250,7 +250,7 @@
   /* sync */
   .sync-card{background:linear-gradient(135deg,#f8f9fd 0%,#f2f4fa 100%); border:1px solid #e2e5ef; border-radius:16px; padding:20px; margin-top:16px; box-shadow:0 1px 4px rgba(99,102,241,.04)}
   .sync-card h3{margin:0 0 12px; font-size:14px; display:flex; align-items:center; gap:6px; color:var(--text)}
-  .sync-status{display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; padding:7px 14px; border-radius:20px; white-space:nowrap; transition:all .25s}
+  .sync-status{display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; padding:6px 13px; border-radius:20px; white-space:nowrap; transition:all .25s}
   .sync-status.ok{color:#16a34a; background:#f0fdf4; border:1px solid #bbf7d0}
   .sync-status.err{color:#dc2626; background:#fef2f2; border:1px solid #fecaca}
   .sync-status.busy{color:#d97706; background:#fffbeb; border:1px solid #fde68a}
@@ -260,12 +260,56 @@
   .sync-status.busy::before{background:#f59e0b}
   @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.35}}
   .sync-row{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
-  .sync-id{font-size:12px; color:var(--muted); word-break:break-all; background:#fff; border:1px solid var(--border); border-radius:8px; padding:6px 8px; flex:1; min-width:120px}
-  .sync-tip{font-size:12px; color:#92400e; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; margin-top:12px; line-height:1.55}
+  /* sync input fields — refined */
+  .sync-card .field{margin-bottom:12px}
+  .sync-card .field label{font-size:13px; font-weight:600; color:var(--text); margin-bottom:5px; display:block}
+  .sync-card .field label a{color:var(--primary); text-decoration:none; font-weight:700}
+  .sync-card .field label a:hover{text-decoration:underline}
+  .sync-card input[type="text"],
+  .sync-card input[type="password"]{
+    font-size:16px; padding:11px 14px; border:1.5px solid #dde1e8; border-radius:10px;
+    background:#fff; width:100%; font-family:inherit; transition:border-color .2s, box-shadow .2s;
+    outline:none; box-sizing:border-box
+  }
+  .sync-card input[type="text"]:focus,
+  .sync-card input[type="password"]:focus{
+    border-color:var(--primary); box-shadow:0 0 0 3px rgba(67,97,238,.1)
+  }
+  /* primary action button */
+  .sync-card .btn-primary{
+    background:linear-gradient(135deg,#4361ee,#3b52c7); color:#fff; border:none;
+    padding:10px 20px; border-radius:10px; font-size:14px; font-weight:700;
+    cursor:pointer; transition:transform .15s, box-shadow .2s
+  }
+  .sync-card .btn-primary:hover{transform:translateY(-1px); box-shadow:0 4px 12px rgba(67,97,238,.3)}
+  .sync-card .btn-primary:active{transform:translateY(0)}
+  /* ghost buttons in sync */
+  .sync-card .btn-ghost{
+    background:#fff; color:var(--text); border:1.5px solid #dde1e8;
+    padding:9px 16px; border-radius:10px; font-size:13px; font-weight:600;
+    cursor:pointer; transition:border-color .15s, background .15s
+  }
+  .sync-card .btn-ghost:hover{border-color:var(--primary); color:var(--primary); background:#f8f9ff}
+  /* warning tip — compact collapsible */
+  .sync-tip{font-size:12px; color:#92400e; background:linear-gradient(135deg,#fffbeb,#fef3c7); border:1px solid #fde68a; border-radius:10px; margin-top:12px; overflow:hidden; cursor:pointer; transition:height .3s}
+  .sync-tip-summary{padding:9px 14px; display:flex; align-items:center; gap:6px; font-weight:600}
+  .sync-tip-summary::before{content:"⚠️"; flex-shrink:0}
+  .sync-tip-summary .arrow{margin-left:auto; font-size:10px; transition:transform .3s; color:#b45309}
+  .sync-tip[open] .sync-tip-summary .arrow{transform:rotate(180deg)}
+  .sync-tip-body{padding:0 14px 10px; line-height:1.6; color:#78350f; font-weight:400}
+  .sync-tip:not([open]) .sync-tip-body{display:none}
+  .sync-tip code{background:#fef3c7; color:#92400e; padding:1px 5px; border-radius:4px; font-size:11px}
   .sync-divider{height:1px; background:linear-gradient(to right,transparent,var(--border),transparent); margin:18px 0 14px; border:0}
   .sync-backup-label{display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--text); margin-bottom:8px}
   .sync-backup-label svg{color:var(--muted); flex-shrink:0}
-  .sync-tip code{background:#fef3c7; color:#92400e; padding:1px 5px; border-radius:4px; font-size:11px}
+  /* backup button group */
+  .sync-backup-btns{display:flex; gap:8px}
+  .sync-backup-btns .btn-bg{
+    flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
+    padding:10px 16px; border-radius:10px; font-size:13px; font-weight:600;
+    cursor:pointer; border:1.5px solid #dde1e8; background:#fff; transition:all .15s
+  }
+  .sync-backup-btns .btn-bg:hover{border-color:var(--primary); color:var(--primary); background:#f8f9ff}
   /* checkin history */
   .ci-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:11px;margin-bottom:8px;background:#fff;transition:border-color .2s}
   .ci-item:hover{border-color:var(--primary)}
@@ -552,29 +596,36 @@
         </h2>
         <div class="sync-card" id="syncCard">
           <!-- 连接状态徽章 -->
-          <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
             <span class="sync-status" id="syncStatus"></span>
           </div>
           <div class="field"><label>📦 GitHub 仓库</label>
-            <input type="text" id="syncRepo" placeholder="owner/repo" autocomplete="off" style="font-size:16px" value="genghaonanaml/research-hub">
+            <input type="text" id="syncRepo" placeholder="owner/repo" autocomplete="off" value="genghaonanaml/research-hub">
           </div>
           <div class="field"><label>🔑 Classic Token（<a href="https://github.com/settings/tokens/new?scopes=repo&description=研途学习台同步" target="_blank" rel="noopener">点此一键创建 → 勾 repo</a>）</label>
-            <input type="password" id="syncToken" placeholder="ghp_ 开头的 Classic token（非 Fine-grained）" autocomplete="off" style="font-size:16px">
+            <input type="password" id="syncToken" placeholder="ghp_ 开头的 Classic token（非 Fine-grained）" autocomplete="off">
           </div>
-          <div class="sync-row" style="margin-top:14px">
-            <button class="btn sm" id="btnSaveSync">💾 保存并启用</button>
-            <button class="btn sm ghost" id="btnDiagToken">🔍 诊断 Token</button>
-            <button class="btn sm ghost hidden" id="btnCopySyncLink">📱 复制手机链接</button>
+          <div class="sync-row" style="margin-top:16px">
+            <button class="btn-primary" id="btnSaveSync">💾 保存并启用</button>
+            <button class="btn-ghost" id="btnDiagToken">🔍 诊断</button>
+            <button class="btn-ghost hidden" id="btnCopySyncLink">📱 复制手机链接</button>
           </div>
-          <div class="sync-tip" id="syncTip" style="display:none">⚠️ Token 必须选 <b>Tokens (classic)</b> 类型（非 Fine-grained），且勾选 <code>repo</code> 权限。路径：GitHub → Settings → Developer settings → Personal access tokens → <b>Tokens (classic)</b></div>
+          <!-- 可折叠警告 -->
+          <details class="sync-tip" id="syncTip">
+            <summary class="sync-tip-summary">Token 类型或权限报错？点此查看详细说明<span class="arrow">▼</span></summary>
+            <div class="sync-tip-body">
+              必须选 <b>Tokens (classic)</b>（非 Fine-grained），且勾选 <code>repo</code> 权限。<br>
+              路径：GitHub → Settings → Developer settings → <b>Tokens (classic)</b> → Generate new token → 勾选 <code>repo</code> → 复制填入上方。
+            </div>
+          </details>
           <hr class="sync-divider">
           <div class="sync-backup-label">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             本地备份（与云同步互补，存到本机文件）
           </div>
-          <div class="sync-row">
-            <button class="btn sm ghost" id="btnExportSync">📤 导出备份 JSON</button>
-            <button class="btn sm ghost" id="btnImportSync">📥 导入恢复</button>
+          <div class="sync-backup-btns">
+            <button class="btn-bg" id="btnExportSync">📤 导出备份 JSON</button>
+            <button class="btn-bg" id="btnImportSync">📥 导入恢复</button>
             <input type="file" id="importFile" accept="application/json,.json" style="display:none">
           </div>
         </div>
@@ -1719,7 +1770,7 @@
     var s=readSyncForm();
     if(!s.repo){ toast("请输入仓库地址"); return; }
     if(!s.token){ toast("请填入 Token（电脑和手机都要，才能互相同步）"); return; }
-    document.getElementById("syncTip").style.display="";
+    document.getElementById("syncTip").setAttribute("open","");
     document.getElementById("btnCopySyncLink").classList.remove("hidden");
     setSyncStatus("保存中…","busy");
     pushGitHub();
