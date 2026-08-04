@@ -522,15 +522,15 @@
           <div class="field"><label>GitHub 仓库</label>
             <input type="text" id="syncRepo" placeholder="owner/repo" autocomplete="off" style="font-size:16px" value="genghaonanaml/research-hub">
           </div>
-          <div class="field"><label>Token（<a href="https://github.com/settings/tokens/new?scopes=repo&description=研途学习台同步" target="_blank" rel="noopener">如何获取？</a>）</label>
-            <input type="password" id="syncToken" placeholder="ghp_xxxx · 仅电脑端填写" autocomplete="off" style="font-size:16px">
+          <div class="field"><label>Classic Token（<a href="https://github.com/settings/tokens/new?scopes=repo&description=研途学习台同步" target="_blank" rel="noopener">点此一键创建 → 勾 repo</a>）</label>
+            <input type="password" id="syncToken" placeholder="ghp_ 开头的 Classic token（非 Fine-grained）" autocomplete="off" style="font-size:16px">
           </div>
           <div class="sync-row">
             <button class="btn sm" id="btnSaveSync">保存并启用</button>
             <button class="btn sm ghost hidden" id="btnCopySyncLink">复制手机链接</button>
             <span class="sync-status" id="syncStatus" style="margin-left:auto;font-size:13px"></span>
           </div>
-          <div class="sync-tip" id="syncTip" style="display:none">保存后：电脑/手机任意一端改了都自动同步到另一端（每次改动自动上传，打开或切回页面自动拉取）。Token 只存在你本机浏览器，不会外泄。<br>把「复制手机链接」发给手机打开一次，手机即具备双向同步能力。</div>
+          <div class="sync-tip" id="syncTip" style="display:none">保存后：电脑/手机任意一端改了都自动同步到另一端。Token 只存本机浏览器。<br>⚠️ <b>Token 必须选「Classic」类型</b>（不是 Fine-grained）：GitHub→Settings→Developer settings→Personal access tokens→<b>Tokens (classic)</b>→Generate new token → 勾选 <code>repo</code> → 复制填入上方。Fine-grained token 不兼容此接口。</div>
         </div>
       </section>
     </main>
@@ -645,6 +645,14 @@
     if(auth && s.token) h["Authorization"]="Bearer "+s.token.trim();
     return h;
   }
+  // 根据 HTTP 状态码猜测 GitHub 错误原因，给用户可操作的提示
+  function guessGithubError(status){
+    if(status===403) return "Token 无效或权限不足→确认用 Classic token 并勾选 repo 权限";
+    if(status===401) return "Token 错误或已过期→重新生成一个填入";
+    if(status===404) return "仓库不存在或无访问权限→检查仓库名 owner/repo";
+    if(status===422) return "请求格式有误（通常是 SHA 冲突）→稍后重试";
+    return "网络或服务端问题";
+  }
   function b64utf8(str){ return btoa(unescape(encodeURIComponent(str))); }
   // ---- 随身链接（数据打包进 URL，免 PAT/免推送，国内手机网络直接可用） ----
   function b64urlEncode(str){
@@ -672,7 +680,7 @@
     setSyncStatus("同步中…", "busy");
     // 先拉取远端并合并进本地，避免覆盖另一端刚改的内容，再整体上传
     fetch(url, {headers:ghHeaders(false)})
-      .then(function(r){ if(r.status===404) return null; if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(r){ if(r.status===404) return null; if(!r.ok) throw new Error("HTTP "+r.status+"（"+guessGithubError(r.status)+"）"); return r.json(); })
       .then(function(data){
         if(data && data.content){
           try{
@@ -688,14 +696,14 @@
           body:JSON.stringify({ message:"sync update", content:b64utf8(JSON.stringify(payload)), sha: data && data.sha ? data.sha : undefined })
         });
       })
-      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); renderAll(); setSyncStatus("已同步 ✓ "+new Date().toLocaleTimeString(), "ok"); })
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status+"（"+guessGithubError(r.status)+"）"); renderAll(); setSyncStatus("已同步 ✓ "+new Date().toLocaleTimeString(), "ok"); })
       .catch(function(e){ setSyncStatus("同步失败："+e.message, "err"); });
   }
   function pullGitHub(){
     var url=ghApiUrl(); if(!url) return Promise.resolve();
     setSyncStatus("拉取中…", "busy");
     return fetch(url, {headers:ghHeaders(false)})
-      .then(function(r){ if(r.status===404) return null; if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(r){ if(r.status===404) return null; if(!r.ok) throw new Error("HTTP "+r.status+"（"+guessGithubError(r.status)+"）"); return r.json(); })
       .then(function(data){
         if(data && data.content){
           var txt=decodeURIComponent(escape(atob(data.content.replace(/\s/g,""))));
