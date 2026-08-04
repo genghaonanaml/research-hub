@@ -175,6 +175,8 @@
     .tt-card .tc-room{font-size:8px;display:none}
     .tt-cell{min-height:34px}
   }
+  .tt-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;margin:0 -2px}
+  @media(max-width:768px){ .timetable{min-width:600px} .week-bar{min-width:560px} }
   /* course form - vertical list style */
   .cf-list{display:flex;flex-direction:column;gap:14px}
   .cf-row{display:flex;align-items:center;gap:10px}
@@ -299,6 +301,7 @@
         <div id="todoList"></div>
         <div id="weekDates" class="week-dates"></div>
         <div class="seed-clear hidden" id="seedClear">当前含示例数据，<a id="btnSeedClear">清空示例数据</a></div>
+        <div class="backup-note" id="backupNote"></div>
       </section>
 
       <!-- 课程表 -->
@@ -328,7 +331,7 @@
           <button class="btn sm ghost" id="btnWeekNext">下周 ›</button>
         </div>
         <div class="week-bar" id="weekBar"></div>
-        <div class="timetable" id="timetable"></div>
+        <div class="tt-scroll"><div class="timetable" id="timetable"></div></div>
 
         <!-- 添加课程按钮 -->
         <div style="margin-top:14px;text-align:center">
@@ -530,11 +533,12 @@
             <button class="btn sm" id="btnSaveToken">保存并启用同步</button>
             <button class="btn sm ghost" id="btnSyncNow">立即同步</button>
             <button class="btn sm ghost" id="btnTestSync">测试连接</button>
+            <button class="btn sm ghost" id="btnCopyDataLink">生成随身链接</button>
             <button class="btn sm ghost" id="btnCopySyncLink">复制同步链接</button>
             <label class="field" style="flex-direction:row; align-items:center; gap:6px; font-size:13px; color:var(--muted)"><input type="checkbox" id="syncAuto" style="width:auto" checked> 自动同步</label>
           </div>
           <div class="sync-status" id="syncStatus">未配置同步</div>
-          <div class="sync-tip"><b>为什么用 GitHub：</b>Firebase(Google) 在中国大陆手机网络常被墙，改用你已在用的 GitHub 做同步后端，国内访问稳定。<br><b>① 电脑端（一次性）：</b>GitHub 头像 → Settings → Developer settings → Personal access tokens → 新建 <b>classic token</b>，勾选 <code>repo</code> 权限 → 复制粘贴到上方「Token」框（仓库已预填）。点「保存并启用」「立即同步」上传数据。<br>📱 <b>② 手机端（免 Token）：</b>电脑点「复制同步链接」→ 发到手机 → 手机浏览器打开 → 自动只读拉取（公开仓库无需 Token）。<br>⚠️ Token 只存在你本机浏览器，不上传；手机只读不写。同步数据文件存于仓库 <code>sync/data.json</code>（公开可读，介意隐私可换私有仓库）。</div>
+          <div class="sync-tip"><b>为什么用 GitHub：</b>Firebase(Google) 在中国大陆手机网络常被墙，改用你已在用的 GitHub 做同步后端，国内访问稳定。<br>🚀 <b>最省事（免 PAT · 免推送）：</b>点「生成随身链接」→ 复制链接发到手机 → 手机浏览器打开 → <b>自动导入全部数据</b>。适合偶尔同步，国内网络直接可用，无需任何配置。<br><b>① 电脑端（一次性，长期自动同步）：</b>GitHub 头像 → Settings → Developer settings → Personal access tokens → 新建 <b>classic token</b>，勾选 <code>repo</code> 权限 → 复制粘贴到上方「Token」框（仓库已预填）。点「保存并启用」「立即同步」上传数据，之后每次修改自动上传。<br>📱 <b>② 手机端（免 Token）：</b>电脑点「复制同步链接」→ 发到手机 → 手机浏览器打开 → 自动只读拉取（公开仓库无需 Token）。<br>⚠️ Token 只存在你本机浏览器，不上传；手机只读不写。同步数据文件存于仓库 <code>sync/data.json</code>（公开可读，介意隐私可换私有仓库）。</div>
         </div>
       </section>
     </main>
@@ -648,6 +652,26 @@
     return h;
   }
   function b64utf8(str){ return btoa(unescape(encodeURIComponent(str))); }
+  // ---- 随身链接（数据打包进 URL，免 PAT/免推送，国内手机网络直接可用） ----
+  function b64urlEncode(str){
+    try{ return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+    catch(e){ return ""; }
+  }
+  function b64urlDecode(b64){
+    try{
+      b64=String(b64).replace(/-/g,"+").replace(/_/g,"/");
+      while(b64.length%4) b64+="=";
+      return decodeURIComponent(escape(atob(b64)));
+    }catch(e){ return null; }
+  }
+  function encodeAllData(){
+    var payload={}; Object.keys(K).forEach(function(k){ payload[k]=localStorage.getItem(k); });
+    return b64urlEncode(JSON.stringify(payload));
+  }
+  function decodeAllData(b64){
+    var json=b64urlDecode(b64); if(!json) return null;
+    try{ var obj=JSON.parse(json); return (obj&&typeof obj==="object")?obj:null; }catch(e){ return null; }
+  }
   function pushGitHub(){
     var url=ghApiUrl(); if(!url) return;
     var s=getSync(); if(!s.token){ setSyncStatus("未填 Token，无法上传（手机端只读）","err"); return; }
@@ -898,6 +922,17 @@
     })();
 
     document.getElementById("seedClear").classList.toggle("hidden", !hasSample());
+
+    // 备份提醒（铁律2：用户数据累计 ≥30 条，顶部温和提示）
+    var uc=0;
+    [K.courses,K.checkins,K.words,K.papers].forEach(function(k){
+      uc += load(k,[]).filter(function(x){ return x && !x.sample; }).length;
+    });
+    var bn=document.getElementById("backupNote");
+    if(bn){
+      if(uc>=30){ bn.textContent="📦 数据已积累 "+uc+" 条，建议用侧栏「导出备份 JSON」留存一份"; bn.classList.add("show"); }
+      else { bn.classList.remove("show"); }
+    }
   }
 
   // ---------- render: courses ----------
@@ -945,10 +980,12 @@
     try{
     var allCourses=load(K.courses,[]);
     var wn=getWeekNum();
+    // 未开学时（wn<1）用第 1 周作预览展示，方便提前看课表；表头仍显示"未开学"
+    var dispWn = wn<1 ? 1 : wn;
     // Filter courses by week: if course has 'weeks' field, check if current week matches
     var courses = allCourses.filter(function(c){
       if(!c.weeks) return true; // no weeks restriction = show always
-      return matchWeek(c.weeks, wn);
+      return matchWeek(c.weeks, dispWn);
     });
     var now=new Date();
     // header: 周数+状态 + 日期（wn 已在上面算过，不再重复调用）
@@ -973,7 +1010,7 @@
     if(!mon){
       mon=new Date(now); mon.setDate(now.getDate()-((now.getDay()+6)%7));
     } else {
-      mon.setDate(mon.getDate()+(wn-1)*7);
+      mon.setDate(mon.getDate()+(Math.max(1,wn)-1)*7);
     }
     // 只有当天真实日期那一列才高亮（切到其他周时没有任何列高亮）
     var todayDateStr = todayStr(); // e.g. "2026-08-03"
@@ -1483,7 +1520,7 @@
   });
   // clear sample
   document.getElementById("btnSeedClear").addEventListener("click", function(){
-    if(!confirm("用示例课表（去年课程）重置示例数据？你自行添加的非示例内容会保留。")) return;
+    if(!confirm("清空示例数据？你自行添加的课程 / 单词 / 文献都会保留，仅示例模板被移除。")) return;
     ["courses","checkins","words","papers"].forEach(function(key){
       var arr=load(K[key],[]).filter(function(x){ return !(x && x.sample); });
       save(K[key],arr);
@@ -1531,6 +1568,17 @@
       navigator.clipboard.writeText(link).then(done, function(){ fallbackCopy(link); done(); });
     } else { fallbackCopy(link); done(); }
   });
+  // 生成随身链接（数据打包进 URL，免 PAT/免推送）
+  document.getElementById("btnCopyDataLink").addEventListener("click", function(){
+    var enc=encodeAllData();
+    if(!enc){ toast("暂无数据可生成"); return; }
+    var link=location.origin+location.pathname+"?d="+enc;
+    if(link.length>7800){ toast("数据较多，链接偏长；建议改用 Token 同步更稳"); }
+    var done=function(){ toast("已复制随身链接，发到手机打开即自动导入"); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(link).then(done, function(){ fallbackCopy(link); done(); });
+    } else { fallbackCopy(link); done(); }
+  });
   function fallbackCopy(text){
     try{
       var ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
@@ -1560,6 +1608,16 @@
   renderAll();
   // init sync UI
   (function(){
+    // 随身链接数据导入（最高优先级，免 Token/免推送）：手机打开 ?d= 链接自动导入
+    var dq=location.search.match(/[?&]d=([^&]+)/);
+    if(dq){
+      var imported=decodeAllData(dq[1]);
+      if(imported && typeof imported==="object"){
+        Object.keys(imported).forEach(function(k){ if(imported[k]!=null) localStorage.setItem(k, imported[k]); });
+        try{ history.replaceState(null,"",location.pathname); }catch(e){}
+        toast("已从随身链接导入数据");
+      }
+    }
     var s=getSync();
     // 本地没有则从网址 ?s=repo|path 恢复（防 iOS 清空 localStorage；手机端只读，无需 Token）
     if(!s.repo){
