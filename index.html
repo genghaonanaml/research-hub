@@ -184,7 +184,7 @@
   .cf-icon svg{width:18px;height:18px}
   .cf-body{flex:1;display:flex;flex-direction:column;gap:4px}
   .cf-label{font-size:13px;font-weight:600;color:var(--muted)}
-  .cf-input{font-size:15px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;width:100%;font-family:inherit}
+  .cf-input{font-size:16px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;width:100%;font-family:inherit}
   .cf-input:focus{outline:none;border-color:var(--primary)}
   .cf-section{font-size:13px;font-weight:700;color:var(--text);margin:6px 0 2px;padding-top:6px;border-top:1px dashed var(--border);display:flex;align-items:center;justify-content:space-between}
   .cf-section .cf-close{cursor:pointer;color:var(--muted);font-size:16px;background:none;border:none;padding:2px 6px}
@@ -215,7 +215,7 @@
   .wp-mode{flex:1;padding:8px;border:1px solid var(--border);border-radius:10px;text-align:center;font-size:13px;font-weight:700;cursor:pointer;background:#fff;color:var(--muted)}
   .wp-mode.active{background:var(--primary);color:#fff;border-color:var(--primary)}
   /* inline day / period chips (WakeUp-style) */
-  .settings-input{width:auto;min-width:132px;padding:5px 8px;font-size:14px;border:1px solid var(--border);border-radius:6px;min-height:40px;background:#fff}
+  .settings-input{width:auto;min-width:132px;padding:5px 8px;font-size:16px;border:1px solid var(--border);border-radius:6px;min-height:40px;background:#fff}
   .week-badge{font-weight:800;font-size:15px;color:var(--primary);min-width:66px;text-align:center}
   .day-chips{display:flex;gap:6px;flex-wrap:wrap}
   .day-chip{flex:1;min-width:36px;height:40px;border:2px solid var(--border);border-radius:9px;background:#fff;font-size:14px;font-weight:700;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;-webkit-tap-highlight-color:transparent}
@@ -289,6 +289,8 @@
         云同步
       </div>
       <a class="side-link" id="btnExportSidebar">导出备份 JSON</a>
+      <a class="side-link" id="btnImportSidebar">导入恢复</a>
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none">
     </nav>
 
     <main class="content">
@@ -629,9 +631,11 @@
         var map={}; local.forEach(function(x){ if(x&&x.id) map[x.id]=x; });
         remote.forEach(function(x){ if(x&&x.id) map[x.id]=x; });
         var merged=[]; Object.keys(map).forEach(function(id){ merged.push(map[id]); });
-        save(sk, merged);
+        // 仅在内容真正变化时才写回，避免两端互相 pull→save→push 的震荡（无限产生 git commit 阻塞推送）
+        if(JSON.stringify(merged)!==JSON.stringify(local)) save(sk, merged);
       } else {
-        localStorage.setItem(sk, obj[k]);
+        var cur=localStorage.getItem(sk);
+        if(cur!==obj[k]) localStorage.setItem(sk, obj[k]);
       }
     });
   }
@@ -1558,6 +1562,27 @@
     a.download="研途学习台-备份-"+todayStr()+".json";
     a.click(); URL.revokeObjectURL(a.href);
     toast("已导出备份");
+  });
+  // import restore (safety backup file)
+  document.getElementById("btnImportSidebar").addEventListener("click", function(){
+    document.getElementById("importFile").click();
+  });
+  document.getElementById("importFile").addEventListener("change", function(e){
+    var file=e.target.files[0]; if(!file){ return; }
+    if(!confirm("导入备份将按存储键覆盖当前同名数据，确定继续？")){ e.target.value=""; return; }
+    var reader=new FileReader();
+    reader.onload=function(){
+      try{
+        var imported=JSON.parse(reader.result);
+        if(!imported || typeof imported!=="object") throw new Error("文件格式不正确");
+        Object.keys(imported).forEach(function(k){ if(imported[k]!=null) localStorage.setItem(k, imported[k]); });
+        toast("已导入备份，即将刷新");
+        setTimeout(function(){ location.reload(); }, 700);
+      }catch(err){ alert("导入失败："+err.message); }
+      e.target.value="";
+    };
+    reader.onerror=function(){ alert("读取文件失败"); e.target.value=""; };
+    reader.readAsText(file);
   });
   // clear sample
   document.getElementById("btnSeedClear").addEventListener("click", function(){
