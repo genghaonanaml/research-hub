@@ -679,9 +679,26 @@
     var url=ghApiUrl(); if(!url) return;
     var s=getSync(); if(!s.token){ setSyncStatus("未填 Token，无法上传","err"); return; }
     setSyncStatus("同步中…", "busy");
-    // 先拉取远端并合并进本地，避免覆盖另一端刚改的内容，再整体上传
-    fetch(url, {headers:ghHeaders(false)})
-      .then(function(r){ if(r.status===404) return null; if(!r.ok) throw new Error("HTTP "+r.status+"（"+guessGithubError(r.status)+"）"); return r.json(); })
+    // 先尝试无认证拉取（公开仓库够用），失败则带 token 重试（private 仓库）
+    function doPull(withAuth){
+      return fetch(url, {headers:ghHeaders(withAuth)})
+        .then(function(r){
+          if(r.status===404) return null;
+          if(!r.ok){
+            // 读取 GitHub 原始错误原因
+            return r.text().then(function(t){
+              var detail=t||"";
+              // 无认证且被拒 → 带 token 重试一次
+              if(!withAuth && (r.status===403||r.status===401)){
+                return doPull(true);
+              }
+              throw new Error("拉取失败 HTTP "+r.status+" — "+(detail.slice(0,200)||"无详情"));
+            });
+          }
+          return r.json();
+        });
+    }
+    doPull(false)
       .then(function(data){
         if(data && data.content){
           try{
@@ -696,7 +713,7 @@
           headers:ghHeaders(true),
           body:JSON.stringify({ message:"sync update", content:b64utf8(JSON.stringify(payload)), sha: data && data.sha ? data.sha : undefined })
         }).then(function(r){
-          if(!r.ok) return r.text().then(function(t){ throw new Error("HTTP "+r.status+" GitHub原因: "+(t||"无详情")); });
+          if(!r.ok) return r.text().then(function(t){ throw new Error("上传失败 HTTP "+r.status+" — "+((t||"无详情").slice(0,200))); });
           renderAll(); setSyncStatus("已同步 ✓ "+new Date().toLocaleTimeString(), "ok"); })
       })
       .catch(function(e){ setSyncStatus("同步失败："+e.message, "err"); });
@@ -704,8 +721,21 @@
   function pullGitHub(){
     var url=ghApiUrl(); if(!url) return Promise.resolve();
     setSyncStatus("拉取中…", "busy");
-    return fetch(url, {headers:ghHeaders(false)})
-      .then(function(r){ if(r.status===404) return null; if(!r.ok) throw new Error("HTTP "+r.status+"（"+guessGithubError(r.status)+"）"); return r.json(); })
+    var triedAuth=false;
+    function doPull(withAuth){
+      return fetch(url, {headers:ghHeaders(withAuth)})
+        .then(function(r){
+          if(r.status===404) return null;
+          if(!r.ok){
+            return r.text().then(function(t){
+              if(!withAuth && (r.status===403||r.status===401)){ triedAuth=true; return doPull(true); }
+              throw new Error("HTTP "+r.status+" — "+((t||"无详情").slice(0,200)));
+            });
+          }
+          return r.json();
+        });
+    }
+    return doPull(false)
       .then(function(data){
         if(data && data.content){
           var txt=decodeURIComponent(escape(atob(data.content.replace(/\s/g,""))));
