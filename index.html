@@ -1582,6 +1582,7 @@
     var results=[];
     var h={"Accept":"application/vnd.github+json"};
     h["Authorization"]="Bearer "+token;
+    var repoUrl="https://api.github.com/repos/"+repo;
     // 测试1：Token 本身是否有效（查用户信息）
     fetch("https://api.github.com/user",{headers:h})
       .then(function(r){
@@ -1591,7 +1592,6 @@
       .then(function(u){
         if(u&&u.login) results[0]="① Token有效 ✓ 用户: "+u.login;
         // 测试2：能否访问该仓库
-        var repoUrl="https://api.github.com/repos/"+repo;
         return fetch(repoUrl,{headers:h});
       })
       .then(function(r2){
