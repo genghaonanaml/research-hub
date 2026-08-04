@@ -322,6 +322,15 @@
   .ci-acts button:hover{color:var(--primary);border-color:var(--primary)}
   .ci-acts button.del:hover{color:var(--red);border-color:var(--red)}
   .ci-empty{text-align:center;color:var(--muted);padding:20px 10px;font-size:14px}
+  /* collapsible checkin history */
+  .ci-details{margin-top:16px; border:1px solid var(--border); border-radius:12px; background:#fff; overflow:hidden}
+  .ci-summary{display:flex;align-items:center;justify-content:space-between;padding:12px 14px; cursor:pointer; user-select:none; font-size:14px; font-weight:600; color:var(--text); transition:background .15s}
+  .ci-summary:hover{background:#f8f9fc}
+  .ci-summary span{display:flex;align-items:center;gap:6px}
+  .ci-summary svg{color:var(--muted)}
+  .ci-count-badge{font-size:11px; font-weight:700; color:var(--primary); background:#eef2ff; padding:2px 8px; border-radius:10px}
+  .ci-details[open] .ci-summary{border-bottom:1px solid var(--border)}
+  .ci-details > div{padding:12px 14px}
 </style>
 </head>
 <body>
@@ -514,7 +523,6 @@
           <div class="stat"><div class="n" id="stTotal">0</div><div class="l">累计背词</div></div>
           <div class="stat"><div class="n" id="stDays">0</div><div class="l">打卡天数</div></div>
         </div>
-        <div class="heat-wrap" id="wordHeat"></div>
 
         <div class="sync-card" style="margin-top:14px">
           <h2 style="font-size:14px; margin:0 0 10px">
@@ -524,17 +532,18 @@
           <div id="todayCheckin"></div>
         </div>
 
-        <!-- 打卡历史 -->
-        <div style="margin-top:18px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <h2 style="font-size:15px; margin:0">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <!-- 打卡历史（默认折叠） -->
+        <details class="ci-details" id="checkinDetails">
+          <summary class="ci-summary">
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               打卡历史
-            </h2>
-            <button class="btn sm ghost" id="btnClearCheckins" style="font-size:12px;padding:5px 10px">🗑️ 清空记录</button>
-          </div>
+              <span class="ci-count-badge" id="ciCountBadge"></span>
+            </span>
+            <button class="btn sm ghost" id="btnClearCheckins" style="font-size:11px;padding:4px 8px" onclick="event.stopPropagation()">🗑️ 清空</button>
+          </summary>
           <div id="checkinHistory"></div>
-        </div>
+        </details>
 
         <h2 style="font-size:15px; margin-top:18px">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
@@ -561,7 +570,6 @@
           <div class="stat"><div class="n" id="pGoal">3</div><div class="l">每日目标</div></div>
           <div class="stat"><div class="n" id="pTotal">0</div><div class="l">累计篇数</div></div>
         </div>
-        <div class="heat-wrap" id="paperHeat"></div>
 
         <div class="row" style="margin:10px 0 14px">
           <div class="field" style="flex:0 0 140px"><label>每日阅读目标</label>
@@ -1261,7 +1269,9 @@
     document.getElementById("stStreak").textContent=calcStreak(cm);
     document.getElementById("stTotal").textContent=load(K.checkins,[]).reduce(function(s,c){ return s+(+c.count||0); },0);
     document.getElementById("stDays").textContent=load(K.checkins,[]).length;
-    document.getElementById("wordHeat").innerHTML=heatmapSVG(cm,8);
+    // 折叠徽章显示打卡天数
+    var ciBadge=document.getElementById("ciCountBadge");
+    if(ciBadge) ciBadge.textContent=load(K.checkins,[]).length+" 天";
 
     var td=todayStr();
     var todayRec=load(K.checkins,[]).filter(function(c){ return c.date===td; })[0];
@@ -1313,7 +1323,6 @@
     document.getElementById("pGoal").textContent=goal;
     document.getElementById("pGoalInput").value=goal;
     document.getElementById("pTotal").textContent=load(K.papers,[]).filter(function(p){ return p.status==="已读"; }).length;
-    document.getElementById("paperHeat").innerHTML=heatmapSVG(pm,8);
 
     var papers=load(K.papers,[]).slice().sort(function(a,b){
       var da=a.date||a.planDate||"", db=b.date||b.planDate||""; return da<db?1:-1;
