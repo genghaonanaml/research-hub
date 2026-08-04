@@ -1579,32 +1579,24 @@
     var repo=document.getElementById("syncRepo").value.trim();
     if(!token){ setSyncStatus("⚠️ 请先填入 Token","err"); return; }
     setSyncStatus("诊断中…","busy");
-    var results=[];
-    var h={"Accept":"application/vnd.github+json"};
-    h["Authorization"]="Bearer "+token;
-    var repoUrl="https://api.github.com/repos/"+repo;
-    // 测试1：Token 本身是否有效（查用户信息）
-    fetch("https://api.github.com/user",{headers:h})
-      .then(function(r){
-        results.push("① Token有效性: HTTP "+r.status+(r.ok?" ✓ 有效 ✗ 无效":""));
-        return r.json().catch(function(){});
-      })
-      .then(function(u){
-        if(u&&u.login) results[0]="① Token有效 ✓ 用户: "+u.login;
-        // 测试2：能否访问该仓库
-        return fetch(repoUrl,{headers:h});
-      })
-      .then(function(r2){
-        results.push("② 仓库访问: HTTP "+r2.status+(r2.ok?" ✓ 可访问":" ✗ "+(r2.status===404?"仓库不存在":r2.status===403?"无权限":"未知错误")));
-        // 测试3：尝试读取 sync/data.json（测试 Contents API 权限）
-        var contentsUrl=repoUrl+"/contents/sync/data.json";
-        return fetch(contentsUrl,{headers:h});
-      })
-      .then(function(r3){
-        results.push("③ Contents API(写数据用): HTTP "+r3.status+(r3.status===200?" ✓ 有权限":r3.status===404?" ✓ 有权限(文件尚不存在)":" ✗ "+(r3.status===403?"被拒—确认 repo scope":r3.status===401?"Token 错误":"HTTP "+r3.status)));
-        setSyncStatus(results.join(" | "), r3.ok||r3.status===404 ? "ok" : "err");
-      })
-      .catch(function(e){ setSyncStatus("诊断失败: "+e.message,"err"); });
+    var h={"Accept":"application/vnd.github+json","Authorization":"Bearer "+token};
+    var r1="",r2="",r3="";
+    // 测试1
+    fetch("https://api.github.com/user",{headers:h}).then(function(res){
+      r1="① Token: HTTP "+res.status+(res.ok?" ✓":" ✗");
+      return res.json().catch(function(){});
+    }).then(function(u){
+      if(u&&u.login) r1="① Token ✓ "+u.login;
+      // 测试2
+      return fetch("https://api.github.com/repos/"+repo,{headers:h});
+    }).then(function(res){
+      r2="② 仓库: HTTP "+res.status+(res.ok?" ✓":res.status===404?" ✗ 不存在":" ✗ "+res.status);
+      // 测试3
+      return fetch("https://api.github.com/repos/"+repo+"/contents/sync/data.json",{headers:h});
+    }).then(function(res){
+      r3="③ 写权限: HTTP "+res.status+(res.status===200||res.status===404?" ✓ 有权限":" ✗ "+(res.status===403?"被拒—需Classic+repo":"HTTP"+res.status));
+      setSyncStatus(r1+" | "+r2+" | "+r3, (r3.indexOf("✓")>=0)?"ok":"err");
+    }).catch(function(e){ setSyncStatus("诊断失败: "+e.message,"err"); });
   });
   function buildSyncLink(){
     var s=getSync();
