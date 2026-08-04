@@ -1597,6 +1597,11 @@
       }
     }
     var s=getSync();
+    // 裸地址打开（手机首次，无本地配置、无 ?s= 链接）：默认用预填仓库做只读拉取，保证能看到电脑端设置（含开学日期）
+    if(!s.repo){
+      var q0=location.search.match(/[?&]s=([^&]+)/);
+      if(!q0){ s.repo="genghaonanaml/research-hub"; s.path=s.path||"sync/data.json"; if(s.auto==null)s.auto=true; setSync(s); }
+    }
     // 从网址 ?s=repo|path|token 恢复（含 Token → 手机也具备回传能力）
     if(!s.repo || !s.token){
       var q=location.search.match(/[?&]s=([^&]+)/);
@@ -1604,15 +1609,13 @@
     }
     if(s.repo) document.getElementById("syncRepo").value=s.repo;
     if(s.token){ document.getElementById("syncToken").value=s.token; document.getElementById("syncTip").style.display=""; document.getElementById("btnCopySyncLink").classList.remove("hidden"); }
-    if(s.repo && s.token){
-      setSyncStatus("已启用，双向同步中","ok");
+    if(s.repo){
+      setSyncStatus(s.token ? "已启用，双向同步中" : "已启用（只读），打开自动拉取", s.token?"ok":"");
+      // 有 repo 即拉取（token 只决定能否上传）；定时 + 切回页面 + 聚焦时自动拉取，保证两端改动互相同步
       pullGitHub();
-      // 定时拉取 + 切回页面拉取，保证两端改动互相同步
-      setInterval(function(){ var ss=getSync(); if(ss.repo && ss.token) pullGitHub(); }, 45000);
+      setInterval(function(){ var ss=getSync(); if(ss.repo) pullGitHub(); }, 45000);
       document.addEventListener("visibilitychange", function(){ if(!document.hidden) pullGitHub(); });
       window.addEventListener("focus", pullGitHub);
-    } else if(s.repo){
-      setSyncStatus("已配置仓库（待填 Token 才能上传）","");
     } else {
       setSyncStatus("未配置同步","");
     }
