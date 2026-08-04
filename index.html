@@ -1511,7 +1511,7 @@
 
   // export (safety backup, sidebar link)
   document.getElementById("btnExportSidebar").addEventListener("click", function(){
-    var data={}; Object.keys(K).forEach(function(k){ data[k]=localStorage.getItem(k); });
+    var data={}; Object.keys(K).forEach(function(k){ data[K[k]]=localStorage.getItem(K[k]); });
     var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
     var a=document.createElement("a");
     a.href=URL.createObjectURL(blob);
@@ -1593,7 +1593,7 @@
     if(dq){
       var imported=decodeAllData(dq[1]);
       if(imported && typeof imported==="object"){
-        Object.keys(imported).forEach(function(k){ if(imported[k]!=null) localStorage.setItem(K[k], imported[k]); });
+        Object.keys(imported).forEach(function(k){ if(imported[k]!=null) localStorage.setItem(k, imported[k]); });
         try{ history.replaceState(null,"",location.pathname); }catch(e){}
         toast("已从链接导入数据");
       }
