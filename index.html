@@ -331,6 +331,9 @@
   .ci-count-badge{font-size:11px; font-weight:700; color:var(--primary); background:#eef2ff; padding:2px 8px; border-radius:10px}
   .ci-details[open] .ci-summary{border-bottom:1px solid var(--border)}
   .ci-details > div{padding:12px 14px}
+  .ci-footer{margin-top:10px; padding-top:10px; border-top:1px dashed var(--border); text-align:center}
+  .ci-footer button{background:none; border:none; color:var(--muted); font-size:12px; cursor:pointer; padding:4px 8px; font-family:inherit; transition:color .15s}
+  .ci-footer button:hover{color:var(--red)}
 </style>
 </head>
 <body>
@@ -540,7 +543,6 @@
               打卡历史
               <span class="ci-count-badge" id="ciCountBadge"></span>
             </span>
-            <button class="btn sm ghost" id="btnClearCheckins" style="font-size:11px;padding:4px 8px" onclick="event.stopPropagation()">🗑️ 清空</button>
           </summary>
           <div id="checkinHistory"></div>
         </details>
@@ -1301,7 +1303,7 @@
             '<button data-delck="'+c.id+'" class="del" title="删除此条记录">✕</button>'+
           '</div></div>';
       });
-      histBox.innerHTML=h;
+      histBox.innerHTML=h + '<div class="ci-footer"><button data-clearck="1">清空全部打卡记录</button></div>';
     }
 
     var words=load(K.words,[]).slice().sort(function(a,b){ return (b.addedDate||"")<(a.addedDate||"")?-1:1; });
@@ -1660,15 +1662,17 @@
       if(!confirm("确定删除 "+rec.date+" 的打卡记录（"+rec.count+" 词）？")) return;
       save(K.checkins,all.filter(function(c){ return c.id!==id; }));
       renderWords(); renderTodo(); toast("已删除 "+rec.date+" 记录");
+      return;
     }
-  });
-  // 清空所有打卡记录
-  document.getElementById("btnClearCheckins").addEventListener("click", function(){
-    var all=load(K.checkins,[]);
-    if(!all.length){ toast("没有打卡记录"); return; }
-    var total=all.reduce(function(s,c){return s+(+c.count||0);},0);
-    if(!confirm("确定清空全部 "+all.length+" 条打卡记录（共 "+total+" 词）？\n此操作不可撤销！")) return;
-    save(K.checkins,[]); renderWords(); renderTodo(); toast("已清空全部打卡记录");
+    // 清空全部打卡记录（列表底部小字链接，避免误触）
+    var clearBtn=e.target.closest("[data-clearck]");
+    if(clearBtn){
+      var all=load(K.checkins,[]);
+      if(!all.length){ toast("没有打卡记录"); return; }
+      var total=all.reduce(function(s,c){return s+(+c.count||0);},0);
+      if(!confirm("确定清空全部 "+all.length+" 条打卡记录（共 "+total+" 词）？\n此操作不可撤销！")) return;
+      save(K.checkins,[]); renderWords(); renderTodo(); toast("已清空全部打卡记录");
+    }
   });
 
   // word form
