@@ -126,10 +126,11 @@
   .mini-btn.del:hover{color:var(--red); border-color:var(--red)}
   .tag{display:inline-block; font-size:12px; padding:2px 8px; border-radius:20px; background:#eef0fe; color:var(--primary); font-weight:700; margin-right:6px}
   .tag.green{background:#e6f6ec; color:var(--green)} .tag.red{background:#fdeaea; color:var(--red)} .tag.gray{background:#eef0f3; color:var(--muted)}
-  .stat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:14px}
-  .stat{background:#f7f8fc; border-radius:12px; padding:14px; text-align:center}
-  .stat .n{font-size:26px; font-weight:800; color:var(--primary)}
-  .stat .l{font-size:13px; color:var(--muted); margin-top:2px}
+  .stat-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px}
+  .stat{background:linear-gradient(135deg,#f8f9fd 0%,#f2f4fa 100%); border:1px solid #e2e5ef; border-radius:14px; padding:16px 12px; text-align:center; position:relative; overflow:hidden}
+  .stat::after{content:""; position:absolute; top:-20px; right:-20px; width:60px; height:60px; border-radius:50%; background:var(--primary); opacity:.04}
+  .stat .n{font-size:28px; font-weight:800; color:var(--primary); line-height:1.2}
+  .stat .l{font-size:12px; color:var(--muted); margin-top:3px; font-weight:500}
   /* schedule - timetable grid (12 single periods, cards span N rows) */
   .course-info-bar{margin-bottom:8px}
   .ci-week{font-size:22px;font-weight:800;color:var(--text);line-height:1.3}
@@ -265,6 +266,18 @@
   .sync-backup-label{display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--text); margin-bottom:8px}
   .sync-backup-label svg{color:var(--muted); flex-shrink:0}
   .sync-tip code{background:#fef3c7; color:#92400e; padding:1px 5px; border-radius:4px; font-size:11px}
+  /* checkin history */
+  .ci-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:11px;margin-bottom:8px;background:#fff;transition:border-color .2s}
+  .ci-item:hover{border-color:var(--primary)}
+  .ci-date{font-weight:700;font-size:14px;color:var(--text);white-space:nowrap;min-width:80px}
+  .ci-date.today{color:var(--primary)}
+  .ci-count{font-size:20px;font-weight:800;color:var(--primary);min-width:48px;text-align:center}
+  .ci-note{flex:1;font-size:13px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ci-acts{display:flex;gap:5px;flex-shrink:0}
+  .ci-acts button{border:1px solid var(--border);background:#fff;border-radius:8px;width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:13px}
+  .ci-acts button:hover{color:var(--primary);border-color:var(--primary)}
+  .ci-acts button.del:hover{color:var(--red);border-color:var(--red)}
+  .ci-empty{text-align:center;color:var(--muted);padding:20px 10px;font-size:14px}
 </style>
 </head>
 <body>
@@ -459,12 +472,24 @@
         </div>
         <div class="heat-wrap" id="wordHeat"></div>
 
-        <div class="card" style="background:#f7f8fc; margin-top:8px">
-          <h2 style="font-size:15px">
+        <div class="sync-card" style="margin-top:14px">
+          <h2 style="font-size:14px; margin:0 0 10px">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
             今日打卡
           </h2>
           <div id="todayCheckin"></div>
+        </div>
+
+        <!-- 打卡历史 -->
+        <div style="margin-top:18px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <h2 style="font-size:15px; margin:0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              打卡历史
+            </h2>
+            <button class="btn sm ghost" id="btnClearCheckins" style="font-size:12px;padding:5px 10px">🗑️ 清空记录</button>
+          </div>
+          <div id="checkinHistory"></div>
         </div>
 
         <h2 style="font-size:15px; margin-top:18px">
@@ -1194,7 +1219,28 @@
       box.innerHTML='<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">今日已背 '+todayRec.count+' 词</div><div class="todo-sub">'+(todayRec.note?esc(todayRec.note):"连续 "+calcStreak(cm)+" 天")+'</div></div><button class="todo-act done" id="btnRecheck">重新打卡</button></div>';
     } else {
       var goal=load(K.wordgoal,30);
-      box.innerHTML='<form id="formCheckin" class="row" style="margin:0"><div class="field" style="flex:0 0 130px"><label>今天背了几个词</label><input type="number" id="ckCount" min="1" value="'+goal+'"></div><div class="field" style="flex:1"><label>备注(可选)</label><input type="text" id="ckNote" placeholder="如 词表 List 5"></div><button class="btn" type="submit" style="align-self:flex-end">打卡</button></form>';
+      box.innerHTML='<form id="formCheckin" class="row" style="margin:0"><div class="field" style="flex:0 0 130px"><label>今天背了几个词</label><input type="number" id="ckCount" min="1" value="'+goal+'" style="font-size:16px"></div><div class="field" style="flex:1"><label>备注(可选)</label><input type="text" id="ckNote" placeholder="如 词表 List 5" style="font-size:16px"></div><button class="btn sm" type="submit" style="align-self:flex-end">✅ 打卡</button></form>';
+    }
+
+    // 打卡历史列表（按日期倒序）
+    var allCheckins = load(K.checkins,[]).slice().sort(function(a,b){ return (b.date||"")<(a.date||"")?-1:1; });
+    var histBox=document.getElementById("checkinHistory");
+    if(!allCheckins.length){
+      histBox.innerHTML='<div class="ci-empty">还没有打卡记录，开始背单词吧 📚</div>';
+    } else {
+      var h="";
+      allCheckins.forEach(function(c){
+        var isToday=c.date===td;
+        h+='<div class="ci-item" data-cid="'+c.id+'">'+
+          '<div class="ci-date'+(isToday?' today':'')+'">'+(isToday?'📌 今天':c.date)+'</div>'+
+          '<div class="ci-count">'+c.count+'</div>'+
+          '<div class="ci-note">'+(c.note?esc(c.note):'—')+'</div>'+
+          '<div class="ci-acts">'+
+            '<button data-editck="'+c.id+'" title="编辑数量/备注">✏️</button>'+
+            '<button data-delck="'+c.id+'" class="del" title="删除此条记录">✕</button>'+
+          '</div></div>';
+      });
+      histBox.innerHTML=h;
     }
 
     var words=load(K.words,[]).slice().sort(function(a,b){ return (b.addedDate||"")<(a.addedDate||"")?-1:1; });
@@ -1524,6 +1570,45 @@
       var arr=load(K.checkins,[]).filter(function(c){ return c.date!==todayStr(); });
       save(K.checkins,arr); renderWords(); renderTodo(); toast("已清除今日打卡，可重新打");
     }
+  });
+
+  // 打卡历史：编辑单条
+  document.getElementById("checkinHistory").addEventListener("click", function(e){
+    var editBtn=e.target.closest("[data-editck]");
+    if(editBtn){
+      var id=editBtn.getAttribute("data-editck");
+      var all=load(K.checkins,[]);
+      var rec=all.filter(function(c){ return c.id===id; })[0];
+      if(!rec) return;
+      var newCount=prompt("修改「"+rec.date+"」的背词数量（当前："+rec.count+"）", rec.count);
+      if(newCount===null) return;
+      newCount=+newCount||0;
+      if(newCount<=0){ toast("数量必须大于0"); return; }
+      rec.count=newCount;
+      var newNote=prompt("修改备注（留空不变）", rec.note||"");
+      if(newNote!==null) rec.note=newNote.trim();
+      save(K.checkins,all); renderWords(); renderTodo(); toast("已更新 "+rec.date+" 的记录");
+      return;
+    }
+    // 删除单条
+    var delBtn=e.target.closest("[data-delck]");
+    if(delBtn){
+      var id=delBtn.getAttribute("data-delck");
+      var all=load(K.checkins,[]);
+      var rec=all.filter(function(c){ return c.id===id; })[0];
+      if(!rec) return;
+      if(!confirm("确定删除 "+rec.date+" 的打卡记录（"+rec.count+" 词）？")) return;
+      save(K.checkins,all.filter(function(c){ return c.id!==id; }));
+      renderWords(); renderTodo(); toast("已删除 "+rec.date+" 记录");
+    }
+  });
+  // 清空所有打卡记录
+  document.getElementById("btnClearCheckins").addEventListener("click", function(){
+    var all=load(K.checkins,[]);
+    if(!all.length){ toast("没有打卡记录"); return; }
+    var total=all.reduce(function(s,c){return s+(+c.count||0);},0);
+    if(!confirm("确定清空全部 "+all.length+" 条打卡记录（共 "+total+" 词）？\n此操作不可撤销！")) return;
+    save(K.checkins,[]); renderWords(); renderTodo(); toast("已清空全部打卡记录");
   });
 
   // word form
