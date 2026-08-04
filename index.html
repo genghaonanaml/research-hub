@@ -621,6 +621,10 @@
     var el=document.getElementById("syncStatus"); if(!el) return;
     el.textContent=msg; el.className="sync-status"+(cls?(" "+cls):"");
   }
+  function nowTime(){
+    var d=new Date(), p=function(n){ return (n<10?"0":"")+n; };
+    return p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds());
+  }
   function buildSyncPayload(){
     var d={};
     Object.keys(K).forEach(function(k){
@@ -736,7 +740,7 @@
           body:JSON.stringify({ message:"sync update", content:b64utf8(JSON.stringify(payload)), sha: data && data.sha ? data.sha : undefined })
         }).then(function(r){
           if(!r.ok) return r.text().then(function(t){ throw new Error("上传失败 HTTP "+r.status+" — "+((t||"无详情").slice(0,200))); });
-          renderAll(); setSyncStatus("已同步 ✓ "+new Date().toLocaleTimeString(), "ok"); })
+          renderAll(); setSyncStatus("已同步 ✓ "+nowTime(), "ok"); })
       })
       .catch(function(e){ setSyncStatus("同步失败："+e.message, "err"); });
   }
@@ -763,7 +767,7 @@
           var txt=decodeURIComponent(escape(atob(data.content.replace(/\s/g,""))));
           var obj; try{ obj=JSON.parse(txt); }catch(e){ obj=null; }
           if(obj && typeof obj==="object"){ mergePayload(obj); renderAll(); }
-          setSyncStatus("已拉取 ✓ "+new Date().toLocaleTimeString(), "ok");
+          setSyncStatus("已拉取 ✓ "+nowTime(), "ok");
         } else {
           setSyncStatus("云端暂无数据（首次使用）","");
         }
