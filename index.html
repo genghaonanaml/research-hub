@@ -603,32 +603,34 @@
   function buildSyncPayload(){
     var d={};
     Object.keys(K).forEach(function(k){
-      if(k===K.courses||k===K.checkins||k===K.words||k===K.papers){
+      var sk=K[k];  // sk = 实际存储键 (wb_research_xxx)
+      if(sk===K.courses||sk===K.checkins||sk===K.words||sk===K.papers){
         // 只同步用户自建数据，示例模板课永不上传云端（避免旧模板被拉回覆盖）
         try{
-          var arr=JSON.parse(localStorage.getItem(k)||"[]").filter(function(x){ return x && !x.sample; });
+          var arr=JSON.parse(localStorage.getItem(sk)||"[]").filter(function(x){ return x && !x.sample; });
           d[k]=JSON.stringify(arr);
-        }catch(e){ d[k]=localStorage.getItem(k); }
+        }catch(e){ d[k]=localStorage.getItem(sk); }
       } else {
-        d[k]=localStorage.getItem(k);
+        d[k]=localStorage.getItem(sk);
       }
     });
     return d;
   }
   function mergePayload(obj){
     Object.keys(K).forEach(function(k){
+      var sk=K[k];  // sk = 实际存储键
       if(obj[k]==null) return;
-      if(k===K.courses||k===K.checkins||k===K.words||k===K.papers){
-        var local=load(k,[]); var remote=[];
+      if(sk===K.courses||sk===K.checkins||sk===K.words||sk===K.papers){
+        var local=load(sk,[]); var remote=[];
         try{ remote=JSON.parse(obj[k])||[]; }catch(e){ remote=[]; }
         // 丢弃云端来的示例模板（本地 seed 会自己种新鲜的那份，避免旧模板污染）
         remote=remote.filter(function(x){ return x && !x.sample; });
         var map={}; local.forEach(function(x){ if(x&&x.id) map[x.id]=x; });
         remote.forEach(function(x){ if(x&&x.id) map[x.id]=x; });
         var merged=[]; Object.keys(map).forEach(function(id){ merged.push(map[id]); });
-        save(k, merged);
+        save(sk, merged);
       } else {
-        localStorage.setItem(k, obj[k]);
+        localStorage.setItem(sk, obj[k]);
       }
     });
   }
@@ -657,7 +659,7 @@
     }catch(e){ return null; }
   }
   function encodeAllData(){
-    var payload={}; Object.keys(K).forEach(function(k){ payload[k]=localStorage.getItem(k); });
+    var payload={}; Object.keys(K).forEach(function(k){ payload[k]=localStorage.getItem(K[k]); });
     return b64urlEncode(JSON.stringify(payload));
   }
   function decodeAllData(b64){
@@ -1591,7 +1593,7 @@
     if(dq){
       var imported=decodeAllData(dq[1]);
       if(imported && typeof imported==="object"){
-        Object.keys(imported).forEach(function(k){ if(imported[k]!=null) localStorage.setItem(k, imported[k]); });
+        Object.keys(imported).forEach(function(k){ if(imported[k]!=null) localStorage.setItem(K[k], imported[k]); });
         try{ history.replaceState(null,"",location.pathname); }catch(e){}
         toast("已从链接导入数据");
       }
