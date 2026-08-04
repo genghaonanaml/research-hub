@@ -527,6 +527,7 @@
           </div>
           <div class="sync-row">
             <button class="btn sm" id="btnSaveSync">保存并启用</button>
+            <button class="btn sm ghost" id="btnDiagToken">诊断 Token</button>
             <button class="btn sm ghost hidden" id="btnCopySyncLink">复制手机链接</button>
             <span class="sync-status" id="syncStatus" style="margin-left:auto;font-size:13px"></span>
           </div>
@@ -1571,6 +1572,39 @@
     var s=getSync();
     if(!s.repo||!s.token){ toast("请先保存仓库与 Token"); return; }
     copyText(buildSyncLink(), "已复制同步链接");
+  });
+  // 诊断 Token：逐项检查 Token 是否有效、是否有 repo 权限、能否读写仓库
+  document.getElementById("btnDiagToken").addEventListener("click", function(){
+    var token=document.getElementById("syncToken").value.trim();
+    var repo=document.getElementById("syncRepo").value.trim();
+    if(!token){ setSyncStatus("⚠️ 请先填入 Token","err"); return; }
+    setSyncStatus("诊断中…","busy");
+    var results=[];
+    var h={"Accept":"application/vnd.github+json"};
+    h["Authorization"]="Bearer "+token;
+    // 测试1：Token 本身是否有效（查用户信息）
+    fetch("https://api.github.com/user",{headers:h})
+      .then(function(r){
+        results.push("① Token有效性: HTTP "+r.status+(r.ok?" ✓ 有效 ✗ 无效":""));
+        return r.json().catch(function(){});
+      })
+      .then(function(u){
+        if(u&&u.login) results[0]="① Token有效 ✓ 用户: "+u.login;
+        // 测试2：能否访问该仓库
+        var repoUrl="https://api.github.com/repos/"+repo;
+        return fetch(repoUrl,{headers:h});
+      })
+      .then(function(r2){
+        results.push("② 仓库访问: HTTP "+r2.status+(r2.ok?" ✓ 可访问":" ✗ "+(r2.status===404?"仓库不存在":r2.status===403?"无权限":"未知错误")));
+        // 测试3：尝试读取 sync/data.json（测试 Contents API 权限）
+        var contentsUrl=repoUrl+"/contents/sync/data.json";
+        return fetch(contentsUrl,{headers:h});
+      })
+      .then(function(r3){
+        results.push("③ Contents API(写数据用): HTTP "+r3.status+(r3.status===200?" ✓ 有权限":r3.status===404?" ✓ 有权限(文件尚不存在)":" ✗ "+(r3.status===403?"被拒—确认 repo scope":r3.status===401?"Token 错误":"HTTP "+r3.status)));
+        setSyncStatus(results.join(" | "), r3.ok||r3.status===404 ? "ok" : "err");
+      })
+      .catch(function(e){ setSyncStatus("诊断失败: "+e.message,"err"); });
   });
   function buildSyncLink(){
     var s=getSync();
