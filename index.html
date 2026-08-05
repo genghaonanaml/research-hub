@@ -131,7 +131,7 @@
   .stat::after{content:""; position:absolute; top:-20px; right:-20px; width:60px; height:60px; border-radius:50%; background:var(--primary); opacity:.04}
   .stat .n{font-size:28px; font-weight:800; color:var(--primary); line-height:1.2}
   .stat .l{font-size:12px; color:var(--muted); margin-top:3px; font-weight:500}
-  /* schedule - timetable grid (11 single periods, cards span N rows) */
+  /* schedule - timetable grid (12 single periods, no header row, cards span N rows) */
   .course-info-bar{margin-bottom:8px}
   .ci-week{font-size:22px;font-weight:800;color:var(--text);line-height:1.3}
   .ci-date{font-size:14px;color:var(--muted);margin-top:2px}
@@ -152,7 +152,7 @@
   .wb-day.today .wbd-name{color:#4361ee}
   .wbd-name{display:block;font-size:12px}
   .wbd-num{display:block;font-size:15px;font-weight:800}
-  .timetable{display:grid;grid-template-columns:40px repeat(7,1fr);grid-template-rows:auto repeat(11,1fr);border:1px solid #dde3ef;border-radius:12px;overflow:hidden;background:#fff}
+  .timetable{display:grid;grid-template-columns:40px repeat(7,1fr);grid-template-rows:repeat(12,1fr);border:1px solid #dde3ef;border-radius:12px;overflow:hidden;background:#fff}
   .tt-slot{background:#f8f9fc;padding:0;text-align:center;font-size:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid #dde3ef;border-bottom:1px solid #dde3ef;min-height:42px}
   .tt-slot .tt-snum{font-size:14px;font-weight:800;color:var(--text);line-height:1}
   .tt-slot .tt-stime{font-size:8px;color:var(--muted);line-height:1.1;margin-top:1px}
@@ -944,7 +944,7 @@
     {"day":1,"start":9,"end":10,"name":"清洁能源前沿技术","room":"","teacher":"","color":"#00a3b4","sample":true,"weeks":"1"},
     {"day":1,"start":11,"end":12,"name":"英语水平测试听力&综合训练","room":"","teacher":"","color":"#9b5de5","sample":true,"weeks":"3"},
     /* ===== 周二 day=2 ===== */
-    {"day":2,"start":2,"end":3,"name":"新时代中国特色社会主义理论与实践","room":"","teacher":"","color":"#4361ee","sample":true,"weeks":"1-8"},
+    {"day":2,"start":1,"end":2,"name":"新时代中国特色社会主义理论与实践","room":"","teacher":"","color":"#4361ee","sample":true,"weeks":"1-8"},
     {"day":2,"start":5,"end":6,"name":"高等传热传质学（双语人工智能+）","room":"","teacher":"","color":"#e5484d","sample":true,"weeks":"5-8"},
     {"day":2,"start":7,"end":8,"name":"论文写作与指导","room":"","teacher":"","color":"#f97316","sample":true,"weeks":"9"},
     {"day":2,"start":7,"end":8,"name":"论文写作与指导","room":"","teacher":"","color":"#f97316","sample":true,"weeks":"11-16"},
@@ -956,11 +956,11 @@
     {"day":3,"start":5,"end":6,"name":"清洁能源技术领域案例专题课","room":"","teacher":"","color":"#e8a33d","sample":true,"weeks":"9-12"},
     {"day":3,"start":9,"end":10,"name":"英语水平测试听力&综合训练","room":"","teacher":"","color":"#9b5de5","sample":true,"weeks":"3"},
     /* ===== 周四 day=4 ===== */
-    {"day":4,"start":2,"end":3,"name":"自然辩证法概论","room":"","teacher":"","color":"#e5484d","sample":true,"weeks":"8"},
+    {"day":4,"start":1,"end":2,"name":"自然辩证法概论","room":"","teacher":"","color":"#e5484d","sample":true,"weeks":"8"},
     {"day":4,"start":3,"end":4,"name":"自然辩证法概论","room":"","teacher":"","color":"#e5484d","sample":true,"weeks":"1-7"},
     {"day":4,"start":5,"end":6,"name":"高等工程热力学","room":"","teacher":"","color":"#4361ee","sample":true,"weeks":"1-4"},
     /* ===== 周五 day=5 ===== */
-    {"day":5,"start":2,"end":3,"name":"英语水平测试听力&综合训练","room":"","teacher":"","color":"#9b5de5","sample":true,"weeks":"1-14"},
+    {"day":5,"start":1,"end":2,"name":"英语水平测试听力&综合训练","room":"","teacher":"","color":"#9b5de5","sample":true,"weeks":"1-14"},
     /* ===== 周六 day=6 ===== */
     {"day":6,"start":5,"end":6,"name":"新时代中国特色社会主义理论与实践","room":"","teacher":"","color":"#4361ee","sample":true,"weeks":"9"},
     {"day":6,"start":5,"end":6,"name":"自然辩证法概论","room":"","teacher":"","color":"#e5484d","sample":true,"weeks":"7"},
@@ -1190,11 +1190,11 @@
   }
 
   // ---------- render: courses ----------
-  // ---------- render: courses (timetable grid - 11 single periods) ----------
+  // ---------- render: courses (timetable grid - 12 single periods) ----------
   // 12 individual periods per day; a course spans 2 periods (grid-row: span 2)
   // Time table: each pair (1-2, 3-4, ...) is one continuous class (双节连上)
   var PERIOD_INFO = [
-    {num:2,start:'08:50',end:'09:35'},
+    {num:1,start:'08:00',end:'08:45'}, {num:2,start:'08:50',end:'09:35'},
     {num:3,start:'09:55',end:'10:40'}, {num:4,start:'10:45',end:'11:30'},
     {num:5,start:'13:30',end:'14:15'}, {num:6,start:'14:20',end:'15:05'},
     {num:7,start:'15:25',end:'16:10'}, {num:8,start:'16:15',end:'17:00'},
@@ -1302,12 +1302,9 @@
     // Grid: col1=slot, col2-8=Mon-Sun | row0=header, row1-12=periods 1-12
     // This eliminates CSS Grid auto-flow confusion with span
     var tt = '';
-    // === Row 0: Header ===
-    tt += '<div class="tt-slot" style="grid-column:1;grid-row:1"><div class="tt-snum">节</div></div>';
-    for(var d=0;d<7;d++) tt += '<div class="tt-cell'+(d===todayCol?' today-col':'')+'" style="grid-column:'+(d+2)+';grid-row:1"></div>';
-    // === Rows 1-11: Period rows ===
-    for(var p=0;p<11;p++){
-      var gi = p + 2; // grid row index (1-based): period 0 → row 2, period 1 → row 3, ...
+    // === Rows 0-11: Period rows (no separate "节" header row) ===
+    for(var p=0;p<12;p++){
+      var gi = p + 1; // grid row index (1-based): period 0 → row 1, ...
       var pi = PERIOD_INFO[p];
       // Left slot: period number + time
       tt += '<div class="tt-slot" style="grid-column:1;grid-row:'+gi+'"><div class="tt-snum">'+pi.num+'</div><div class="tt-stime">'+pi.start+'</div><div class="tt-stime">'+pi.end+'</div></div>';
@@ -1333,9 +1330,9 @@
               if(spanRows < 2) spanRows = 2;
             }
           });
-          if(p + spanRows > 11) spanRows = 11 - p;
+          if(p + spanRows > 12) spanRows = 12 - p;
           // Mark covered cells as occupied
-          for(var oc=p+1; oc<p+spanRows && oc<11; oc++) occupied[d][oc] = true;
+          for(var oc=p+1; oc<p+spanRows && oc<12; oc++) occupied[d][oc] = true;
           // Build cell with EXPLICIT position + optional span
           // Use "grid-row: start / span N" syntax — NOT separate declarations (span would override start!)
           var cellStyle = 'position:relative;grid-column:'+gc;
@@ -1518,7 +1515,7 @@
   var selectedColor = COURSE_COLORS[0];
   // Form state for pickers
   var formWeeks = {start:1, end:16, mode:'all'}; // all | odd | even
-  var formPeriod = {day:1, start:2, end:3}; // day(1-7), period range
+  var formPeriod = {day:1, start:1, end:2}; // day(1-7), period range
 
   function initColorPicker(){
     var p=document.getElementById("cColorPicker");
@@ -1556,7 +1553,7 @@
     document.getElementById("cCredits").value='';
     document.getElementById("cNote").value='';
     formWeeks={start:1,end:16,mode:'all',list:null};
-    formPeriod={day:1,start:2,end:3};
+    formPeriod={day:1,start:1,end:2};
     ppFirstTap=false;
     renderDayChips(); renderPeriodChips();
     updateWeeksDisplay();
