@@ -363,6 +363,49 @@
     .kb-board{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:10px;padding-bottom:6px;scroll-snap-type:x mandatory}
     .kb-col{min-width:82%;flex-shrink:0;scroll-snap-align:start}
   }
+
+  /* ===== 漫威模块（深色主题 + 红蓝盾牌元素） ===== */
+  .marvel-card{background:#0b0c10;border:1px solid #1f2a3a;border-radius:16px;padding:18px;color:#c5c6c7;margin-bottom:14px}
+  .marvel-hero{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+  .marvel-shield{flex-shrink:0;width:46px;height:46px;filter:drop-shadow(0 0 6px rgba(229,83,83,.5))}
+  .marvel-hero-text h3{margin:0;font-size:18px;font-weight:900;letter-spacing:1px;color:#fff;
+    background:linear-gradient(90deg,#e55353,#66fcf1);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .marvel-hero-text p{margin:3px 0 0;font-size:12px;color:#8a93a0}
+  .marvel-progress{background:#2b3643;border-radius:20px;height:22px;overflow:hidden;position:relative;margin-bottom:8px}
+  .marvel-progress-bar{background:linear-gradient(90deg,#e55353,#66fcf1);height:100%;width:0%;transition:width .35s ease}
+  .marvel-progress-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;font-weight:800;color:#fff;text-shadow:0 0 6px rgba(0,0,0,.9);white-space:nowrap}
+  .marvel-stats{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .marvel-stat{flex:1;min-width:90px;background:#151b25;border:1px solid #243043;border-radius:12px;padding:10px 12px;text-align:center}
+  .marvel-stat .n{font-size:22px;font-weight:900;color:#66fcf1}
+  .marvel-stat .l{font-size:12px;color:#8a93a0;margin-top:2px}
+  .marvel-timeline{position:relative;padding-left:24px;max-height:62vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .marvel-timeline::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:2px;background:#34495e;border-radius:2px}
+  .marvel-item{display:flex;align-items:center;gap:10px;margin-bottom:12px;position:relative;cursor:pointer}
+  .marvel-node{position:absolute;left:-24px;width:12px;height:12px;border-radius:50%;background:#e55353;border:3px solid #0b0c10;box-shadow:0 0 0 2px #e55353;flex-shrink:0;top:6px}
+  .marvel-item.checked .marvel-node{background:#66fcf1;box-shadow:0 0 0 2px #66fcf1}
+  .marvel-check{margin:0;width:20px;height:20px;accent-color:#e55353;flex-shrink:0;cursor:pointer}
+  .marvel-item-card{background:#1f2833;border-left:3px solid #45a29e;border-radius:8px;padding:8px 12px;flex:1;transition:opacity .2s,border-color .2s}
+  .marvel-item.checked .marvel-item-card{opacity:.45;border-left-color:#555}
+  .marvel-item.checked .marvel-title{text-decoration:line-through;color:#888}
+  .marvel-tag{display:inline-block;font-size:10px;padding:1px 7px;border-radius:10px;color:#fff;margin-right:8px;font-weight:800;vertical-align:middle}
+  .tag-mcu{background:#e55353}.tag-mtv{background:#9b59b6}.tag-anm{background:#f39c12}
+  .tag-xmn{background:#2ecc71}.tag-spdr{background:#3498db}.tag-lgy{background:#95a5a6}
+  .tag-nfx{background:#e74c3c}.tag-old{background:#34495e}
+  .marvel-title{font-size:14px;color:#fff;font-weight:600}
+  .marvel-year{color:#66fcf1;font-weight:800;font-size:13px;margin-right:6px}
+  .marvel-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .marvel-btn{border:1px solid #e55353;background:#1f2833;color:#e55353;font-weight:700;font-size:14px;border-radius:10px;padding:10px 16px;cursor:pointer;min-height:44px;transition:.2s}
+  .marvel-btn:hover{background:#e55353;color:#fff}
+  .marvel-btn.ghost{border-color:#34495e;color:#8a93a0}
+  .marvel-btn.ghost:hover{background:#1f2833;color:#c5c6c7}
+  .marvel-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+  .marvel-legend span{font-size:11px;color:#8a93a0;display:inline-flex;align-items:center;gap:4px}
+  .marvel-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+  @media(max-width:680px){
+    .marvel-timeline{max-height:55vh}
+    .marvel-title{font-size:13px}
+    .marvel-hero-text h3{font-size:16px}
+  }
 </style>
 </head>
 <body>
@@ -393,6 +436,10 @@
       <div class="nav-item" data-mod="tasks">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="18" rx="1.5"/><rect x="14" y="3" width="7" height="11" rx="1.5"/></svg>
         任务看板
+      </div>
+      <div class="nav-item" data-mod="marvel">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 5 6 0-4.5 4 1.5 6-6-3-6 3 1.5-6L3 7l6 0z"/><circle cx="12" cy="11" r="2.5"/></svg>
+        漫威
       </div>
       <div class="nav-item" data-mod="sync">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9"/><path d="M21 3v6h-6"/><path d="M3 21v-6h6"/></svg>
@@ -659,6 +706,53 @@
         <div class="kb-board" id="kbBoard"></div>
       </section>
 
+      <!-- 漫威打卡 -->
+      <section class="card hidden" id="panel-marvel">
+        <div class="marvel-card">
+          <div class="marvel-hero">
+            <svg class="marvel-shield" viewBox="0 0 24 24" fill="none" stroke="#e55353" stroke-width="1.6" stroke-linejoin="round">
+              <path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z" fill="#1b1f2a"/>
+              <path d="M12 5l5.5 2v4.2c0 3.4-2.4 5.8-5.5 7.6-3.1-1.8-5.5-4.2-5.5-7.6V7z" stroke="#e55353"/>
+              <path d="M12 8.5l2.2 1.6-0.8 2.6h-2.8l-0.8-2.6z" fill="#66fcf1" stroke="#66fcf1"/>
+              <line x1="12" y1="2" x2="12" y2="5" stroke="#e55353"/>
+              <line x1="12" y1="19" x2="12" y2="22" stroke="#e55353"/>
+            </svg>
+            <div class="marvel-hero-text">
+              <h3>漫威 140 部 · 剧情时间线</h3>
+              <p>从 1940s 到 2026，按观看顺序一路打到第 140 部</p>
+            </div>
+          </div>
+
+          <div class="marvel-progress">
+            <div class="marvel-progress-bar" id="mvBar"></div>
+            <div class="marvel-progress-text" id="mvText">已打卡: 0 / 140</div>
+          </div>
+          <div class="marvel-stats">
+            <div class="marvel-stat"><div class="n" id="mvDone">0</div><div class="l">已完成</div></div>
+            <div class="marvel-stat"><div class="n" id="mvLeft">140</div><div class="l">待观看</div></div>
+            <div class="marvel-stat"><div class="n" id="mvPct">0%</div><div class="l">完成度</div></div>
+          </div>
+
+          <div class="marvel-timeline" id="mvTimeline"></div>
+
+          <div class="marvel-legend">
+            <span><i style="background:#e55353"></i>MCU 电影宇宙</span>
+            <span><i style="background:#9b59b6"></i>剧集 MTV</span>
+            <span><i style="background:#f39c12"></i>动画 ANM</span>
+            <span><i style="background:#2ecc71"></i>X战警 XMN</span>
+            <span><i style="background:#3498db"></i>蜘蛛侠 SPDR</span>
+            <span><i style="background:#95a5a6"></i>老怪 LGY</span>
+            <span><i style="background:#e74c3c"></i>Netflix NFX</span>
+            <span><i style="background:#34495e"></i>其他 OLD</span>
+          </div>
+
+          <div class="marvel-actions">
+            <button class="marvel-btn" id="mvExpand">展开全部</button>
+            <button class="marvel-btn ghost" id="mvReset">重置打卡</button>
+          </div>
+        </div>
+      </section>
+
       <!-- 云同步 -->
       <section class="card hidden" id="panel-sync">
         <h2>
@@ -725,6 +819,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="18" rx="1.5"/><rect x="14" y="3" width="7" height="11" rx="1.5"/></svg>
       看板
     </div>
+    <div class="nav-item" data-mod="marvel">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 5 6 0-4.5 4 1.5 6-6-3-6 3 1.5-6L3 7l6 0z"/><circle cx="12" cy="11" r="2.5"/></svg>
+      漫威
+    </div>
     <div class="nav-item" data-mod="sync">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9"/><path d="M21 3v6h-6"/><path d="M3 21v-6h6"/></svg>
       同步
@@ -748,7 +846,8 @@
     weekOverride: PREFIX+"weekOverride",
     termStart: PREFIX+"termStart",
     tasks: PREFIX+"tasks",
-    tomb: PREFIX+"deleted"   // 墓碑：记录已删除的记录 id，防止云同步把已删记录拉回复活
+    tomb: PREFIX+"deleted",   // 墓碑：记录已删除的记录 id，防止云同步把已删记录拉回复活
+    marvel: PREFIX+"marvel"   // 漫威 140 部打卡状态：{idx:true}
   };
   function load(key, def){ try{ var v=localStorage.getItem(key); return v==null?def:JSON.parse(v); }catch(e){ return def; } }
   function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); scheduleSync(); }
@@ -793,6 +892,8 @@
           var arr=JSON.parse(localStorage.getItem(sk)||"[]").filter(function(x){ return x && !x.sample; });
           d[k]=JSON.stringify(arr);
         }catch(e){ d[k]=localStorage.getItem(sk); }
+      } else if(sk===K.marvel){
+        d[k]=JSON.stringify(mvState());  // 漫威打卡状态（idx→true）同步上传
       } else {
         d[k]=localStorage.getItem(sk);
       }
@@ -824,6 +925,13 @@
         var set={}; lt.concat(rt).forEach(function(id){ if(id) set[id]=1; });
         var mergedTomb=Object.keys(set);
         if(JSON.stringify(mergedTomb)!==JSON.stringify(lt)) save(K.tomb, mergedTomb);
+      } else if(sk===K.marvel){
+        // 漫威打卡状态：取本地+云端键并集（任一处打卡即视为已看，双端进度合并）
+        var lm=load(K.marvel,{}); var rm={};
+        try{ rm=JSON.parse(obj[k])||{}; }catch(e){ rm={}; }
+        var changed=false;
+        Object.keys(rm).forEach(function(idx){ if(rm[idx] && !lm[idx]){ lm[idx]=true; changed=true; } });
+        if(changed) save(K.marvel, lm);
       } else {
         // 标量设置项（开学日期 / 每日目标 / 周次覆盖等）：本地已有值则保留，
         // 避免云端旧值覆盖用户刚做的修改（例如改了开学日期又被同步回旧值）
@@ -1175,6 +1283,14 @@
     overdue.forEach(function(p){
       html += '<div class="todo-item overdue"><span class="todo-dot red"></span><div class="todo-body"><div class="todo-title">逾期未读：'+esc(p.title)+'</div><div class="todo-sub">计划 '+esc(p.planDate)+' · '+esc(p.source||"")+'</div></div><button class="todo-act" data-go="papers">去处理</button></div>';
     });
+    // 漫威打卡进度（轻量提示，不阻塞）
+    var mvSt=mvState(); var mvTotal=MV_DATA.length;
+    var mvDone=0; for(var mi=0; mi<mvTotal; mi++){ if(mvSt[mi]) mvDone++; }
+    if(mvTotal>0){
+      var mvPct=Math.round(mvDone/mvTotal*100);
+      var mvSub = mvDone===0 ? "还没开始，从美国队长看起" : ("已完成 "+mvPct+"%，继续追到终局之战");
+      html += '<div class="todo-item"><span class="todo-dot blue"></span><div class="todo-body"><div class="todo-title">漫威观影：'+mvDone+' / '+mvTotal+' 部</div><div class="todo-sub">'+mvSub+'</div></div><button class="todo-act" data-go="marvel">去打卡</button></div>';
+    }
     if(!html){ html='<div class="empty">今天暂时没有待处理事项，去各模块添加内容吧。</div>'; }
     document.getElementById("todoList").innerHTML=html;
 
@@ -1454,7 +1570,68 @@
     list.innerHTML=h;
   }
 
-  function renderAll(){ renderTodo(); renderCourses(); renderWords(); renderPapers(); renderTasks(); }
+  function renderAll(){ renderTodo(); renderCourses(); renderWords(); renderPapers(); renderTasks(); renderMarvel(); }
+
+  // ---------- 漫威 140 部打卡 ----------
+  // 严格对应 8 大板块，按剧情时间轴排序（源自 D:\Desktop\漫威打卡.html）
+  var MV_DATA = [
+    {y:"1940s",n:"美国队长：复仇者先锋",t:"MCU"},{y:"1940s",n:"特工卡特 第一季",t:"OLD"},{y:"1940s",n:"特工卡特 第二季",t:"OLD"},
+    {y:"1962",n:"X战警：第一战",t:"XMN"},{y:"1983",n:"X战警：天启",t:"XMN"},{y:"1980s",n:"刀锋战士",t:"LGY"},{y:"1980s",n:"刀锋战士2",t:"LGY"},{y:"1980s",n:"刀锋战士3",t:"LGY"},
+    {y:"1990s",n:"惊奇队长",t:"MCU"},{y:"2000",n:"X战警",t:"XMN"},{y:"2002",n:"蜘蛛侠 (托比)",t:"SPDR"},{y:"2002",n:"蜘蛛侠2 (托比)",t:"SPDR"},{y:"2002",n:"蜘蛛侠3 (托比)",t:"SPDR"},
+    {y:"2003",n:"X战警2",t:"XMN"},{y:"2003",n:"夜魔侠 2003",t:"LGY"},{y:"2003",n:"绿巨人浩克 2003",t:"LGY"},{y:"2004",n:"惩罚者 2004",t:"LGY"},{y:"2005",n:"神奇四侠 2005",t:"LGY"},
+    {y:"2005",n:"艾丽卡",t:"LGY"},{y:"2006",n:"恶灵骑士",t:"LGY"},{y:"2006",n:"X战警3：背水一战",t:"XMN"},{y:"2008",n:"钢铁侠",t:"MCU"},{y:"2008",n:"无敌浩克",t:"MCU"},
+    {y:"2009",n:"金刚狼",t:"XMN"},{y:"2010",n:"钢铁侠2",t:"MCU"},{y:"2011",n:"雷神",t:"MCU"},{y:"2012",n:"复仇者联盟",t:"MCU"},{y:"2012",n:"超凡蜘蛛侠",t:"SPDR"},{y:"2012",n:"超凡蜘蛛侠2",t:"SPDR"},
+    {y:"2013",n:"钢铁侠3",t:"MCU"},{y:"2013",n:"雷神2：黑暗世界",t:"MCU"},{y:"2013",n:"神盾局特工 第一季",t:"OLD"},{y:"2013",n:"金刚狼2",t:"XMN"},{y:"2014",n:"美国队长2：冬日战士",t:"MCU"},
+    {y:"2014",n:"银河护卫队",t:"MCU"},{y:"2014",n:"X战警：逆转未来",t:"XMN"},{y:"2014",n:"神盾局特工 第二季",t:"OLD"},{y:"2015",n:"复仇者联盟2：奥创纪元",t:"MCU"},{y:"2015",n:"蚁人",t:"MCU"},
+    {y:"2015",n:"夜魔侠 第一季",t:"NFX"},{y:"2015",n:"杰西卡·琼斯 第一季",t:"NFX"},{y:"2015",n:"神盾局特工 第三季",t:"OLD"},{y:"2015",n:"神奇四侠 2015",t:"LGY"},{y:"2016",n:"美国队长3：内战",t:"MCU"},
+    {y:"2016",n:"奇异博士",t:"MCU"},{y:"2016",n:"夜魔侠 第二季",t:"NFX"},{y:"2016",n:"卢克·凯奇 第一季",t:"NFX"},{y:"2016",n:"铁拳 第一季",t:"NFX"},{y:"2016",n:"惩罚者 第一季",t:"NFX"},
+    {y:"2016",n:"神盾局特工 第四季",t:"OLD"},{y:"2016",n:"死侍",t:"XMN"},{y:"2017",n:"银河护卫队2",t:"MCU"},{y:"2017",n:"蜘蛛侠：英雄归来",t:"MCU"},{y:"2017",n:"雷神3：诸神黄昏",t:"MCU"},
+    {y:"2017",n:"捍卫者联盟",t:"NFX"},{y:"2017",n:"杰西卡·琼斯 第二季",t:"NFX"},{y:"2017",n:"卢克·凯奇 第二季",t:"NFX"},{y:"2017",n:"神盾局特工 第五季",t:"OLD"},{y:"2017",n:"异人族",t:"OLD"},
+    {y:"2017",n:"金刚狼3：殊死一战",t:"XMN"},{y:"2018",n:"黑豹",t:"MCU"},{y:"2018",n:"复仇者联盟3：无限战争",t:"MCU"},{y:"2018",n:"蚁人2：黄蜂女现身",t:"MCU"},{y:"2018",n:"夜魔侠 第三季",t:"NFX"},
+    {y:"2018",n:"铁拳 第二季",t:"NFX"},{y:"2018",n:"惩罚者 第二季",t:"NFX"},{y:"2018",n:"杰西卡·琼斯 第三季",t:"NFX"},{y:"2018",n:"离家童盟 第一季",t:"OLD"},{y:"2018",n:"斗篷与匕首 第一季",t:"OLD"},
+    {y:"2018",n:"死侍2",t:"XMN"},{y:"2018",n:"X战警：黑凤凰",t:"XMN"},{y:"2019",n:"复仇者联盟4：终局之战",t:"MCU"},{y:"2019",n:"蜘蛛侠：英雄远征",t:"MCU"},{y:"2019",n:"神盾局特工 第六季",t:"OLD"},
+    {y:"2019",n:"神盾局特工 第七季",t:"OLD"},{y:"2019",n:"离家童盟 第二季",t:"OLD"},{y:"2019",n:"斗篷与匕首 第二季",t:"OLD"},{y:"2020",n:"黑寡妇",t:"MCU"},{y:"2020",n:"离家童盟 第三季",t:"OLD"},
+    {y:"2020",n:"新变种人",t:"XMN"},{y:"2021",n:"尚气与十环传奇",t:"MCU"},{y:"2021",n:"永恒族",t:"MCU"},{y:"2021",n:"蜘蛛侠：英雄无归",t:"MCU"},{y:"2021",n:"旺达幻视",t:"MTV"},
+    {y:"2021",n:"猎鹰与冬兵",t:"MTV"},{y:"2021",n:"洛基 第一季",t:"MTV"},{y:"2021",n:"假如……？ 第一季",t:"ANM"},{y:"2021",n:"鹰眼",t:"MTV"},{y:"2021",n:"我是格鲁特 第一季",t:"ANM"},
+    {y:"2021",n:"毒液",t:"SPDR"},{y:"2021",n:"毒液2",t:"SPDR"},{y:"2021",n:"莫比亚斯",t:"SPDR"},{y:"2021",n:"地狱风暴",t:"OLD"},{y:"2022",n:"奇异博士2：疯狂多元宇宙",t:"MCU"},
+    {y:"2022",n:"雷神4：爱与雷霆",t:"MCU"},{y:"2022",n:"黑豹2：瓦坎达万岁",t:"MCU"},{y:"2022",n:"月光骑士",t:"MTV"},{y:"2022",n:"惊奇少女",t:"MTV"},{y:"2022",n:"女浩克",t:"MTV"},
+    {y:"2022",n:"暗夜狼人",t:"MTV"},{y:"2022",n:"银河护卫队：圣诞特别篇",t:"MTV"},{y:"2022",n:"假如……？ 第二季",t:"ANM"},{y:"2022",n:"我是格鲁特 第二季",t:"ANM"},{y:"2022",n:"X战警97 第一季",t:"ANM"},
+    {y:"2023",n:"蚁人与黄蜂女：量子狂潮",t:"MCU"},{y:"2023",n:"银河护卫队3",t:"MCU"},{y:"2023",n:"惊奇队长2",t:"MCU"},{y:"2023",n:"秘密入侵",t:"MTV"},{y:"2023",n:"洛基 第二季",t:"MTV"},
+    {y:"2023",n:"回声",t:"MTV"},{y:"2024",n:"死侍与金刚狼",t:"MCU"},{y:"2024",n:"阿加莎",t:"MTV"},{y:"2024",n:"夜魔侠：重生 第一季",t:"MTV"},{y:"2024",n:"钢铁之心",t:"MTV"},
+    {y:"2024",n:"奇迹人 第一季",t:"MTV"},{y:"2024",n:"惩罚者：最后一击",t:"MTV"},{y:"2024",n:"蜘蛛夫人",t:"SPDR"},{y:"2024",n:"猎人克莱文",t:"SPDR"},{y:"2024",n:"毒液3：最后一舞",t:"SPDR"},
+    {y:"2025",n:"美国队长4：勇敢新世界",t:"MCU"},{y:"2025",n:"雷霆特攻队*",t:"MCU"},{y:"2025",n:"神奇四侠：初露锋芒",t:"MCU"},{y:"2025",n:"蜘蛛侠：崭新之日",t:"MCU"},{y:"2025",n:"夜魔侠：重生 第二季",t:"MTV"},
+    {y:"2025",n:"你的友好邻居蜘蛛侠 第一季",t:"ANM"},{y:"2025",n:"漫威丧尸 第一季",t:"ANM"},{y:"2025",n:"瓦坎达之眼",t:"ANM"},{y:"2025",n:"X战警97 第二季",t:"ANM"},
+    {y:"2026",n:"暗影蜘蛛侠 (Spider-Noir) 第一季",t:"SPDR"},{y:"2026",n:"蜘蛛侠：平行宇宙",t:"SPDR"},{y:"2026",n:"蜘蛛侠：纵横宇宙",t:"SPDR"},{y:"2026",n:"假如……？ 第三季",t:"ANM"},
+    {y:"OLD",n:"恶灵骑士2：复仇时刻",t:"LGY"},{y:"OLD",n:"惩罚者2：战争特区",t:"LGY"},{y:"OLD",n:"神奇四侠2：银影侠现身",t:"LGY"},{y:"OLD",n:"大群 第一季",t:"XMN"},{y:"OLD",n:"大群 第二季",t:"XMN"},
+    {y:"OLD",n:"大群 第三季",t:"XMN"},{y:"OLD",n:"天赋异禀 第一季",t:"XMN"},{y:"OLD",n:"天赋异禀 第二季",t:"XMN"}
+  ];
+  var MV_TAG2CLS = {MCU:"tag-mcu",MTV:"tag-mtv",ANM:"tag-anm",XMN:"tag-xmn",SPDR:"tag-spdr",LGY:"tag-lgy",NFX:"tag-nfx",OLD:"tag-old"};
+  function mvState(){ return load(K.marvel,{}); }
+  function renderMarvel(){
+    var st = mvState();
+    var total = MV_DATA.length, checked = 0;
+    var html = "";
+    for(var i=0;i<total;i++){
+      var it = MV_DATA[i];
+      var on = !!st[i];
+      if(on) checked++;
+      var cls = MV_TAG2CLS[it.t] || "tag-mcu";
+      html += '<div class="marvel-item'+(on?" checked":"")+'" data-mvi="'+i+'">'
+        + '<div class="marvel-node"></div>'
+        + '<input type="checkbox" class="marvel-check" '+(on?"checked":"")+' data-mvcheck="'+i+'">'
+        + '<div class="marvel-item-card"><span class="marvel-year">'+esc(it.y)+'</span>'
+        + '<span class="marvel-tag '+cls+'">'+it.t+'</span>'
+        + '<span class="marvel-title">'+esc(it.n)+'</span></div></div>';
+    }
+    var box = document.getElementById("mvTimeline");
+    if(box) box.innerHTML = html;
+    var pct = Math.round(checked/total*100);
+    var bar = document.getElementById("mvBar"); if(bar) bar.style.width = pct+"%";
+    var txt = document.getElementById("mvText"); if(txt) txt.textContent = "已打卡: "+checked+" / "+total;
+    var d = document.getElementById("mvDone"); if(d) d.textContent = checked;
+    var l = document.getElementById("mvLeft"); if(l) l.textContent = total-checked;
+    var p = document.getElementById("mvPct"); if(p) p.textContent = pct+"%";
+  }
 
   // ---------- render: tasks (kanban) ----------
   function renderTasks(){
@@ -1496,7 +1673,7 @@
 
   // ---------- module switch ----------
   function showMod(mod){
-    ["todo","courses","words","papers","tasks","sync"].forEach(function(m){
+    ["todo","courses","words","papers","tasks","marvel","sync"].forEach(function(m){
       var p=document.getElementById("panel-"+m);
       if(p) p.classList.toggle("hidden", m!==mod);
     });
@@ -1504,6 +1681,7 @@
       n.classList.toggle("active", n.getAttribute("data-mod")===mod);
     });
     if(mod==="todo") renderTodo();
+    if(mod==="marvel") renderMarvel();
   }
 
   // ---------- events ----------
@@ -1997,6 +2175,31 @@
     });
     save(K.seeded, false);
     location.reload();
+  });
+
+  // 漫威打卡：勾选切换（事件委托）
+  document.getElementById("mvTimeline").addEventListener("click", function(e){
+    var cb=e.target.closest("[data-mvcheck]"); if(!cb) return;
+    var i=+cb.getAttribute("data-mvcheck");
+    var st=mvState();
+    if(cb.checked){ st[i]=true; } else { delete st[i]; }
+    save(K.marvel, st);
+    var item=cb.closest(".marvel-item");
+    if(item) item.classList.toggle("checked", cb.checked);
+    renderMarvel(); renderTodo();
+  });
+  // 展开全部 / 收起
+  document.getElementById("mvExpand").addEventListener("click", function(){
+    var box=document.getElementById("mvTimeline");
+    if(!box) return;
+    var collapsed = box.style.maxHeight && box.style.maxHeight!=="none";
+    if(collapsed){ box.style.maxHeight="none"; this.textContent="收起列表"; }
+    else { box.style.maxHeight="62vh"; this.textContent="展开全部"; }
+  });
+  // 重置打卡
+  document.getElementById("mvReset").addEventListener("click", function(){
+    if(!confirm("确定要重置所有 140 部漫威作品的打卡状态吗？此操作不可逆。")) return;
+    save(K.marvel, {}); renderMarvel(); renderTodo(); toast("已重置漫威打卡");
   });
 
   // sync events
