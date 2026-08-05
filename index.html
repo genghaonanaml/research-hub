@@ -84,7 +84,7 @@
   .todo-item.overdue{border-color:#f7c5c7; background:#fff5f5}
   .todo-item.done{border-color:#bfe6cd; background:#f3fbf6}
   .todo-dot{width:10px; height:10px; border-radius:50%; flex-shrink:0}
-  .todo-dot.red{background:var(--red)} .todo-dot.green{background:var(--green)} .todo-dot.blue{background:var(--primary)}
+  .todo-dot.red{background:var(--red)} .todo-dot.green{background:var(--green)} .todo-dot.blue{background:var(--primary)} .todo-dot.orange{background:#f59e0b}
   .todo-body{flex:1; min-width:0}
   .todo-title{font-weight:700}
   .todo-sub{font-size:13px; color:var(--muted)}
@@ -1123,12 +1123,32 @@
       var diff=goal-pToday;
       html += '<div class="todo-item overdue"><span class="todo-dot red"></span><div class="todo-body"><div class="todo-title">今日还差 '+diff+' 篇文献</div><div class="todo-sub">目标每天 '+goal+' 篇</div></div><button class="todo-act" data-go="papers">去记录</button></div>';
     }
-    // 任务看板待办
+    // 任务看板：待办 & 进行中 逐条展示
     var tks=load(K.tasks,[]);
     var tTodo=tks.filter(function(t){ return t.status==="todo"; }).length;
     var tDoing=tks.filter(function(t){ return t.status==="doing"; }).length;
+    var tDone=tks.filter(function(t){ return t.status==="done"; }).length;
     if(tTodo+tDoing>0){
-      html += '<div class="todo-item'+(tDoing>0?' overdue':'')+'"><span class="todo-dot '+(tDoing>0?'red':'blue')+'"></span><div class="todo-body"><div class="todo-title">任务看板：'+tTodo+' 个待办 · '+tDoing+' 进行中</div><div class="todo-sub">点击查看并推进你的任务</div></div><button class="todo-act" data-go="tasks">去处理</button></div>';
+      var pending=tks.filter(function(t){ return t.status==="todo"||t.status==="doing"; })
+                      .sort(function(a,b){ return (a.prio||2)-(b.prio||2) || ((a.added||"")<(b.added||"")?-1:1); });
+      pending.forEach(function(t){
+        var p=t.prio||2;
+        var pcls=p===1?"p1":(p===3?"p3":"p2");
+        var plabel=p===1?"P1":(p===3?"P3":"P2");
+        var isDoing=(t.status==="doing");
+        var dot=(p===1&&!isDoing)?"red":(isDoing?"orange":"blue");
+        var subTxt=(isDoing?"进行中":(p===1?"紧急待办":"待办"))+(t.note?(" · "+(t.note.length>20?t.note.slice(0,20)+"…":t.note)):"");
+        var actTxt=isDoing?"完成 ✓":"开始 →";
+        html += '<div class="todo-item'+(p===1&&!isDoing?' overdue':'')+'">'
+              + '<span class="todo-dot '+dot+'"></span>'
+              + '<div class="todo-body"><div class="todo-title">'+esc(t.title)+' <span class="kb-prio '+pcls+'">'+plabel+'</span></div>'
+              + '<div class="todo-sub">'+esc(subTxt)+'</div></div>'
+              + '<button class="todo-act" data-mv="'+t.id+'" data-to="next">'+actTxt+'</button></div>';
+      });
+      // 汇总行（含已完成数，便于跳看板）
+      html += '<div class="todo-item"><span class="todo-dot blue"></span><div class="todo-body"><div class="todo-title">任务看板：'+tTodo+' 待办 · '+tDoing+' 进行中 · '+tDone+' 已完成</div><div class="todo-sub">点击进入看板做更多管理</div></div><button class="todo-act" data-go="tasks">看板</button></div>';
+    } else if(tDone>0){
+      html += '<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">任务看板：'+tDone+' 个已完成</div><div class="todo-sub">暂无待办，干得漂亮 👍</div></div><button class="todo-act done" data-go="tasks">查看</button></div>';
     }
     // 逾期文献
     var papers=load(K.papers,[]);
@@ -1476,7 +1496,20 @@
   });
   // todo quick actions
   document.getElementById("todoList").addEventListener("click", function(e){
-    var b=e.target.closest("[data-go]"); if(b){ showMod(b.getAttribute("data-go")); }
+    var b=e.target.closest("[data-go]"); if(b){ showMod(b.getAttribute("data-go")); return; }
+    var mv=e.target.closest("[data-mv]");
+    if(mv){
+      var id=mv.getAttribute("data-mv");
+      var dir=mv.getAttribute("data-to")||"next";
+      var tasks=load(K.tasks,[]);
+      var t=tasks.filter(function(x){ return x.id===id; })[0];
+      if(!t) return;
+      var order=["todo","doing","done"];
+      var i=order.indexOf(t.status||"todo");
+      var ni= dir==="next" ? Math.min(i+1,2) : Math.max(i-1,0);
+      t.status=order[ni];
+      save(K.tasks,tasks); renderTasks(); renderTodo(); toast((t.status==="done")?"已完成 🎉":"已推进");
+    }
   });
 
   // ---------- course form & pickers ----------
