@@ -53,7 +53,7 @@
   .nav-item svg{width:20px; height:20px; flex-shrink:0}
   .nav-item.active{background:var(--primary); color:#fff}
   .nav-item:hover:not(.active){background:#eef0fe; color:var(--primary)}
-  .content{flex:1; padding:16px; max-width:920px; width:100%; margin:0 auto}
+  .content{flex:1; padding:16px; max-width:920px; width:100%; margin:0 auto; overflow-x:hidden}
   .bottomtab{display:none}
   @media(max-width:768px){
     .app{flex-direction:column; min-height:auto}
@@ -177,7 +177,7 @@
     .tt-cell{min-height:34px}
   }
   .tt-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;margin:0 -2px}
-  @media(max-width:768px){ .timetable{min-width:600px} .week-bar{min-width:560px} }
+  @media(max-width:768px){ .timetable{min-width:600px} .week-bar{min-width:600px} }
   /* course form - vertical list style */
   .cf-list{display:flex;flex-direction:column;gap:14px}
   .cf-row{display:flex;align-items:center;gap:10px}
@@ -486,8 +486,7 @@
           <span class="week-badge" id="curWeekBadge">第 1 周</span>
           <button class="btn sm ghost" id="btnWeekNext">下周 ›</button>
         </div>
-        <div class="week-bar" id="weekBar"></div>
-        <div class="tt-scroll"><div class="timetable" id="timetable"></div></div>
+        <div class="tt-scroll"><div class="week-bar" id="weekBar"></div><div class="timetable" id="timetable"></div></div>
 
         <!-- 添加课程按钮 -->
         <div style="margin-top:14px;text-align:center">
