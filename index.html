@@ -167,7 +167,7 @@
   .tt-cell.today-col{background:linear-gradient(180deg,rgba(67,97,238,.04) 0%,transparent 100%)}
   .tt-card{background:var(--card-color,#4361ee);color:#fff;border-radius:6px;padding:3px 5px;font-size:11px;line-height:1.25;cursor:pointer;position:absolute;top:1px;left:1px;right:1px;bottom:1px;display:flex;flex-direction:column;justify-content:center;z-index:2;box-shadow:0 1px 3px rgba(0,0,0,.1);overflow:hidden}
   .tt-card:hover{opacity:.92}
-  .tt-card .tc-name{font-weight:700;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tt-card .tc-name{font-weight:700;font-size:11px;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .tt-card .tc-room{font-size:9px;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .tt-card .tc-del{position:absolute;top:1px;right:2px;width:15px;height:15px;border-radius:50%;background:rgba(255,255,255,.35);color:#fff;border:none;font-size:11px;line-height:15px;text-align:center;cursor:pointer;display:none}
   .tt-card:hover .tc-del{display:block}
@@ -182,7 +182,7 @@
     .tt-cell{min-height:34px}
   }
   .tt-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;margin:0 -2px}
-  @media(max-width:768px){ .timetable{min-width:600px} .week-bar{min-width:600px} }
+  @media(max-width:768px){ .timetable{min-width:auto;grid-template-columns:32px repeat(7,1fr)} .week-bar{min-width:auto;grid-template-columns:32px repeat(7,1fr)} }
   /* course form - vertical list style */
   .cf-list{display:flex;flex-direction:column;gap:14px}
   .cf-row{display:flex;align-items:center;gap:10px}
