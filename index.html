@@ -46,6 +46,11 @@
   .mobile-only{display:none}
   .side-link{margin-top:8px; font-size:12px; color:var(--muted); text-align:center; cursor:pointer; text-decoration:underline; padding:8px 6px; border-radius:8px}
   .side-link:hover{color:var(--primary); background:#eef0fe}
+  .hamburger{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;margin-right:4px;border:none;background:transparent;color:var(--text);cursor:pointer;padding:0}
+  .hamburger svg{width:22px;height:22px}
+  .drawer-mask{position:fixed;inset:0;background:rgba(15,18,30,.45);z-index:90;opacity:0;visibility:hidden;transition:opacity .25s}
+  .drawer-mask.open{opacity:1;visibility:visible}
+  .drawer-close{display:none}
   .nav-item{
     display:flex; align-items:center; gap:10px; padding:12px 12px; border-radius:11px;
     cursor:pointer; font-weight:700; color:var(--muted); font-size:14px; user-select:none;
@@ -57,18 +62,18 @@
   .bottomtab{display:none}
   @media(max-width:768px){
     .app{flex-direction:column; min-height:auto}
-    .sidebar{display:none}
+    .sidebar{
+      position:fixed; top:0; left:0; bottom:0; width:80vw; max-width:300px; z-index:100;
+      transform:translateX(-100%); transition:transform .25s ease;
+      border-right:1px solid var(--border); box-shadow:2px 0 16px rgba(0,0,0,.12); padding-top:8px;
+    }
+    .sidebar.open{transform:translateX(0)}
+    .drawer-close{display:flex;align-items:center;justify-content:center;position:absolute;top:10px;right:10px;width:36px;height:36px;border:none;background:#eef0fe;color:var(--primary);border-radius:10px;cursor:pointer;font-size:20px;line-height:1}
     .mobile-only{display:block}
-    .content{padding:12px 12px 90px}
+    .content{padding:12px 12px 24px}
     .icon-btn span.txt{display:none}
     .icon-btn{padding:0; width:44px}
-    .bottomtab{
-      display:flex; position:fixed; bottom:0; left:0; right:0; z-index:50;
-      background:var(--card); border-top:1px solid var(--border);
-      padding-bottom:env(safe-area-inset-bottom);
-    }
-    .bottomtab .nav-item{flex:1; flex-direction:column; gap:3px; padding:9px 2px; font-size:11px; border-radius:0}
-    .bottomtab .nav-item.active{background:transparent; color:var(--primary)}
+    .bottomtab{display:none}
   }
   /* cards */
   .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:16px}
@@ -410,6 +415,9 @@
 </head>
 <body>
   <header class="topbar">
+    <button class="hamburger mobile-only" id="btnMenu" aria-label="打开菜单">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
     <div class="brand"><span class="logo">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2z"/><path d="M17 8h3v12a2 2 0 0 1-2 2H6"/><path d="M12 6l3 3"/></svg>
     </span>研途学习台</div>
@@ -417,6 +425,7 @@
 
   <div class="app">
     <nav class="sidebar">
+      <button class="drawer-close" id="btnDrawerClose" aria-label="关闭菜单">×</button>
       <div class="nav-item active" data-mod="todo">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         今天要处理
@@ -828,6 +837,7 @@
     </div>
   </nav>
 
+  <div class="drawer-mask" id="drawerMask"></div>
   <div class="toast" id="toast"></div>
 
 <script>
@@ -2278,6 +2288,22 @@
   }
 
   // init
+  // ===== 移动端抽屉导航（汉堡按钮 → 侧边栏）=====
+  (function(){
+    var sidebar=document.querySelector(".sidebar");
+    var mask=document.getElementById("drawerMask");
+    var btnMenu=document.getElementById("btnMenu");
+    var btnClose=document.getElementById("btnDrawerClose");
+    if(!sidebar||!mask||!btnMenu) return;
+    function openDrawer(){ sidebar.classList.add("open"); mask.classList.add("open"); }
+    function closeDrawer(){ sidebar.classList.remove("open"); mask.classList.remove("open"); }
+    btnMenu.addEventListener("click", openDrawer);
+    if(btnClose) btnClose.addEventListener("click", closeDrawer);
+    mask.addEventListener("click", closeDrawer);
+    sidebar.querySelectorAll(".nav-item").forEach(function(n){
+      n.addEventListener("click", function(){ if(window.innerWidth<=768) closeDrawer(); });
+    });
+  })();
   seed();
   if(!load(K.termStart,null)){ save(K.termStart, todayStr()); }
   document.getElementById("pDate").value=todayStr();
