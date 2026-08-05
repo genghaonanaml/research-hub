@@ -747,10 +747,14 @@
     seeded: PREFIX+"seeded",
     weekOverride: PREFIX+"weekOverride",
     termStart: PREFIX+"termStart",
-    tasks: PREFIX+"tasks"
+    tasks: PREFIX+"tasks",
+    tomb: PREFIX+"deleted"   // 墓碑：记录已删除的记录 id，防止云同步把已删记录拉回复活
   };
   function load(key, def){ try{ var v=localStorage.getItem(key); return v==null?def:JSON.parse(v); }catch(e){ return def; } }
   function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); scheduleSync(); }
+  // 墓碑：删除记录时把 id 记入黑名单，合并云端数据时会剔除这些 id，避免已删记录被同步复活
+  function addTomb(id){ if(!id) return; var t=load(K.tomb,[]); if(t.indexOf(id)<0){ t.push(id); save(K.tomb, t); } }
+  function inTomb(id){ return id && load(K.tomb,[]).indexOf(id)>=0; }
   function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
   function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
   function pad(n){ return n<10?"0"+n:""+n; }
@@ -781,7 +785,9 @@
     var d={};
     Object.keys(K).forEach(function(k){
       var sk=K[k];  // sk = 实际存储键 (wb_research_xxx)
-      if(sk===K.courses||sk===K.checkins||sk===K.words||sk===K.papers){
+      if(sk===K.tomb){
+        d[k]=JSON.stringify(load(K.tomb,[]));  // 墓碑集合同步上传
+      } else if(sk===K.courses||sk===K.checkins||sk===K.words||sk===K.papers){
         // 只同步用户自建数据，示例模板课永不上传云端（避免旧模板被拉回覆盖）
         try{
           var arr=JSON.parse(localStorage.getItem(sk)||"[]").filter(function(x){ return x && !x.sample; });
@@ -804,9 +810,20 @@
         remote=remote.filter(function(x){ return x && !x.sample; });
         var map={}; local.forEach(function(x){ if(x&&x.id) map[x.id]=x; });
         remote.forEach(function(x){ if(x&&x.id) map[x.id]=x; });
-        var merged=[]; Object.keys(map).forEach(function(id){ merged.push(map[id]); });
+        var merged=[]; Object.keys(map).forEach(function(id){
+          // 墓碑：本地已删除的记录（无论本地还是云端有同名 id）一律剔除，确保删除生效、不再被同步复活
+          if(inTomb(id)) return;
+          merged.push(map[id]);
+        });
         // 仅在内容真正变化时才写回，避免两端互相 pull→save→push 的震荡（无限产生 git commit 阻塞推送）
         if(JSON.stringify(merged)!==JSON.stringify(local)) save(sk, merged);
+      } else if(sk===K.tomb){
+        // 墓碑集合本身也双向合并（并集），保证删除在两端都生效
+        var lt=load(K.tomb,[]); var rt=[];
+        try{ rt=JSON.parse(obj[k])||[]; }catch(e){ rt=[]; }
+        var set={}; lt.concat(rt).forEach(function(id){ if(id) set[id]=1; });
+        var mergedTomb=Object.keys(set);
+        if(JSON.stringify(mergedTomb)!==JSON.stringify(lt)) save(K.tomb, mergedTomb);
       } else {
         // 标量设置项（开学日期 / 每日目标 / 周次覆盖等）：本地已有值则保留，
         // 避免云端旧值覆盖用户刚做的修改（例如改了开学日期又被同步回旧值）
@@ -1762,7 +1779,11 @@
   document.getElementById("timetable").addEventListener("click", function(e){
     var b=e.target.closest("[data-delcourse]"); if(!b) return;
     if(!confirm("确定删除这门课？")) return;
-    var arr=load(K.courses,[]).filter(function(x){ return x.id!==b.getAttribute("data-delcourse"); });
+    var cid=b.getAttribute("data-delcourse");
+    var carr=load(K.courses,[]);
+    var cdel=carr.filter(function(x){ return x.id===cid; })[0];
+    var arr=carr.filter(function(x){ return x.id!==cid; });
+    if(cdel && !cdel.sample) addTomb(cid);  // 仅用户自建课程进墓碑，示例课程 seed 会重种
     save(K.courses,arr); renderCourses(); renderTodo(); toast("已删除");
   });
 
@@ -1778,8 +1799,9 @@
   });
   document.getElementById("todayCheckin").addEventListener("click", function(e){
     if(e.target.id==="btnRecheck" || e.target.closest("#btnRecheck")){
+      var todayCks=load(K.checkins,[]).filter(function(c){ return c.date===todayStr(); });
       var arr=load(K.checkins,[]).filter(function(c){ return c.date!==todayStr(); });
-      save(K.checkins,arr); renderWords(); renderTodo(); toast("已清除今日打卡，可重新打");
+      save(K.checkins,arr); todayCks.forEach(function(c){ addTomb(c.id); }); renderWords(); renderTodo(); toast("已清除今日打卡，可重新打");
     }
   });
 
@@ -1810,6 +1832,7 @@
       if(!rec) return;
       if(!confirm("确定删除 "+rec.date+" 的打卡记录（"+rec.count+" 词）？")) return;
       save(K.checkins,all.filter(function(c){ return c.id!==id; }));
+      addTomb(id);
       renderWords(); renderTodo(); toast("已删除 "+rec.date+" 记录");
       return;
     }
@@ -1820,7 +1843,8 @@
       if(!all.length){ toast("没有打卡记录"); return; }
       var total=all.reduce(function(s,c){return s+(+c.count||0);},0);
       if(!confirm("确定清空全部 "+all.length+" 条打卡记录（共 "+total+" 词）？\n此操作不可撤销！")) return;
-      save(K.checkins,[]); renderWords(); renderTodo(); toast("已清空全部打卡记录");
+      var allIds=all.map(function(c){ return c.id; });
+      save(K.checkins,[]); allIds.forEach(function(id){ addTomb(id); }); renderWords(); renderTodo(); toast("已清空全部打卡记录");
     }
   });
 
@@ -1840,8 +1864,10 @@
     }
     var dl=e.target.closest("[data-delword]"); if(dl){
       if(!confirm("删除这个生词？")) return;
-      var arr=load(K.words,[]).filter(function(x){ return x.id!==dl.getAttribute("data-delword"); });
-      save(K.words,arr); renderWords(); toast("已删除");
+      var wid=dl.getAttribute("data-delword");
+      save(K.words, load(K.words,[]).filter(function(x){ return x.id!==wid; }));
+      addTomb(wid);
+      renderWords(); toast("已删除");
     }
   });
 
@@ -1868,8 +1894,10 @@
     }
     var dl=e.target.closest("[data-delpaper]"); if(dl){
       if(!confirm("删除这条记录？")) return;
-      var arr=load(K.papers,[]).filter(function(x){ return x.id!==dl.getAttribute("data-delpaper"); });
-      save(K.papers,arr); renderPapers(); renderTodo(); toast("已删除");
+      var pid=dl.getAttribute("data-delpaper");
+      save(K.papers, load(K.papers,[]).filter(function(x){ return x.id!==pid; }));
+      addTomb(pid);
+      renderPapers(); renderTodo(); toast("已删除");
     }
   });
 
@@ -1924,6 +1952,7 @@
       var id=dl.getAttribute("data-del");
       if(!confirm("删除这个任务？")) return;
       save(K.tasks, load(K.tasks,[]).filter(function(x){ return x.id!==id; }));
+      addTomb(id);
       renderTasks(); renderTodo(); toast("已删除"); return;
     }
   });
