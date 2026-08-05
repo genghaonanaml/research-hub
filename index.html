@@ -808,8 +808,10 @@
         // 仅在内容真正变化时才写回，避免两端互相 pull→save→push 的震荡（无限产生 git commit 阻塞推送）
         if(JSON.stringify(merged)!==JSON.stringify(local)) save(sk, merged);
       } else {
+        // 标量设置项（开学日期 / 每日目标 / 周次覆盖等）：本地已有值则保留，
+        // 避免云端旧值覆盖用户刚做的修改（例如改了开学日期又被同步回旧值）
         var cur=localStorage.getItem(sk);
-        if(cur!==obj[k]) localStorage.setItem(sk, obj[k]);
+        if(cur==null) localStorage.setItem(sk, obj[k]);
       }
     });
   }
