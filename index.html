@@ -756,6 +756,7 @@
 
           <div class="marvel-actions">
             <button class="marvel-btn" id="mvExpand">展开全部</button>
+            <button class="marvel-btn" id="mvImport">导入旧进度</button>
             <button class="marvel-btn ghost" id="mvReset">重置打卡</button>
           </div>
         </div>
@@ -2210,6 +2211,16 @@
     if(!confirm("确定要重置所有 140 部漫威作品的打卡状态吗？此操作不可逆。")) return;
     save(K.marvel, {}); renderMarvel(); renderTodo(); toast("已重置漫威打卡");
   });
+  // 导入旧漫威文件进度（兼容旧文件 marvel_timeline_checklist 的 {idx:checked} 格式；旧键仅 file:// 同浏览器可读）
+  document.getElementById("mvImport").addEventListener("click", function(){
+    var old=null;
+    try{ old=JSON.parse(localStorage.getItem("marvel_timeline_checklist")); }catch(e){ old=null; }
+    if(!old || typeof old!=="object"){ toast("没找到旧进度（旧文件需用本浏览器 file:// 打开过）"); return; }
+    var st=mvState(), n=0;
+    Object.keys(old).forEach(function(k){ if(old[k] && !st[k]){ st[k]=true; n++; } });
+    if(n===0){ toast("旧进度已是最新，无新增"); return; }
+    save(K.marvel, st); renderMarvel(); renderTodo(); toast("已导入 "+n+" 部旧进度，将自动同步");
+  });
 
   // sync events
   function readSyncForm(){
@@ -2305,6 +2316,18 @@
     });
   })();
   seed();
+  // 自动迁移旧漫威文件进度：仅当新键 wb_research_marvel 从未设置过（全新/无数据）才搬；
+  // 用户主动清空（键存在、值为空）时不搬，尊重其清空意图。旧键仅 file:// 同浏览器可读。
+  if(localStorage.getItem(K.marvel)===null){
+    try{
+      var _old=JSON.parse(localStorage.getItem("marvel_timeline_checklist"));
+      if(_old && typeof _old==="object"){
+        var _st={}, _n=0;
+        Object.keys(_old).forEach(function(k){ if(_old[k]){ _st[k]=true; _n++; } });
+        if(_n>0) save(K.marvel, _st);
+      }
+    }catch(e){}
+  }
   if(!load(K.termStart,null)){ save(K.termStart, todayStr()); }
   document.getElementById("pDate").value=todayStr();
   renderAll();
