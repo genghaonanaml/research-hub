@@ -173,13 +173,13 @@
   .tt-card:hover .tc-del{display:block}
   @media(max-width:768px){
     .timetable{font-size:11px}
-    .tt-slot{min-height:34px}
+    .tt-slot{min-height:40px}
     .tt-slot .tt-snum{font-size:12px}
     .tt-slot .tt-stime{font-size:7px}
     .tt-card{padding:2px 4px;font-size:10px}
-    .tt-card .tc-name{font-size:9px}
+    .tt-card .tc-name{font-size:11px;line-height:1.18}
     .tt-card .tc-room{font-size:8px;display:none}
-    .tt-cell{min-height:34px}
+    .tt-cell{min-height:40px}
   }
   .tt-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;margin:0 -2px}
   @media(max-width:768px){ .timetable{min-width:auto;grid-template-columns:32px repeat(7,1fr)} .week-bar{min-width:auto;grid-template-columns:32px repeat(7,1fr)} }
@@ -1490,7 +1490,7 @@
           }
           matches.forEach(function(c){
             cardsHtml += '<div class="tt-card" style="--card-color:'+esc(c.color||'#4361ee')+'" data-delcourse="'+c.id+'" title="'+esc(c.name)+'">';
-            cardsHtml += '<div class="tc-name">'+esc(c.name)+'</div>';
+            cardsHtml += '<div class="tc-name" style="-webkit-line-clamp:'+(3*spanRows)+'">'+esc(c.name)+'</div>';
             if(c.room) cardsHtml += '<div class="tc-room">'+esc(c.room)+'</div>';
             cardsHtml += '<button class="tc-del" data-delcourse="'+c.id+'" title="删除">×</button>';
             cardsHtml += '</div>';
