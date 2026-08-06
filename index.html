@@ -380,6 +380,12 @@
   .marvel-progress-bar{background:linear-gradient(90deg,#e55353,#66fcf1);height:100%;width:0%;transition:width .35s ease}
   .marvel-progress-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;font-weight:800;color:#fff;text-shadow:0 0 6px rgba(0,0,0,.9);white-space:nowrap}
   .marvel-stats{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .marvel-search{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .marvel-search input{flex:1;background:#151b25;border:1px solid #243043;border-radius:10px;padding:10px 12px;color:#fff;font-size:16px;min-height:44px;outline:none;-webkit-appearance:none}
+  .marvel-search input::placeholder{color:#6b7682}
+  .marvel-search input:focus{border-color:#66fcf1;box-shadow:0 0 0 2px rgba(102,252,241,.25)}
+  .marvel-search-count{font-size:12px;color:#66fcf1;font-weight:800;white-space:nowrap;flex-shrink:0}
+  .marvel-empty{text-align:center;color:#6b7682;font-size:13px;padding:24px 0}
   .marvel-stat{flex:1;min-width:90px;background:#151b25;border:1px solid #243043;border-radius:12px;padding:10px 12px;text-align:center}
   .marvel-stat .n{font-size:22px;font-weight:900;color:#66fcf1}
   .marvel-stat .l{font-size:12px;color:#8a93a0;margin-top:2px}
@@ -739,6 +745,11 @@
             <div class="marvel-stat"><div class="n" id="mvDone">0</div><div class="l">已完成</div></div>
             <div class="marvel-stat"><div class="n" id="mvLeft">140</div><div class="l">待观看</div></div>
             <div class="marvel-stat"><div class="n" id="mvPct">0%</div><div class="l">完成度</div></div>
+          </div>
+
+          <div class="marvel-search">
+            <input type="search" id="mvSearch" placeholder="搜索片名 / 年份 / 标签（如 MCU、2024、蜘蛛侠）" />
+            <span class="marvel-search-count" id="mvSearchCount"></span>
           </div>
 
           <div class="marvel-timeline" id="mvTimeline"></div>
@@ -1620,11 +1631,17 @@
   function renderMarvel(){
     var st = mvState();
     var total = MV_DATA.length, checked = 0;
-    var html = "";
+    var q = ((document.getElementById("mvSearch")||{}).value||"").trim().toLowerCase();
+    var html = "", shown = 0;
     for(var i=0;i<total;i++){
       var it = MV_DATA[i];
       var on = !!st[i];
       if(on) checked++;
+      if(q){
+        var hay = (it.n+" "+it.y+" "+it.t).toLowerCase();
+        if(hay.indexOf(q)===-1) continue;
+      }
+      shown++;
       var cls = MV_TAG2CLS[it.t] || "tag-mcu";
       html += '<div class="marvel-item'+(on?" checked":"")+'" data-mvi="'+i+'">'
         + '<div class="marvel-node"></div>'
@@ -1633,8 +1650,14 @@
         + '<span class="marvel-tag '+cls+'">'+it.t+'</span>'
         + '<span class="marvel-title">'+esc(it.n)+'</span></div></div>';
     }
+    if(shown===0) html = '<div class="marvel-empty">没有匹配的影片，换个关键词试试</div>';
     var box = document.getElementById("mvTimeline");
-    if(box) box.innerHTML = html;
+    if(box){
+      box.innerHTML = html;
+      if(q){ box.style.maxHeight="none"; var ex=document.getElementById("mvExpand"); if(ex) ex.textContent="收起列表"; }
+    }
+    var sc = document.getElementById("mvSearchCount");
+    if(sc) sc.textContent = q ? ("匹配 "+shown+" 部") : "";
     var pct = Math.round(checked/total*100);
     var bar = document.getElementById("mvBar"); if(bar) bar.style.width = pct+"%";
     var txt = document.getElementById("mvText"); if(txt) txt.textContent = "已打卡: "+checked+" / "+total;
@@ -2198,6 +2221,8 @@
     if(item) item.classList.toggle("checked", cb.checked);
     renderMarvel(); renderTodo();
   });
+  // 漫威搜索框：实时过滤
+  document.getElementById("mvSearch").addEventListener("input", renderMarvel);
   // 展开全部 / 收起
   document.getElementById("mvExpand").addEventListener("click", function(){
     var box=document.getElementById("mvTimeline");
