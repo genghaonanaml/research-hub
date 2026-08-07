@@ -618,11 +618,11 @@
 
         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-bottom:4px">
           <div class="field" style="flex:1 1 220px"><label>墨墨 Token</label><input type="password" id="mmToken" placeholder="粘贴墨墨开放 API Token" style="font-size:16px"></div>
-          <div class="field" style="flex:1 1 180px"><label>代理地址</label><input type="text" id="mmProxy" placeholder="http://localhost:3000" style="font-size:16px"></div>
+          <div class="field" style="flex:1 1 180px"><label>代理地址</label><input type="text" id="mmProxy" placeholder="https://maimemo-proxy.genghaonanaml.workers.dev" style="font-size:16px"></div>
           <button class="btn sm" id="mmSaveCfg" type="button">保存配置</button>
           <button class="btn sm primary" id="mmSync" type="button">🔄 同步墨墨</button>
         </div>
-        <p style="font-size:12px;color:#888;margin:6px 0 0">数据经代理读取墨墨（Token 仅存本机浏览器）。代理默认 <code>http://localhost:3000</code>（本机跑代理即用）；手机/公网版请填你的代理地址。</p>
+        <p style="font-size:12px;color:#888;margin:6px 0 0">数据经代理读取墨墨（Token 仅存本机浏览器）。代理默认 <code>https://maimemo-proxy.genghaonanaml.workers.dev</code>（本机跑代理即用）；手机/公网版请填你的代理地址。</p>
 
         <div class="stat-grid">
           <div class="stat"><div class="n" id="mmFinished">0</div><div class="l">今日已背</div></div>
@@ -1527,7 +1527,7 @@
 }
 
   // ---------- 墨墨背单词 (maimemo) ----------
-  function mmProxy(){ return (load(K.maimemoProxy,'http://localhost:3000')||'http://localhost:3000').replace(/\/$/,''); }
+  function mmProxy(){ return (load(K.maimemoProxy,'https://maimemo-proxy.genghaonanaml.workers.dev')||'https://maimemo-proxy.genghaonanaml.workers.dev').replace(/\/$/,''); }
   function mmToken(){ return load(K.maimemoToken,'')||''; }
   function mmReq(path, method, body){
     var t=mmToken();
@@ -2059,8 +2059,8 @@
   // 墨墨配置与同步
   document.getElementById("mmSaveCfg").addEventListener("click", function(){
     save(K.maimemoToken, (document.getElementById("mmToken").value||'').trim());
-    var p=(document.getElementById("mmProxy").value||'http://localhost:3000').trim();
-    save(K.maimemoProxy, p||'http://localhost:3000');
+    var p=(document.getElementById("mmProxy").value||'https://maimemo-proxy.genghaonanaml.workers.dev').trim();
+    save(K.maimemoProxy, p||'https://maimemo-proxy.genghaonanaml.workers.dev');
     toast("已保存配置，点「同步墨墨」拉取数据");
   });
   document.getElementById("mmSync").addEventListener("click", syncMaimemo);

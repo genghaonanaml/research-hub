@@ -1,5 +1,5 @@
 // =============================================================
-// 墨墨背单词 代理 — Cloudflare Workers 版
+// 墨墨背单词 代理 — Cloudflare Workers 版（经典 Service Worker 格式）
 // -------------------------------------------------------------
 // 用途：浏览器页面（github.io / file://）直连墨墨 API 会被 CORS 403 拦截
 //      （墨墨对所有带 Origin 头的鉴权请求返回 common_permission_denied）。
@@ -20,66 +20,59 @@
 
 const MAIMEMO_BASE = 'https://open.maimemo.com/open/api/v1';
 
-// 可选安全加固：仅允许你自己的前端域名调用（取消注释并改成你的 github.io 域名）
-// 不配置则任何人都能用本 Worker 转发（个人使用无碍，但会消耗你的请求额度）。
-// const ALLOWED_ORIGIN = 'https://genghaonanaml.github.io';
+addEventListener('fetch', function (event) {
+  event.respondWith(handle(event.request));
+});
 
-export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
+async function handle(request) {
+  const url = new URL(request.url);
 
-    // 预检 OPTIONS：必须返回 200 + CORS 头，否则浏览器拦截真实请求
-    if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        status: 204,
-        headers: corsHeaders()
-      });
-    }
-
-    // 仅处理 /maimemo/ 前缀
-    if (!url.pathname.startsWith('/maimemo/')) {
-      return new Response('maimemo-proxy worker ready. POST to /maimemo/<path>', {
-        status: 200,
-        headers: { 'Content-Type': 'text/plain; charset=utf-8' }
-      });
-    }
-
-    // 可选：来源校验
-    // if (ALLOWED_ORIGIN && request.headers.get('Origin') !== ALLOWED_ORIGIN) {
-    //   return new Response('forbidden', { status: 403 });
-    // }
-
-    const apiPath = url.pathname.replace(/^\/maimemo\//, '');
-    const target = MAIMEMO_BASE + '/' + apiPath + (url.search || '');
-
-    // 透传 Authorization，但【不要】设置 Origin（关键）
-    const headers = new Headers();
-    const auth = request.headers.get('Authorization');
-    if (auth) headers.set('Authorization', auth);
-    headers.set('Content-Type', request.headers.get('Content-Type') || 'application/json');
-
-    const init = {
-      method: request.method,
-      headers: headers,
-      redirect: 'follow'
-    };
-    if (request.method !== 'GET' && request.method !== 'HEAD') {
-      init.body = request.body;
-    }
-
-    try {
-      const resp = await fetch(target, init);
-      const out = new Response(resp.body, resp);
-      setCors(out.headers);
-      return out;
-    } catch (e) {
-      return new Response(JSON.stringify({ error: String(e) }), {
-        status: 502,
-        headers: Object.assign({ 'Content-Type': 'application/json' }, corsHeaders())
-      });
-    }
+  // 预检 OPTIONS：必须返回 204 + CORS 头，否则浏览器拦截真实请求
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders()
+    });
   }
-};
+
+  // 仅处理 /maimemo/ 前缀
+  if (!url.pathname.startsWith('/maimemo/')) {
+    return new Response('maimemo-proxy worker ready. POST to /maimemo/<path>', {
+      status: 200,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+    });
+  }
+
+  const apiPath = url.pathname.replace(/^\/maimemo\//, '');
+  const target = MAIMEMO_BASE + '/' + apiPath + (url.search || '');
+
+  // 透传 Authorization，但【不要】设置 Origin（关键）
+  const headers = new Headers();
+  const auth = request.headers.get('Authorization');
+  if (auth) headers.set('Authorization', auth);
+  headers.set('Content-Type', request.headers.get('Content-Type') || 'application/json');
+
+  const init = {
+    method: request.method,
+    headers: headers,
+    redirect: 'follow'
+  };
+  if (request.method !== 'GET' && request.method !== 'HEAD') {
+    init.body = request.body;
+  }
+
+  try {
+    const resp = await fetch(target, init);
+    const out = new Response(resp.body, resp);
+    setCors(out.headers);
+    return out;
+  } catch (e) {
+    return new Response(JSON.stringify({ error: String(e) }), {
+      status: 502,
+      headers: Object.assign({ 'Content-Type': 'application/json' }, corsHeaders())
+    });
+  }
+}
 
 function corsHeaders() {
   return {
