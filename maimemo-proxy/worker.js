@@ -20,6 +20,9 @@
 
 const MAIMEMO_BASE = 'https://open.maimemo.com/open/api/v1';
 
+// 只允许自己的页面调用此代理，防止 Token 泄露后被他人滥用
+const ALLOWED_ORIGIN = 'https://genghaonanaml.github.io';
+
 addEventListener('fetch', function (event) {
   event.respondWith(handle(event.request));
 });
@@ -41,6 +44,12 @@ async function handle(request) {
       status: 200,
       headers: { 'Content-Type': 'text/plain; charset=utf-8' }
     });
+  }
+
+  // 来源校验：浏览器跨域请求带 Origin；非本页来源直接拒绝
+  const origin = request.headers.get('Origin');
+  if (origin && origin !== ALLOWED_ORIGIN) {
+    return new Response('forbidden', { status: 403, headers: { 'Content-Type': 'text/plain' } });
   }
 
   const apiPath = url.pathname.replace(/^\/maimemo\//, '');
@@ -76,13 +85,13 @@ async function handle(request) {
 
 function corsHeaders() {
   return {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
     'Access-Control-Allow-Headers': 'Authorization, Content-Type',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
   };
 }
 function setCors(h) {
-  h.set('Access-Control-Allow-Origin', '*');
+  h.set('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
   h.set('Access-Control-Allow-Headers', 'Authorization, Content-Type');
   h.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
 }
