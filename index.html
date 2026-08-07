@@ -617,7 +617,7 @@
         </h2>
 
         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-bottom:4px">
-          <div class="field" style="flex:1 1 220px"><label>墨墨 Token</label><input type="password" id="mmToken" placeholder="粘贴墨墨开放 API Token" style="font-size:16px"></div>
+          <div class="field" style="flex:1 1 220px"><label>墨墨 Token</label><input type="password" id="mmToken" value="c0500afdb1cc206a8a9aba1625d3747950b9df5f043bd68beaa9d5941a167ee1" placeholder="粘贴墨墨开放 API Token" style="font-size:16px"></div>
           <div class="field" style="flex:1 1 180px"><label>代理地址</label><input type="text" id="mmProxy" placeholder="https://maimemo-proxy.genghaonanaml.workers.dev" style="font-size:16px"></div>
           <button class="btn sm" id="mmSaveCfg" type="button">保存配置</button>
           <button class="btn sm primary" id="mmSync" type="button">🔄 同步墨墨</button>
@@ -1528,7 +1528,7 @@
 
   // ---------- 墨墨背单词 (maimemo) ----------
   function mmProxy(){ return (load(K.maimemoProxy,'https://maimemo-proxy.genghaonanaml.workers.dev')||'https://maimemo-proxy.genghaonanaml.workers.dev').replace(/\/$/,''); }
-  function mmToken(){ return load(K.maimemoToken,'')||''; }
+  function mmToken(){ return load(K.maimemoToken,'c0500afdb1cc206a8a9aba1625d3747950b9df5f043bd68beaa9d5941a167ee1')||'c0500afdb1cc206a8a9aba1625d3747950b9df5f043bd68beaa9d5941a167ee1'; }
   function mmReq(path, method, body){
     var t=mmToken();
     if(!t) return Promise.reject(new Error('no_token'));
