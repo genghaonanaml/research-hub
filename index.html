@@ -609,39 +609,41 @@
         </div>
       </div>
 
-      <!-- 墨墨背单词 -->
+      <!-- 六级单词 -->
       <section class="card hidden" id="panel-words">
         <h2>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2z"/><path d="M17 8h3v12a2 2 0 0 1-2 2H6"/></svg>
-          墨墨背单词
+          六级单词打卡
         </h2>
-
-        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-bottom:4px">
-          <div class="field" style="flex:1 1 220px"><label>墨墨 Token</label><input type="password" id="mmToken" value="c0500afdb1cc206a8a9aba1625d3747950b9df5f043bd68beaa9d5941a167ee1" placeholder="粘贴墨墨开放 API Token" style="font-size:16px"></div>
-          <div class="field" style="flex:1 1 180px"><label>代理地址</label><input type="text" id="mmProxy" placeholder="https://maimemo-proxy.genghaonanaml.workers.dev" style="font-size:16px"></div>
-          <button class="btn sm" id="mmSaveCfg" type="button">保存配置</button>
-          <button class="btn sm primary" id="mmSync" type="button">🔄 同步墨墨</button>
-        </div>
-        <p style="font-size:12px;color:#888;margin:6px 0 0">数据经代理读取墨墨（Token 仅存本机浏览器）。代理默认 <code>https://maimemo-proxy.genghaonanaml.workers.dev</code>（本机跑代理即用）；手机/公网版请填你的代理地址。</p>
-
         <div class="stat-grid">
-          <div class="stat"><div class="n" id="mmFinished">0</div><div class="l">今日已背</div></div>
-          <div class="stat"><div class="n" id="mmTotal">0</div><div class="l">今日计划</div></div>
-          <div class="stat"><div class="n" id="mmTime">0</div><div class="l">时长(分)</div></div>
+          <div class="stat"><div class="n" id="stStreak">0</div><div class="l">连续天数</div></div>
+          <div class="stat"><div class="n" id="stTotal">0</div><div class="l">累计背词</div></div>
+          <div class="stat"><div class="n" id="stDays">0</div><div class="l">打卡天数</div></div>
         </div>
 
-        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px">
-          <input type="text" id="mmSearch" placeholder="输入拼写搜词库，如 apple" style="font-size:16px;flex:1 1 180px;min-height:44px">
-          <button class="btn sm" id="mmAddBtn" type="button">加入墨墨计划</button>
-          <span id="mmAddHint" style="font-size:12px;color:#888"></span>
+        <div class="sync-card" style="margin-top:14px">
+          <h2 style="font-size:14px; margin:0 0 10px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            今日打卡
+          </h2>
+          <div id="todayCheckin"></div>
         </div>
 
-        <h2 style="font-size:15px; margin-top:16px">今日单词</h2>
-        <div id="mmTodayList"></div>
+        <!-- 打卡历史（默认折叠） -->
+        <details class="ci-details" id="checkinDetails">
+          <summary class="ci-summary">
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              打卡历史
+              <span class="ci-count-badge" id="ciCountBadge"></span>
+            </span>
+          </summary>
+          <div id="checkinHistory"></div>
+        </details>
 
         <h2 style="font-size:15px; margin-top:18px">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-          生词本（不会的词）
+          生词本（不会的六级词）
         </h2>
         <form id="formWord" class="form-grid">
           <div class="field"><label>单词</label><input type="text" id="wWord" placeholder="如 ambiguous" required></div>
@@ -857,9 +859,6 @@
   var K = {
     courses: PREFIX+"courses",
     checkins: PREFIX+"wordcheckins",
-    maimemoToken: PREFIX+"maimemo_token",
-    maimemoProxy: PREFIX+"maimemo_proxy",
-    maimemoCache: PREFIX+"maimemo_cache",
     words: PREFIX+"words",
     papers: PREFIX+"papers",
     papergoal: PREFIX+"papergoal",
@@ -1252,23 +1251,15 @@
         html += '<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">今天没有课</div><div class="todo-sub">好好自习或休息一下</div></div></div>';
       }
     }
-    // 今日背单词（墨墨驱动）
-    var mm=load(K.maimemoCache,null);
-    if(!mm || !mm.today_items){
-      html += '<div class="todo-item"><span class="todo-dot blue"></span><div class="todo-body"><div class="todo-title">墨墨背单词未同步</div><div class="todo-sub">去配置 Token 并同步（或本地背完再同步）</div></div><button class="todo-act" data-go="words">去设置</button></div>';
+    // 今日背单词
+    var cm=checkinMap();
+    var todayDone = cm[td]||0;
+    if(todayDone>0){
+      html += '<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">今日已背 '+todayDone+' 词</div><div class="todo-sub">连续 '+calcStreak(cm)+' 天 · 保持住！</div></div><button class="todo-act done" data-go="words">查看</button></div>';
     } else {
-      var mmItems=mm.today_items||[];
-      var mmTodo=mmItems.filter(function(it){ return !it.is_finished; });
-      var mmDone=mmItems.length-mmTodo.length;
-      if(mmItems.length===0){
-        html += '<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">今日墨墨无新词</div><div class="todo-sub">计划里今天没有待背单词</div></div><button class="todo-act done" data-go="words">查看</button></div>';
-      } else if(mmTodo.length===0){
-        html += '<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">今日墨墨单词已背完（'+mmDone+'/'+mmItems.length+'）</div><div class="todo-sub">进度已同步墨墨 🎉</div></div><button class="todo-act done" data-go="words">复习</button></div>';
-      } else {
-        var preview=mmTodo.slice(0,4).map(function(it){ return it.voc_spelling; }).join('、');
-        if(mmTodo.length>4) preview+=' 等';
-        html += '<div class="todo-item overdue"><span class="todo-dot red"></span><div class="todo-body"><div class="todo-title">今日待背墨墨单词 '+mmTodo.length+' 个</div><div class="todo-sub">'+(mmDone>0?('已背 '+mmDone+' · '):'')+preview+'</div></div><button class="todo-act" data-go="words">去背词</button></div>';
-      }
+      var miss=missedDays(cm);
+      var sub = miss>0 ? ("已连续空缺 "+miss+" 天，今天补上") : "今天还没背，去打卡";
+      html += '<div class="todo-item overdue"><span class="todo-dot red"></span><div class="todo-body"><div class="todo-title">今日未背单词</div><div class="todo-sub">'+sub+'</div></div><button class="todo-act" data-go="words">去背词</button></div>';
     }
     // 今日读文献
     var pm=paperMap();
@@ -1526,104 +1517,55 @@
   } catch(e){ console.error("renderCourses error:",e); }
 }
 
-  // ---------- 墨墨背单词 (maimemo) ----------
-  function mmProxy(){ return (load(K.maimemoProxy,'https://maimemo-proxy.genghaonanaml.workers.dev')||'https://maimemo-proxy.genghaonanaml.workers.dev').replace(/\/$/,''); }
-  function mmToken(){ return load(K.maimemoToken,'c0500afdb1cc206a8a9aba1625d3747950b9df5f043bd68beaa9d5941a167ee1')||'c0500afdb1cc206a8a9aba1625d3747950b9df5f043bd68beaa9d5941a167ee1'; }
-  function mmReq(path, method, body){
-    var t=mmToken();
-    if(!t) return Promise.reject(new Error('no_token'));
-    return fetch(mmProxy()+'/maimemo/'+path, {
-      method:method, headers:{'Authorization':'Bearer '+t,'Content-Type':'application/json'},
-      body: body?JSON.stringify(body):undefined
-    }).then(function(r){ return r.json(); });
-  }
-  function paintMaimemo(data){
-    if(data && data.progress){
-      var p=data.progress;
-      var f=document.getElementById('mmFinished'); if(f) f.textContent=p.finished||0;
-      var t=document.getElementById('mmTotal'); if(t) t.textContent=p.total||0;
-      var s=document.getElementById('mmTime'); if(s) s.textContent=Math.round((p.study_time||0)/60);
+  // ---------- render: words ----------
+  function renderWords(){
+    var cm=checkinMap();
+    document.getElementById("stStreak").textContent=calcStreak(cm);
+    document.getElementById("stTotal").textContent=load(K.checkins,[]).reduce(function(s,c){ return s+(+c.count||0); },0);
+    document.getElementById("stDays").textContent=load(K.checkins,[]).length;
+    // 折叠徽章显示打卡天数
+    var ciBadge=document.getElementById("ciCountBadge");
+    if(ciBadge) ciBadge.textContent=load(K.checkins,[]).length+" 天";
+
+    var td=todayStr();
+    var todayRec=load(K.checkins,[]).filter(function(c){ return c.date===td; })[0];
+    var box=document.getElementById("todayCheckin");
+    if(todayRec){
+      box.innerHTML='<div class="todo-item done"><span class="todo-dot green"></span><div class="todo-body"><div class="todo-title">今日已背 '+todayRec.count+' 词</div><div class="todo-sub">'+(todayRec.note?esc(todayRec.note):"连续 "+calcStreak(cm)+" 天")+'</div></div><button class="todo-act done" id="btnRecheck">重新打卡</button></div>';
+    } else {
+      var goal=load(K.wordgoal,30);
+      box.innerHTML='<form id="formCheckin" class="row" style="margin:0"><div class="field" style="flex:0 0 130px"><label>今天背了几个词</label><input type="number" id="ckCount" min="1" value="'+goal+'" style="font-size:16px"></div><div class="field" style="flex:1"><label>备注(可选)</label><input type="text" id="ckNote" placeholder="如 词表 List 5" style="font-size:16px"></div><button class="btn sm" type="submit" style="align-self:flex-end">✅ 打卡</button></form>';
     }
-    if(data && data.today_items){
-      var box=document.getElementById('mmTodayList');
-      if(!box) return;
-      if(!data.today_items.length){ box.innerHTML='<div class="empty">今日单词都背完啦 🎉</div>'; }
-      else {
-        var h='';
-        data.today_items.forEach(function(it){
-          var tags=[];
-          if(it.is_new) tags.push('<span class="tag gray">新词</span>');
-          tags.push(it.is_finished?'<span class="tag green">已背</span>':'<span class="tag orange">待背</span>');
-          var fr={'FAMILIAR':'熟悉','STUDY_RESPONSE_UNSPECIFIED':'未反馈'}[it.first_response]||'';
-          h+='<div class="item" data-vid="'+esc(it.voc_id)+'"><div class="main"><div class="t">'+esc(it.voc_spelling)+' '+tags.join(' ')+'</div><div class="s">熟悉度：'+fr+'</div></div><div class="acts"><button class="mini-btn ok" data-mmadvance="'+esc(it.voc_id)+'" title="标记已掌握并同步墨墨">✓ 已掌握</button></div></div>';
-        });
-        box.innerHTML=h;
-      }
+
+    // 打卡历史列表（按日期倒序）
+    var allCheckins = load(K.checkins,[]).slice().sort(function(a,b){ return (b.date||"")<(a.date||"")?-1:1; });
+    var histBox=document.getElementById("checkinHistory");
+    if(!allCheckins.length){
+      histBox.innerHTML='<div class="ci-empty">还没有打卡记录，开始背单词吧 📚</div>';
+    } else {
+      var h="";
+      allCheckins.forEach(function(c){
+        var isToday=c.date===td;
+        h+='<div class="ci-item" data-cid="'+c.id+'">'+
+          '<div class="ci-date'+(isToday?' today':'')+'">'+(isToday?'📌 今天':c.date)+'</div>'+
+          '<div class="ci-count">'+c.count+'</div>'+
+          '<div class="ci-note">'+(c.note?esc(c.note):'—')+'</div>'+
+          '<div class="ci-acts">'+
+            '<button data-editck="'+c.id+'" title="编辑数量/备注">✏️</button>'+
+            '<button data-delck="'+c.id+'" class="del" title="删除此条记录">✕</button>'+
+          '</div></div>';
+      });
+      histBox.innerHTML=h + '<div class="ci-footer"><button data-clearck="1">清空全部打卡记录</button></div>';
     }
-    save(K.maimemoCache, data);
-  }
-  function renderMaimemo(){
-    var t=mmToken(), p=mmProxy();
-    var te=document.getElementById('mmToken'); if(te) te.value=t;
-    var pe=document.getElementById('mmProxy'); if(pe) pe.value=p;
-    var cache=load(K.maimemoCache,null);
-    if(cache) paintMaimemo(cache);
-    renderWordBook();
-  }
-  function renderWordBook(){
+
     var words=load(K.words,[]).slice().sort(function(a,b){ return (b.addedDate||"")<(a.addedDate||"")?-1:1; });
     var list=document.getElementById("wordList");
-    if(!list) return;
-    if(!words.length){ list.innerHTML='<div class="empty">生词本还是空的，遇到不会的词就记下来。</div>'; return; }
+    if(!words.length){ list.innerHTML='<div class="empty">生词本还是空的，遇到不会的六级词就记下来。</div>'; return; }
     var h="";
     words.forEach(function(w){
       h += '<div class="item"><div class="main"><div class="t">'+esc(w.word)+' <span class="tag '+(w.reviewed?"green":"gray")+'">'+(w.reviewed?"已巩固":"待巩固")+'</span></div><div class="s">'+esc(w.meaning)+' · 添加于 '+(w.addedDate||"")+'</div></div><div class="acts"><button class="mini-btn '+(w.reviewed?"":"ok")+'" data-toggleword="'+w.id+'" title="切换巩固状态">'+(w.reviewed?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>')+'</button><button class="mini-btn del" data-delword="'+w.id+'" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button></div></div>';
     });
     list.innerHTML=h;
-  }
-  function syncMaimemo(){
-    if(!mmToken()){ toast('请先填写墨墨 Token 并保存配置'); return; }
-    toast('同步中...');
-    Promise.all([
-      mmReq('memo/study/get_study_progress','POST',{}),
-      mmReq('memo/study/get_today_items','POST',{limit:100})
-    ]).then(function(res){
-      var prog=res[0], items=res[1];
-      if(!prog || !prog.success){ toast('同步失败：'+(prog&&prog.errors&&prog.errors[0]&&prog.errors[0].info||'权限错误')); return; }
-      paintMaimemo({progress: prog.data&&prog.data.progress, today_items:(items.data&&items.data.today_items)||[]});
-      toast('墨墨同步成功');
-    }).catch(function(e){ toast('同步出错：'+(e&&e.message||e)); });
-  }
-  function addMaimemoWord(){
-    var sp=document.getElementById('mmSearch');
-    if(!sp) return;
-    var spv=sp.value.trim();
-    if(!spv){ toast('请输入单词拼写'); return; }
-    var hint=document.getElementById('mmAddHint');
-    if(hint) hint.textContent='查询中...';
-    mmReq('memo/vocabulary/query','POST',{spellings:[spv]}).then(function(d){
-      if(!d || !d.success || !d.data || !d.data.voc || !d.data.voc.length){ if(hint) hint.textContent='词库未找到该词'; return; }
-      var vid=d.data.voc[0].id;
-      return mmReq('memo/study/add_words','POST',{words:[{id:vid}],advance:false}).then(function(r){
-        if(r && r.success){ if(hint) hint.textContent='已加入墨墨计划：'+spv; sp.value=''; syncMaimemo(); }
-        else if(hint) hint.textContent='加入失败：'+(r&&r.errors&&r.errors[0]&&r.errors[0].info||'错误');
-      });
-    }).catch(function(e){ if(hint) hint.textContent='出错：'+(e&&e.message||e); });
-  }
-  function advanceMaimemo(vid){
-    mmReq('memo/study/advance_study','POST',{voc_ids:[vid]}).then(function(r){
-      if(r && r.success){ toast('已同步墨墨：提前复习'); syncMaimemo(); }
-      else {
-        var info=(r&&r.errors&&r.errors[0]&&r.errors[0].info)||'';
-        if(info.indexOf('10')>=0 || info.indexOf('level')>=0) toast('需墨墨账号升到 10 级才能提前复习');
-        else toast('同步失败：'+(info||'错误'));
-      }
-    }).catch(function(e){ toast('出错：'+(e&&e.message||e)); });
-  }
-
-  // ---------- render: words ----------
-  function renderWords(){
-    renderMaimemo();
   }
 
   // ---------- render: papers ----------
@@ -2054,19 +1996,6 @@
     var arr=carr.filter(function(x){ return x.id!==cid; });
     if(cdel && !cdel.sample) addTomb(cid);  // 仅用户自建课程进墓碑，示例课程 seed 会重种
     save(K.courses,arr); renderCourses(); renderTodo(); toast("已删除");
-  });
-
-  // 墨墨配置与同步
-  document.getElementById("mmSaveCfg").addEventListener("click", function(){
-    save(K.maimemoToken, (document.getElementById("mmToken").value||'').trim());
-    var p=(document.getElementById("mmProxy").value||'https://maimemo-proxy.genghaonanaml.workers.dev').trim();
-    save(K.maimemoProxy, p||'https://maimemo-proxy.genghaonanaml.workers.dev');
-    toast("已保存配置，点「同步墨墨」拉取数据");
-  });
-  document.getElementById("mmSync").addEventListener("click", syncMaimemo);
-  document.getElementById("mmAddBtn").addEventListener("click", addMaimemoWord);
-  document.getElementById("mmTodayList").addEventListener("click", function(e){
-    var b=e.target.closest("[data-mmadvance]"); if(b) advanceMaimemo(b.getAttribute("data-mmadvance"));
   });
 
   // word checkin (delegated, may re-render)
